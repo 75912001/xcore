@@ -26,7 +26,7 @@ func TestObjectError(t *testing.T) {
 		fields fields
 		want   string
 	}{
-		{ // 正常-success
+		{
 			name: constants.Normal,
 			fields: fields{
 				code: Success.code,
@@ -35,7 +35,7 @@ func TestObjectError(t *testing.T) {
 			},
 			want: "",
 		},
-		{ // 正常
+		{
 			name: constants.Normal,
 			fields: fields{
 				code: Link.code,
@@ -82,7 +82,7 @@ func TestObjectWithExtra(t *testing.T) {
 		fields fields
 		want   *object
 	}{
-		{ // 正常-success
+		{
 			name: constants.Normal,
 			fields: fields{
 				code:         obj.code,
