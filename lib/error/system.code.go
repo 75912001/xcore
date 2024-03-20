@@ -1,8 +1,5 @@
 package error
 
-// 错误信息
-var errMap map[uint32]struct{}
-
 var (
 	// Success 成功
 	Success = CreateObject(0x0000, "Success", "success")

@@ -51,6 +51,9 @@ func CreateObject(code uint32, name string, desc string) *object {
 	return newError
 }
 
+// 错误信息
+var errMap map[uint32]struct{}
+
 // 检查重复情况
 func checkDuplication(err *object) error {
 	once.Do(func() {
