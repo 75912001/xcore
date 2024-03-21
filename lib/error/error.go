@@ -3,11 +3,6 @@ package error
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"sync"
-)
-
-var (
-	once sync.Once
 )
 
 // 对象
@@ -52,13 +47,10 @@ func CreateObject(code uint32, name string, desc string) *object {
 }
 
 // 错误信息
-var errMap map[uint32]struct{}
+var errMap = make(map[uint32]struct{})
 
 // 检查重复情况
 func checkDuplication(err *object) error {
-	once.Do(func() {
-		errMap = make(map[uint32]struct{})
-	})
 	if _, ok := errMap[err.code]; ok { // 重复
 		return errors.WithStack(errors.Errorf("duplicate err, code:%v %#x", err.code, err.code))
 	}

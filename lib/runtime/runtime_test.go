@@ -17,13 +17,13 @@ func TestIsDebug(t *testing.T) {
 			name: constants.Normal,
 			want: false,
 			preFunc: func() {
-				GRunMode = RunModeRelease
+				programRunMode = RunModeRelease
 			},
 		},
 		{
 			name: constants.Normal,
 			preFunc: func() {
-				GRunMode = RunModeDebug
+				programRunMode = RunModeDebug
 			},
 			want: true,
 		},
@@ -38,22 +38,6 @@ func TestIsDebug(t *testing.T) {
 	}
 }
 
-//func TestIsLinux(t *testing.T) {
-//	tests := []struct {
-//		name string
-//		want bool
-//	}{
-//		// TODO: Add test cases.
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := IsLinux(); got != tt.want {
-//				t.Errorf("IsLinux() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
-
 func TestIsRelease(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -64,13 +48,13 @@ func TestIsRelease(t *testing.T) {
 			name: constants.Normal,
 			want: true,
 			preFunc: func() {
-				GRunMode = RunModeRelease
+				programRunMode = RunModeRelease
 			},
 		},
 		{
 			name: constants.Normal,
 			preFunc: func() {
-				GRunMode = RunModeDebug
+				programRunMode = RunModeDebug
 			},
 			want: false,
 		},
@@ -84,22 +68,6 @@ func TestIsRelease(t *testing.T) {
 		})
 	}
 }
-
-//func TestIsWindows(t *testing.T) {
-//	tests := []struct {
-//		name string
-//		want bool
-//	}{
-//		// TODO: Add test cases.
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := IsWindows(); got != tt.want {
-//				t.Errorf("IsWindows() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
 
 func TestLocation(t *testing.T) {
 	tests := []struct {

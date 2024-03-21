@@ -6,16 +6,16 @@ import (
 )
 
 // DayBeginSecByTime 当天开始时间戳
-func DayBeginSecByTime(t *time.Time) int64 {
-	if getInstance().utcAble {
+func (p *Mgr) DayBeginSecByTime(t *time.Time) int64 {
+	if p.utcAble {
 		return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC).Unix()
 	}
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()).Unix()
 }
 
 // DayBeginSec 返回给定时间戳所在天的开始时间戳
-func DayBeginSec(timestamp int64) int64 {
-	if getInstance().utcAble {
+func (p *Mgr) DayBeginSec(timestamp int64) int64 {
+	if p.utcAble {
 		t := time.Unix(timestamp, 0).UTC()
 		return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC).Unix()
 	}
@@ -26,9 +26,9 @@ func DayBeginSec(timestamp int64) int64 {
 // GenYMD 获取 e.g.:20210819
 //
 //	返回YMD
-func GenYMD(timestamp int64) int {
+func (p *Mgr) GenYMD(timestamp int64) int {
 	var strYMD string
-	if getInstance().utcAble {
+	if p.utcAble {
 		strYMD = time.Unix(timestamp, 0).UTC().Format("20060102")
 	} else {
 		strYMD = time.Unix(timestamp, 0).Format("20060102")

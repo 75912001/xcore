@@ -4,10 +4,10 @@ import "runtime"
 
 // IsWindows win
 func IsWindows() bool {
-	return `windows` == runtime.GOOS
+	return runtime.GOOS == `windows`
 }
 
 // IsLinux linux
 func IsLinux() bool {
-	return `linux` == runtime.GOOS
+	return runtime.GOOS == `linux`
 }

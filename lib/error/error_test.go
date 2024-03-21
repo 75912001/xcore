@@ -70,27 +70,21 @@ func TestObjectWithExtra(t *testing.T) {
 		extraMessage: "0xffff-message",
 		extraError:   errors.New("0xffff-error"),
 	}
-	type fields struct {
-		code         uint32
-		name         string
-		desc         string
-		extraMessage string
-		extraError   error
-	}
 	tests := []struct {
 		name   string
-		fields fields
+		fields object
 		want   *object
 	}{
 		{
 			name: constants.Normal,
-			fields: fields{
-				code:         obj.code,
-				name:         obj.name,
-				desc:         obj.desc,
-				extraMessage: obj.extraMessage,
-				extraError:   obj.extraError,
-			},
+			//fields: fields{
+			//	code:         obj.code,
+			//	name:         obj.name,
+			//	desc:         obj.desc,
+			//	extraMessage: obj.extraMessage,
+			//	extraError:   obj.extraError,
+			//},
+			fields: obj,
 			want: newObject(obj.code, obj.name, obj.desc).
 				WithExtraError(obj.extraError).WithExtraMessage(obj.extraMessage),
 		},
@@ -115,7 +109,7 @@ func TestCreateObject(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 			// 在这里处理 panic 的情况
-			//t.Logf("Expected panic: %v", r)
+			t.Logf("这里应该panic %v", r)
 		}
 	}()
 

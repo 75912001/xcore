@@ -1,60 +1,47 @@
 package time
 
 import (
-	"sync"
 	"time"
 )
 
-var (
-	instance *mgr
-	once     sync.Once
-)
-
-// 获取实例
-func getInstance() *mgr {
-	once.Do(func() {
-		instance = &mgr{}
-	})
-	return instance
-}
-
-// mgr 时间管理器
-type mgr struct {
-	TimestampSecond       int64     //上一次调用Update更新的时间戳-秒
-	TimestampMillisecond  int64     //上一次调用Update更新的时间戳-毫秒
-	Time                  time.Time //上一次调用Update更新的时间
-	TimestampSecondOffset int64     //时间戳偏移量-秒
+// Mgr 时间管理器
+type Mgr struct {
+	timestampSecond       int64     //上一次调用Update更新的时间戳-秒
+	timestampMillisecond  int64     //上一次调用Update更新的时间戳-毫秒
+	time                  time.Time //上一次调用Update更新的时间
+	timestampSecondOffset int64     //时间戳偏移量-秒
 	utcAble               bool      //是否使用UTC时间
 }
 
-func AbleUTC() {
-	getInstance().utcAble = true
+func (p *Mgr) AbleUTC() {
+	p.utcAble = true
 }
 
-func DisableUTC() {
-	getInstance().utcAble = false
+func (p *Mgr) DisableUTC() {
+	p.utcAble = false
 }
 
-func NowTime() time.Time {
-	if getInstance().utcAble {
+// NowTime 获取当前时间
+func (p *Mgr) NowTime() time.Time {
+	if p.utcAble {
 		return time.Now().UTC()
 	}
 	return time.Now()
 }
 
 // Update 更新时间管理器中的,当前时间
-func Update() {
-	getInstance().Time = NowTime()
-	getInstance().TimestampSecond = getInstance().Time.Unix()
-	getInstance().TimestampMillisecond = getInstance().Time.UnixMilli()
+func (p *Mgr) Update() {
+	p.time = p.NowTime()
+	p.timestampSecond = p.time.Unix()
+	p.timestampMillisecond = p.time.UnixMilli()
 }
 
 // ShadowTimestampSecond 叠加偏移量的时间戳-秒
-func ShadowTimestampSecond() int64 {
-	return getInstance().TimestampSecond + getInstance().TimestampSecondOffset
+func (p *Mgr) ShadowTimestampSecond() int64 {
+	return p.timestampSecond + p.timestampSecondOffset
 }
 
 // SetTimestampSecondOffset 设置 时间戳偏移量-秒
-func SetTimestampSecondOffset(offset int64) {
-	getInstance().TimestampSecondOffset = offset
+func (p *Mgr) SetTimestampSecondOffset(offset int64) {
+	p.timestampSecondOffset = offset
 }
