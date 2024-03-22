@@ -1,3 +1,7 @@
+issues:
+  exclude-dirs:
+    - lib/ringbuf # todo menglc [代码未完善]
+    - lib/protobuf # todo menglc [代码未完善]
 linters:
   enable:
     - staticcheck

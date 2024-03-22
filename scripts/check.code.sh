@@ -10,9 +10,9 @@ echo -e "\e[92m项目路径 ${projectPath}\e[0m"
 #检查代码
 echo -e "\e[93m======检查代码... \e[0m"
 cd  "${projectPath}" || exit
-echo "gofmt..."
-gofmt -w .
-echo "golangci-lint..."
-golangci-lint run
+  echo "gofmt..."
+  gofmt -w .
+  echo "golangci-lint run --fix..."
+  golangci-lint run --fix
 cd - || exit
 echo -e "\e[92m======检查代码完成\e[0m"
