@@ -6,9 +6,9 @@
 ## 安装包
 - go get github.com/pkg/errors@v0.9.1
 ## 代码检测工具
+- go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 - go get -u golang.org/x/lint/golint (未使用)
 - go install honnef.co/go/tools/cmd/staticcheck@v0.4.7 (未使用)
-- go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 
 ## git 提交标签
 - \[feat\]: 新功能（feature）
