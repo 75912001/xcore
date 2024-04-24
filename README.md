@@ -5,6 +5,8 @@
 - go mod init xcore
 ## 安装包
 - go get github.com/pkg/errors@v0.9.1
+## 代码测试工具
+- $ go get github.com/agiledragon/gomonkey@v2.0.2
 ## 代码检测工具
 - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 - go get -u golang.org/x/lint/golint (未使用)

@@ -2,6 +2,8 @@ package runtime
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 	"xcore/lib/constants"
 )
@@ -31,4 +33,14 @@ func Location() string {
 		location.funcName = runtime.FuncForPC(pc).Name()
 	}
 	return location.String()
+}
+
+// GetExecutablePath 获取当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径.
+func GetExecutablePath() (string, error) {
+	path, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	// 返回目录路径
+	return filepath.Dir(path), nil
 }
