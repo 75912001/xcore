@@ -29,7 +29,7 @@ func TestAbleUTC(t *testing.T) {
 	}
 }
 
-func TestDayBeginSec(t *testing.T) {
+func TestGetDayStartTimestampFromTimestamp(t *testing.T) {
 	type args struct {
 		timestamp int64
 	}
@@ -55,14 +55,14 @@ func TestDayBeginSec(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.preFunc()
-			if got := mgr.DayBeginSec(tt.args.timestamp); got != tt.want {
-				t.Errorf("DayBeginSec() = %v, want %v", got, tt.want)
+			if got := mgr.GetDayStartTimestampFromTimestamp(tt.args.timestamp); got != tt.want {
+				t.Errorf("GetDayStartTimestampFromTimestamp() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestDayBeginSecByTime(t *testing.T) {
+func TestGetDayStartTimestampFromTime(t *testing.T) {
 	type args struct {
 		t *time.Time
 	}
@@ -90,8 +90,8 @@ func TestDayBeginSecByTime(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.preFunc()
-			if got := mgr.DayBeginSecByTime(tt.args.t); got != tt.want {
-				t.Errorf("DayBeginSecByTime() = %v, want %v", got, tt.want)
+			if got := mgr.GetDayStartTimestampFromTime(tt.args.t); got != tt.want {
+				t.Errorf("GetDayStartTimestampFromTime() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -117,7 +117,7 @@ func TestDisableUTC(t *testing.T) {
 	}
 }
 
-func TestGenYMD(t *testing.T) {
+func TestGetYMDFromTimestamp(t *testing.T) {
 	type args struct {
 		timestamp int64
 	}
@@ -143,8 +143,8 @@ func TestGenYMD(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.preFunc()
-			if got := mgr.GenYMD(tt.args.timestamp); got != tt.want {
-				t.Errorf("GenYMD() = %v, want %v", got, tt.want)
+			if got := mgr.GetYMDFromTimestamp(tt.args.timestamp); got != tt.want {
+				t.Errorf("GetYMDFromTimestamp() = %v, want %v", got, tt.want)
 			}
 		})
 	}

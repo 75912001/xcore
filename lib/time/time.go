@@ -13,10 +13,12 @@ type Mgr struct {
 	utcAble               bool      //是否使用UTC时间
 }
 
+// AbleUTC 使用UTC时间
 func (p *Mgr) AbleUTC() {
 	p.utcAble = true
 }
 
+// DisableUTC 不使用UTC时间
 func (p *Mgr) DisableUTC() {
 	p.utcAble = false
 }
