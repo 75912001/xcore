@@ -11,6 +11,7 @@
 - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 - go get -u golang.org/x/lint/golint (未使用)
 - go install honnef.co/go/tools/cmd/staticcheck@v0.4.7 (未使用)
+- go get honnef.co/go/tools/cmd/staticcheck@latest (未使用)
 
 ## git 提交标签
 - \[feat\]: 新功能（feature）

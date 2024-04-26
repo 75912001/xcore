@@ -5,3 +5,8 @@ issues:
 linters:
   enable:
     - staticcheck
+linters-settings:
+  staticcheck:
+    checks:
+      - all # all 表示执行所有的检查
+    fail-fast: true # fail-fast 选项表示在发现第一个错误时立即停止检查
