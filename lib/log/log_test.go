@@ -11,6 +11,8 @@ import (
 	libtime "xcore/lib/time"
 )
 
+// todo menglc 增加覆盖率测试
+
 func TestGetInstance(t *testing.T) {
 	tests := []struct {
 		name string
