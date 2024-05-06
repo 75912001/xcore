@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -11,93 +12,107 @@ import (
 	libtime "xcore/lib/time"
 )
 
-// todo menglc 增加覆盖率测试
-
 func TestGetInstance(t *testing.T) {
-	tests := []struct {
-		name string
-		want *mgr
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := GetInstance(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetInstance() = %v, want %v", got, tt.want)
-			}
-		})
+	instance1 := GetInstance()
+	instance2 := GetInstance()
+
+	if instance1 != instance2 {
+		t.Errorf("GetInstance() returned different instances")
 	}
 }
 
 func TestIsEnable(t *testing.T) {
-	tests := []struct {
-		name string
-		want bool
-	}{
-		// TODO: Add test cases.
+	// 当 instance 为 nil 时，IsEnable 应返回 false
+	instance = nil
+	if IsEnable() != false {
+		t.Errorf("Expected IsEnable to return false, but it returned true")
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := IsEnable(); got != tt.want {
-				t.Errorf("IsEnable() = %v, want %v", got, tt.want)
-			}
-		})
+	// 当 instance 不为 nil 时， instance.logChan == nil, 此时 IsEnable 应返回 false
+	instance = &mgr{}
+	if IsEnable() != false {
+		t.Errorf("Expected IsEnable to return false, but it returned true")
 	}
+	// 启动, 使 instance.logChan 不为 nil, 此时 IsEnable 应返回 true
+	err := instance.Start()
+	if err != nil {
+		t.Errorf("Start() returned error: %v", err)
+	}
+	if IsEnable() != true {
+		t.Errorf("Expected IsEnable to return true, but it returned false")
+	}
+
+	// Reset instance to nil after the test
+	instance = nil
+}
+
+type myHook struct {
+	fired   bool
+	fireErr error
+}
+
+func (h *myHook) Levels() []int {
+	return []int{LevelTrace, LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal}
+}
+func (h *myHook) Fire(entry *entry) error {
+	fmt.Printf("hook fire %+v", entry)
+	h.fired = true
+	return h.fireErr
 }
 
 func TestLevelHooks_add(t *testing.T) {
-	type args struct {
-		hook Hook
-	}
-	tests := []struct {
-		name  string
-		hooks LevelHooks
-		args  args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.hooks.add(tt.args.hook)
-		})
+	levelHooks := make(LevelHooks)
+	myHook := new(myHook)
+	levelHooks.add(myHook)
+	if len(levelHooks) != 6 {
+		t.Errorf("Expected 6 hook, but got %d", len(levelHooks))
 	}
 }
 
 func TestLevelHooks_fire(t *testing.T) {
-	type args struct {
-		entry *entry
+	levelHooks := make(LevelHooks)
+	myHook := new(myHook)
+	levelHooks.add(myHook)
+	if len(levelHooks) != 6 {
+		t.Errorf("Expected 6 hook, but got %d", len(levelHooks))
 	}
-	tests := []struct {
-		name    string
-		hooks   LevelHooks
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+	{ // return nil
+		err := levelHooks.fire(
+			&entry{
+				level:        LevelInfo,
+				time:         time.Now(),
+				callerInfo:   "callerInfo",
+				message:      "message",
+				ctx:          nil,
+				extendFields: nil,
+			},
+		)
+		if err != nil {
+			t.Errorf("fire() returned error: %v", err)
+		}
+		if !myHook.fired {
+			t.Errorf("Expected hook to be fired, but it was not")
+		}
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.hooks.fire(tt.args.entry); (err != nil) != tt.wantErr {
-				t.Errorf("fire() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+	{ // return error
+		myHook.fireErr = fmt.Errorf("fire error")
+		err := levelHooks.fire(
+			&entry{
+				level:        LevelInfo,
+				time:         time.Now(),
+				callerInfo:   "callerInfo",
+				message:      "message",
+				ctx:          nil,
+				extendFields: nil,
+			},
+		)
+		if err == nil {
+			t.Error("fire() returned error: nil")
+		}
 	}
 }
 
 func TestNewOptions(t *testing.T) {
-	tests := []struct {
-		name string
-		want *options
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewOptions(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewOptions() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	NewOptions()
 }
 
 func TestPrintErr(t *testing.T) {

@@ -3,7 +3,7 @@ package log
 import (
 	"github.com/pkg/errors"
 	"os"
-	liberror "xcore/lib/error"
+	"path/filepath"
 	libruntime "xcore/lib/runtime"
 )
 
@@ -11,9 +11,9 @@ import (
 // documentation for each setter function for an explanation of the option.
 type options struct {
 	level          *int       // 日志等级允许的最小等级 default: LevelOn
-	absPath        *string    // 日志绝对路径
+	absPath        *string    // 日志绝对路径 default: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
 	isReportCaller *bool      // 是否打印调用信息 default: true
-	namePrefix     *string    // 日志名 前缀
+	namePrefix     *string    // 日志名 前缀 default: 当前执行的程序名称
 	isWriteFile    *bool      // 是否写文件 default: true
 	enablePool     *bool      // 使用内存池 default: true
 	hooks          LevelHooks // 各日志级别对应的钩子
@@ -110,14 +110,28 @@ func configure(opts *options) error {
 	if opts.level == nil {
 		var level = LevelOn
 		opts.level = &level
-		return errors.WithMessage(liberror.Param, libruntime.Location())
 	}
 	if opts.absPath == nil {
-		return errors.WithMessage(liberror.Param, libruntime.Location())
+		executablePath, err := libruntime.GetExecutablePath()
+		if err != nil {
+			return errors.WithMessage(err, libruntime.Location())
+		}
+		executablePath = filepath.Join(executablePath, "log")
+		opts.absPath = &executablePath
+	}
+	if err := os.MkdirAll(*opts.absPath, os.ModePerm); err != nil {
+		return errors.WithMessage(err, libruntime.Location())
 	}
 	if opts.isReportCaller == nil {
 		var reportCaller = true
 		opts.isReportCaller = &reportCaller
+	}
+	if opts.namePrefix == nil {
+		executableName, err := libruntime.GetExecutableName()
+		if err != nil {
+			return errors.WithMessage(err, libruntime.Location())
+		}
+		opts.namePrefix = &executableName
 	}
 	if opts.isWriteFile == nil {
 		var writeFile = true
@@ -126,9 +140,6 @@ func configure(opts *options) error {
 	if opts.enablePool == nil {
 		var enablePool = true
 		opts.enablePool = &enablePool
-	}
-	if err := os.MkdirAll(*opts.absPath, os.ModePerm); err != nil {
-		return errors.WithMessage(err, libruntime.Location())
 	}
 	return nil
 }

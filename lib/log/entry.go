@@ -17,7 +17,7 @@ type extendFields []interface{}
 
 // entry 日志数据信息
 type entry struct {
-	level        int       //日志级别
+	level        int       //本条目的日志级别
 	time         time.Time //生成日志的时间
 	callerInfo   string    //调用堆栈信息
 	message      string    //日志消息

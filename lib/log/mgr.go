@@ -65,6 +65,7 @@ func (p *mgr) Start(opts ...*options) error {
 		p.loggerSlice[i] = log.New(os.Stdout, "", 0)
 	}
 	p.logChan = make(chan *entry, logChannelCapacity)
+	p.timeMgr = &libtime.Mgr{}
 	// 初始化各级别的日志输出
 	if err := p.newWriters(); err != nil {
 		return errors.WithMessage(err, libruntime.Location())

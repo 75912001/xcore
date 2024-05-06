@@ -215,3 +215,65 @@ func TestSetRunMode(t *testing.T) {
 		})
 	}
 }
+
+func TestGetExecutableName(t *testing.T) {
+	patches := gomonkey.NewPatches()
+	defer patches.Reset()
+	type fields struct {
+		patches *gomonkey.Patches
+	}
+	tests := []struct {
+		name     string
+		want     string
+		wantErr  bool
+		fields   fields
+		preFunc  func(*fields)
+		postFunc func(*fields)
+	}{
+		{
+			name: "normal case",
+			want: "executable",
+			fields: fields{
+				patches: gomonkey.NewPatches(),
+			},
+			preFunc: func(args *fields) {
+				args.patches.ApplyFunc(os.Executable, func() (string, error) {
+					return "/path/to/executable", nil
+				})
+			},
+			postFunc: func(args *fields) {
+				args.patches.Reset()
+			},
+		},
+		{
+			name:    "os.Executable returns an error",
+			wantErr: true,
+			fields: fields{
+				patches: gomonkey.NewPatches(),
+			},
+			preFunc: func(args *fields) {
+				args.patches.ApplyFunc(os.Executable, func() (string, error) {
+					return "", fmt.Errorf("forced error")
+				})
+			},
+			postFunc: func(args *fields) {
+				args.patches.Reset()
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.preFunc(&tt.fields)
+			got, err := GetExecutableName()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetExecutableName() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetExecutableName() got = %v, want %v", got, tt.want)
+			}
+			tt.postFunc(&tt.fields)
+		})
+	}
+}

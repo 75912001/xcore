@@ -44,3 +44,13 @@ func GetExecutablePath() (string, error) {
 	// 返回目录路径
 	return filepath.Dir(path), nil
 }
+
+// GetExecutableName 获取当前执行的程序的名称
+func GetExecutableName() (string, error) {
+	path, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	// 返回程序名称
+	return filepath.Base(path), nil
+}
