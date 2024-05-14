@@ -33,20 +33,30 @@ func (p *object) WithExtraError(extraError error) *object {
 	return p
 }
 
+func (p *object) WithName(name string) *object {
+	p.name = name
+	return p
+}
+
+func (p *object) WithDesc(desc string) *object {
+	p.desc = desc
+	return p
+}
+
 // CreateObject 创建错误码对象,初始化程序的时候创建,创建失败会 panic.
-// [NOTE] 不要在业务逻辑运行的时候使用.
-func CreateObject(code uint32, name string, desc string) *object {
-	newError := newObject(code, name, desc)
+func CreateObject(code uint32) *object {
+	newError := newObject(code)
 	e := checkDuplication(newError)
 	if e != nil {
 		panic(
-			errors.WithMessage(e, fmt.Sprintf("create error object duplicates %v %#x %v %v", code, code, name, desc)),
+			errors.WithMessage(e, fmt.Sprintf("create error object duplicates %v %#x", code, code)),
 		)
 	}
 	return newError
 }
 
 // 错误信息
+// 用来确保 错误码-唯一性
 var errMap = make(map[uint32]struct{})
 
 // 检查重复情况
@@ -58,10 +68,8 @@ func checkDuplication(err *object) error {
 	return nil
 }
 
-func newObject(code uint32, name string, desc string) *object {
+func newObject(code uint32) *object {
 	return &object{
 		code: code,
-		name: name,
-		desc: desc,
 	}
 }

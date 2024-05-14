@@ -8,8 +8,6 @@ import (
 	"xcore/lib/constants"
 )
 
-//"github.com/stretchr/testify/assert"
-
 //go:generate go test -v -gcflags=all=-l -coverprofile=coverage.out
 //go:generate go tool cover -html=coverage.out -o coverage.html
 
@@ -76,16 +74,9 @@ func TestObjectWithExtra(t *testing.T) {
 		want   *object
 	}{
 		{
-			name: constants.Normal,
-			//fields: fields{
-			//	code:         obj.code,
-			//	name:         obj.name,
-			//	desc:         obj.desc,
-			//	extraMessage: obj.extraMessage,
-			//	extraError:   obj.extraError,
-			//},
+			name:   constants.Normal,
 			fields: obj,
-			want: newObject(obj.code, obj.name, obj.desc).
+			want: newObject(obj.code).WithName(obj.name).WithDesc(obj.desc).
 				WithExtraError(obj.extraError).WithExtraMessage(obj.extraMessage),
 		},
 	}
@@ -113,6 +104,6 @@ func TestCreateObject(t *testing.T) {
 		}
 	}()
 
-	_ = CreateObject(Unknown.code, Unknown.name, Unknown.desc)
+	_ = CreateObject(Unknown.code).WithName(Unknown.name).WithDesc(Unknown.desc)
 	t.Errorf("期望的 panic 没有出现")
 }
