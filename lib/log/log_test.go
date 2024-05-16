@@ -24,23 +24,23 @@ func TestGetInstance(t *testing.T) {
 }
 
 func TestIsEnable(t *testing.T) {
-	// 当 instance 为 nil 时，IsEnable 应返回 false
+	// 当 instance 为 nil 时，isEnable 应返回 false
 	instance = nil
-	if IsEnable() != false {
-		t.Errorf("Expected IsEnable to return false, but it returned true")
+	if isEnable() != false {
+		t.Errorf("Expected isEnable to return false, but it returned true")
 	}
-	// 当 instance 不为 nil 时， instance.logChan == nil, 此时 IsEnable 应返回 false
+	// 当 instance 不为 nil 时， instance.logChan == nil, 此时 isEnable 应返回 false
 	instance = &mgr{}
-	if IsEnable() != false {
-		t.Errorf("Expected IsEnable to return false, but it returned true")
+	if isEnable() != false {
+		t.Errorf("Expected isEnable to return false, but it returned true")
 	}
-	// 启动, 使 instance.logChan 不为 nil, 此时 IsEnable 应返回 true
-	err := instance.Start()
+	// 启动, 使 instance.logChan 不为 nil, 此时 isEnable 应返回 true
+	err := instance.start()
 	if err != nil {
-		t.Errorf("Start() returned error: %v", err)
+		t.Errorf("start() returned error: %v", err)
 	}
-	if IsEnable() != true {
-		t.Errorf("Expected IsEnable to return true, but it returned false")
+	if isEnable() != true {
+		t.Errorf("Expected isEnable to return true, but it returned false")
 	}
 
 	// Reset instance to nil after the test
@@ -130,7 +130,7 @@ func TestPrintErr(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelFatal)) // LevelFatal is less than LevelError
+				instance.start(NewOptions().WithLevel(LevelFatal)) // LevelFatal is less than LevelError
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -252,7 +252,7 @@ func Test_entry_Debug(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelInfo))
+				instance.start(NewOptions().WithLevel(LevelInfo))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -269,7 +269,7 @@ func Test_entry_Debug(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelDebug))
+				instance.start(NewOptions().WithLevel(LevelDebug))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -316,7 +316,7 @@ func Test_entry_Debugf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelInfo))
+				instance.start(NewOptions().WithLevel(LevelInfo))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -333,7 +333,7 @@ func Test_entry_Debugf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelDebug))
+				instance.start(NewOptions().WithLevel(LevelDebug))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -380,7 +380,7 @@ func Test_entry_Error(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelFatal))
+				instance.start(NewOptions().WithLevel(LevelFatal))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -397,7 +397,7 @@ func Test_entry_Error(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelError))
+				instance.start(NewOptions().WithLevel(LevelError))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -444,7 +444,7 @@ func Test_entry_Errorf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelFatal))
+				instance.start(NewOptions().WithLevel(LevelFatal))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -461,7 +461,7 @@ func Test_entry_Errorf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelError))
+				instance.start(NewOptions().WithLevel(LevelError))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -508,7 +508,7 @@ func Test_entry_Fatal(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelOff))
+				instance.start(NewOptions().WithLevel(LevelOff))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -525,7 +525,7 @@ func Test_entry_Fatal(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelFatal))
+				instance.start(NewOptions().WithLevel(LevelFatal))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -572,7 +572,7 @@ func Test_entry_Fatalf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelOff))
+				instance.start(NewOptions().WithLevel(LevelOff))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -589,7 +589,7 @@ func Test_entry_Fatalf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelFatal))
+				instance.start(NewOptions().WithLevel(LevelFatal))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -636,7 +636,7 @@ func Test_entry_Info(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelWarn))
+				instance.start(NewOptions().WithLevel(LevelWarn))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -653,7 +653,7 @@ func Test_entry_Info(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelInfo))
+				instance.start(NewOptions().WithLevel(LevelInfo))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -700,7 +700,7 @@ func Test_entry_Infof(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelWarn))
+				instance.start(NewOptions().WithLevel(LevelWarn))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -717,7 +717,7 @@ func Test_entry_Infof(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelInfo))
+				instance.start(NewOptions().WithLevel(LevelInfo))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -764,7 +764,7 @@ func Test_entry_Trace(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelDebug))
+				instance.start(NewOptions().WithLevel(LevelDebug))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -781,7 +781,7 @@ func Test_entry_Trace(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelTrace))
+				instance.start(NewOptions().WithLevel(LevelTrace))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -828,7 +828,7 @@ func Test_entry_Tracef(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelDebug))
+				instance.start(NewOptions().WithLevel(LevelDebug))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -845,7 +845,7 @@ func Test_entry_Tracef(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelTrace))
+				instance.start(NewOptions().WithLevel(LevelTrace))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -892,7 +892,7 @@ func Test_entry_Warn(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelError))
+				instance.start(NewOptions().WithLevel(LevelError))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -909,7 +909,7 @@ func Test_entry_Warn(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelWarn))
+				instance.start(NewOptions().WithLevel(LevelWarn))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -956,7 +956,7 @@ func Test_entry_Warnf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelError))
+				instance.start(NewOptions().WithLevel(LevelError))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -973,7 +973,7 @@ func Test_entry_Warnf(t *testing.T) {
 			preFunc: func() {
 				GetInstance()
 				instance = &mgr{}
-				instance.Start(NewOptions().WithLevel(LevelWarn))
+				instance.start(NewOptions().WithLevel(LevelWarn))
 			},
 			postFunc: func() {
 				GetInstance().Stop()
@@ -1630,8 +1630,8 @@ func Test_mgr_Start(t *testing.T) {
 				pool:            tt.fields.pool,
 				timeMgr:         tt.fields.timeMgr,
 			}
-			if err := p.Start(tt.args.opts...); (err != nil) != tt.wantErr {
-				t.Errorf("Start() error = %v, wantErr %v", err, tt.wantErr)
+			if err := p.start(tt.args.opts...); (err != nil) != tt.wantErr {
+				t.Errorf("start() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

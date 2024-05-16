@@ -18,26 +18,30 @@ import (
 
 var (
 	instance *mgr
-	once     sync.Once
 )
 
-// GetInstance 获取
-func GetInstance() *mgr {
-	once.Do(func() {
-		instance = new(mgr)
-	})
-	return instance
-}
-
-// IsEnable 是否 开启
-func IsEnable() bool {
+// 是否 开启
+func isEnable() bool {
 	if instance == nil {
 		return false
 	}
-	return GetInstance().logChan != nil
+	return true
 }
 
-// mgr 日志管理器
+// NewMgr 创建日志管理器
+func NewMgr(opts ...*options) (*mgr, error) {
+	element := new(mgr)
+	err := element.start(opts...)
+	if err != nil {
+		instance = nil
+		return nil, err
+	} else {
+		instance = element
+	}
+	return element, nil
+}
+
+// 日志管理器
 type mgr struct {
 	options         *options
 	loggerSlice     [LevelOn]*log.Logger // 日志实例 [note]:使用时,注意协程安全
@@ -45,13 +49,11 @@ type mgr struct {
 	waitGroupOutPut sync.WaitGroup       // 同步锁 用于日志退出时,等待完全输出
 	logDuration     int                  // 日志分割刻度,变化时,使用新的日志文件 按天或者小时  e.g.:20210819或2021081901
 	openFiles       []*os.File           // 当前打开的文件
-	pool            *sync.Pool
 	timeMgr         *libtime.Mgr
-	newEntry        func() *entry // 创建entry
 }
 
-// Start 开始
-func (p *mgr) Start(opts ...*options) error {
+// 开始
+func (p *mgr) start(opts ...*options) error {
 	p.options = mergeOptions(opts...)
 	if err := configure(p.options); err != nil {
 		return errors.WithMessage(err, libruntime.Location())
@@ -68,17 +70,21 @@ func (p *mgr) Start(opts ...*options) error {
 	}
 	// 内存池
 	if p.options.IsEnablePool() {
-		p.pool = &sync.Pool{
+		p.options.entryPoolOptions.pool = &sync.Pool{
 			New: func() interface{} {
-				return new(entry)
+				element := &entry{}
+				element.mgr = p
+				return element
 			},
 		}
-		p.newEntry = func() *entry {
-			return p.pool.Get().(*entry)
+		p.options.entryPoolOptions.newEntryFunc = func() *entry {
+			return p.options.entryPoolOptions.pool.Get().(*entry)
 		}
 	} else {
-		p.newEntry = func() *entry {
-			return &entry{}
+		p.options.entryPoolOptions.newEntryFunc = func() *entry {
+			element := &entry{}
+			element.mgr = p
+			return element
 		}
 	}
 	p.waitGroupOutPut.Add(1)
@@ -99,18 +105,12 @@ func (p *mgr) Start(opts ...*options) error {
 
 // GetLevel 获取日志等级
 func (p *mgr) GetLevel() int {
-	if p.options == nil {
-		return LevelOn
-	}
 	return *p.options.level
 }
 
 // 是否启用内存池
 func (p *mgr) isEnablePool() bool {
-	if p.options == nil {
-		return false
-	}
-	return *p.options.enablePool
+	return *p.options.entryPoolOptions.enablePool
 }
 
 // getLogDuration 取得日志刻度
@@ -139,7 +139,7 @@ func (p *mgr) doLog() {
 				PrintfErr("log duration changed, init writers failed, err:%v", err)
 				if p.options.IsEnablePool() {
 					v.reset()
-					p.pool.Put(v)
+					p.options.entryPoolOptions.pool.Put(v)
 				}
 				continue
 			}
@@ -149,7 +149,7 @@ func (p *mgr) doLog() {
 		}
 		if p.options.IsEnablePool() {
 			v.reset()
-			p.pool.Put(v)
+			p.options.entryPoolOptions.pool.Put(v)
 		}
 	}
 	// goroutine 退出,再设置chan为nil, (如果没有退出就设置为nil, 读chan == nil  会 block)
@@ -237,33 +237,33 @@ func (p *mgr) fireHooks(entry *entry) {
 
 // WithField 由field创建日志信息 默认大小2(cap:2*2=4)
 func (p *mgr) WithField(key string, value interface{}) *entry {
-	entry := newEntry()
+	entry := p.options.entryPoolOptions.newEntryFunc()
 	entry.extendFields = make(extendFields, 0, 4)
 	return entry.withExtendField(key, value)
 }
 
 // WithFields 由fields创建日志信息 默认大小4(cap:4*2=8)
 func (p *mgr) WithFields(f extendFields) *entry {
-	entry := newEntry()
+	entry := p.options.entryPoolOptions.newEntryFunc()
 	entry.extendFields = make(extendFields, 0, 8)
 	return entry.withExtendFields(f)
 }
 
 // WithContext 由ctx创建日志信息
 func (p *mgr) WithContext(ctx context.Context) *entry {
-	entry := newEntry()
+	entry := p.options.entryPoolOptions.newEntryFunc()
 	return entry.withContext(ctx)
 }
 
 // log 记录日志
 func (p *mgr) log(level int, v ...interface{}) {
-	entry := newEntry()
+	entry := p.options.entryPoolOptions.newEntryFunc()
 	entry.log(level, calldepth3, v...)
 }
 
 // logf 记录日志
 func (p *mgr) logf(level int, format string, v ...interface{}) {
-	entry := newEntry()
+	entry := p.options.entryPoolOptions.newEntryFunc()
 	entry.logf(level, calldepth3, format, v...)
 }
 

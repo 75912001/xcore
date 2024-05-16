@@ -18,13 +18,13 @@ type entryPoolOptions struct {
 // options contains options to configure a server instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type options struct {
-	level          *int       // 日志等级允许的最小等级 default: LevelOn
-	absPath        *string    // 日志绝对路径 default: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
-	isReportCaller *bool      // 是否打印调用信息 default: true
-	namePrefix     *string    // 日志名 前缀 default: 当前执行的程序名称
-	isWriteFile    *bool      // 是否写文件 default: true
-	enablePool     *bool      // 使用内存池 default: true
-	hooks          LevelHooks // 各日志级别对应的钩子
+	level            *int    // 日志等级允许的最小等级 default: LevelOn
+	absPath          *string // 日志绝对路径 default: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
+	isReportCaller   *bool   // 是否打印调用信息 default: true
+	namePrefix       *string // 日志名 前缀 default: 当前执行的程序名称
+	isWriteFile      *bool   // 是否写文件 default: true
+	entryPoolOptions *entryPoolOptions
+	hooks            LevelHooks // 各日志级别对应的钩子
 }
 
 // NewOptions 新的Options
@@ -65,12 +65,12 @@ func (p *options) WithIsWriteFile(isWriteFile bool) *options {
 }
 
 func (p *options) WithEnablePool(enablePool bool) *options {
-	p.enablePool = &enablePool
+	p.entryPoolOptions.enablePool = &enablePool
 	return p
 }
 
 func (p *options) IsEnablePool() bool {
-	return *p.enablePool
+	return *p.entryPoolOptions.enablePool
 }
 
 // AddHooks 添加钩子
@@ -106,8 +106,8 @@ func mergeOptions(opts ...*options) *options {
 		if opt.isWriteFile != nil {
 			so.isWriteFile = opt.isWriteFile
 		}
-		if opt.enablePool != nil {
-			so.enablePool = opt.enablePool
+		if opt.entryPoolOptions.enablePool != nil {
+			so.entryPoolOptions.enablePool = opt.entryPoolOptions.enablePool
 		}
 	}
 	return so
@@ -145,9 +145,9 @@ func configure(opts *options) error {
 		var writeFile = true
 		opts.isWriteFile = &writeFile
 	}
-	if opts.enablePool == nil {
+	if opts.entryPoolOptions.enablePool == nil {
 		var enablePool = true
-		opts.enablePool = &enablePool
+		opts.entryPoolOptions.enablePool = &enablePool
 	}
 	return nil
 }

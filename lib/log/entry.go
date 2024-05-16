@@ -17,6 +17,7 @@ type extendFields []interface{}
 
 // 日志数据信息
 type entry struct {
+	mgr          *mgr      //日志管理器
 	level        int       //本条目的日志级别
 	time         time.Time //生成日志的时间
 	callerInfo   string    //调用堆栈信息
@@ -26,16 +27,12 @@ type entry struct {
 }
 
 func (p *entry) reset() {
+	p.mgr = nil
 	p.level = LevelOff
 	p.callerInfo = ""
 	p.message = ""
 	p.ctx = nil
 	p.extendFields = nil
-}
-
-// 创建
-func newEntry() *entry {
-	return GetInstance().newEntry()
 }
 
 // 由ctx创建Entry
@@ -134,8 +131,8 @@ func (p *entry) formatMessage() string {
 // 记录日志
 func (p *entry) log(level int, skip int, v ...interface{}) {
 	p.level = level
-	p.time = GetInstance().timeMgr.NowTime()
-	if *GetInstance().options.isReportCaller {
+	p.time = p.mgr.timeMgr.NowTime()
+	if *p.mgr.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(skip)
 		funcName := libconstants.Unknown
 		if !ok {
@@ -146,15 +143,14 @@ func (p *entry) log(level int, skip int, v ...interface{}) {
 		p.callerInfo = fmt.Sprintf(callerInfoFormat, line, funcName)
 	}
 	p.message = fmt.Sprintln(v...)
-
-	GetInstance().logChan <- p
+	p.mgr.logChan <- p
 }
 
 // 记录日志
 func (p *entry) logf(level int, skip int, format string, v ...interface{}) {
 	p.level = level
-	p.time = GetInstance().timeMgr.NowTime()
-	if *GetInstance().options.isReportCaller {
+	p.time = p.mgr.timeMgr.NowTime()
+	if *p.mgr.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(skip)
 		funcName := libconstants.Unknown
 		if !ok {
@@ -165,13 +161,12 @@ func (p *entry) logf(level int, skip int, format string, v ...interface{}) {
 		p.callerInfo = fmt.Sprintf(callerInfoFormat, line, funcName)
 	}
 	p.message = fmt.Sprintf(format, v...)
-
-	GetInstance().logChan <- p
+	p.mgr.logChan <- p
 }
 
 // Trace 追踪日志
 func (p *entry) Trace(v ...interface{}) {
-	if GetInstance().GetLevel() < LevelTrace {
+	if p.mgr.GetLevel() < LevelTrace {
 		return
 	}
 	p.log(LevelTrace, calldepth2, v...)
@@ -179,7 +174,7 @@ func (p *entry) Trace(v ...interface{}) {
 
 // Tracef 追踪日志
 func (p *entry) Tracef(format string, v ...interface{}) {
-	if GetInstance().GetLevel() < LevelTrace {
+	if p.mgr.GetLevel() < LevelTrace {
 		return
 	}
 	p.logf(LevelTrace, calldepth2, format, v...)
@@ -187,7 +182,7 @@ func (p *entry) Tracef(format string, v ...interface{}) {
 
 // Debug 调试日志
 func (p *entry) Debug(v ...interface{}) {
-	if GetInstance().GetLevel() < LevelDebug {
+	if p.mgr.GetLevel() < LevelDebug {
 		return
 	}
 	p.log(LevelDebug, calldepth2, v...)
@@ -195,7 +190,7 @@ func (p *entry) Debug(v ...interface{}) {
 
 // Debugf 调试日志
 func (p *entry) Debugf(format string, v ...interface{}) {
-	if GetInstance().GetLevel() < LevelDebug {
+	if p.mgr.GetLevel() < LevelDebug {
 		return
 	}
 	p.logf(LevelDebug, calldepth2, format, v...)
@@ -203,7 +198,7 @@ func (p *entry) Debugf(format string, v ...interface{}) {
 
 // Info 信息日志
 func (p *entry) Info(v ...interface{}) {
-	if GetInstance().GetLevel() < LevelInfo {
+	if p.mgr.GetLevel() < LevelInfo {
 		return
 	}
 	p.log(LevelInfo, calldepth2, v...)
@@ -211,7 +206,7 @@ func (p *entry) Info(v ...interface{}) {
 
 // Infof 信息日志
 func (p *entry) Infof(format string, v ...interface{}) {
-	if GetInstance().GetLevel() < LevelInfo {
+	if p.mgr.GetLevel() < LevelInfo {
 		return
 	}
 	p.logf(LevelInfo, calldepth2, format, v...)
@@ -219,7 +214,7 @@ func (p *entry) Infof(format string, v ...interface{}) {
 
 // Warn 警告日志
 func (p *entry) Warn(v ...interface{}) {
-	if GetInstance().GetLevel() < LevelWarn {
+	if p.mgr.GetLevel() < LevelWarn {
 		return
 	}
 	p.log(LevelWarn, calldepth2, v...)
@@ -227,7 +222,7 @@ func (p *entry) Warn(v ...interface{}) {
 
 // Warnf 警告日志
 func (p *entry) Warnf(format string, v ...interface{}) {
-	if GetInstance().GetLevel() < LevelWarn {
+	if p.mgr.GetLevel() < LevelWarn {
 		return
 	}
 	p.logf(LevelWarn, calldepth2, format, v...)
@@ -235,7 +230,7 @@ func (p *entry) Warnf(format string, v ...interface{}) {
 
 // Error 错误日志
 func (p *entry) Error(v ...interface{}) {
-	if GetInstance().GetLevel() < LevelError {
+	if p.mgr.GetLevel() < LevelError {
 		return
 	}
 	p.log(LevelError, calldepth2, v...)
@@ -243,7 +238,7 @@ func (p *entry) Error(v ...interface{}) {
 
 // Errorf 错误日志
 func (p *entry) Errorf(format string, v ...interface{}) {
-	if GetInstance().GetLevel() < LevelError {
+	if p.mgr.GetLevel() < LevelError {
 		return
 	}
 	p.logf(LevelError, calldepth2, format, v...)
@@ -251,7 +246,7 @@ func (p *entry) Errorf(format string, v ...interface{}) {
 
 // Fatal 致命日志
 func (p *entry) Fatal(v ...interface{}) {
-	if GetInstance().GetLevel() < LevelFatal {
+	if p.mgr.GetLevel() < LevelFatal {
 		return
 	}
 	p.log(LevelFatal, calldepth2, v...)
@@ -259,7 +254,7 @@ func (p *entry) Fatal(v ...interface{}) {
 
 // Fatalf 致命日志
 func (p *entry) Fatalf(format string, v ...interface{}) {
-	if GetInstance().GetLevel() < LevelFatal {
+	if p.mgr.GetLevel() < LevelFatal {
 		return
 	}
 	p.logf(LevelFatal, calldepth2, format, v...)
