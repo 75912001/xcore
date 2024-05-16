@@ -12,6 +12,8 @@ import (
 	libtime "xcore/lib/time"
 )
 
+// todo menglc 完成覆盖率 [100%] 测试
+
 func TestGetInstance(t *testing.T) {
 	instance1 := GetInstance()
 	instance2 := GetInstance()
@@ -116,18 +118,40 @@ func TestNewOptions(t *testing.T) {
 }
 
 func TestPrintErr(t *testing.T) {
-	type args struct {
-		v []interface{}
-	}
 	tests := []struct {
-		name string
-		args args
+		name     string
+		input    []interface{}
+		preFunc  func()
+		postFunc func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:  "日志启用",
+			input: []interface{}{"test"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelFatal)) // LevelFatal is less than LevelError
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:  "日志-未启用",
+			input: []interface{}{"test"},
+			preFunc: func() {
+				GetInstance()
+				instance = nil
+			},
+			postFunc: func() {
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			PrintErr(tt.args.v...)
+			tt.preFunc()
+			PrintErr(tt.input...)
+			tt.postFunc()
 		})
 	}
 }
@@ -206,560 +230,851 @@ func Test_configure(t *testing.T) {
 }
 
 func Test_entry_Debug(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		v []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < 等级",
+			level:        LevelDebug,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelInfo))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- 等级 <= 日志等级",
+			level:        LevelDebug,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelDebug))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Debug(tt.args.v...)
+			tt.preFunc()
+			p.Debug("this is message:", 123, "xxx", p)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Debugf(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		format string
-		v      []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < 等级",
+			level:        LevelDebug,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelInfo))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- 等级 <= 日志等级",
+			level:        LevelDebug,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelDebug))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Debugf(tt.args.format, tt.args.v...)
+			tt.preFunc()
+			p.Debugf("this is message:%v", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Error(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		v []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelError,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelFatal))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelError,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelError))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Error(tt.args.v...)
+			tt.preFunc()
+			p.Error("this is message:", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Errorf(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		format string
-		v      []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelError,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelFatal))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelError,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelError))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Errorf(tt.args.format, tt.args.v...)
+			tt.preFunc()
+			p.Errorf("this is message:%v", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Fatal(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		v []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelFatal,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelOff))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelFatal,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelFatal))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Fatal(tt.args.v...)
+			tt.preFunc()
+			p.Fatal("this is message:", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Fatalf(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		format string
-		v      []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelFatal,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelOff))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelFatal,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelFatal))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Fatalf(tt.args.format, tt.args.v...)
+			tt.preFunc()
+			p.Fatalf("this is message:%v", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Info(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		v []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < 等级",
+			level:        LevelInfo,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelWarn))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- 等级 <= 日志等级",
+			level:        LevelInfo,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelInfo))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Info(tt.args.v...)
+			tt.preFunc()
+			p.Info("this is message:", 123, "xxx", p)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Infof(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		format string
-		v      []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < 等级",
+			level:        LevelInfo,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelWarn))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- 等级 <= 日志等级",
+			level:        LevelInfo,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelInfo))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Infof(tt.args.format, tt.args.v...)
+			tt.preFunc()
+			p.Infof("this is message:%v", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Trace(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		v []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelTrace,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelDebug))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelTrace,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelTrace))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Trace(tt.args.v...)
+			tt.preFunc()
+			p.Trace("this is message:", 123, "xxx", p)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Tracef(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		format string
-		v      []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelTrace,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelDebug))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelTrace,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelTrace))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Tracef(tt.args.format, tt.args.v...)
+			tt.preFunc()
+			p.Tracef("this is message:%v", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Warn(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		v []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelWarn,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelError))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelWarn,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelWarn))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Warn(tt.args.v...)
+			tt.preFunc()
+			p.Warn("this is message:", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_Warnf(t *testing.T) {
-	type fields struct {
+	tests := []struct {
+		name         string
 		level        int
 		time         time.Time
 		callerInfo   string
 		message      string
 		ctx          context.Context
 		extendFields extendFields
-	}
-	type args struct {
-		format string
-		v      []interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		preFunc      func()
+		postFunc     func()
 	}{
-		// TODO: Add test cases.
+		{
+			name:         "normal-日志等级 < trace 等级",
+			level:        LevelWarn,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelError))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name:         "normal- trace 等级 <= 日志等级",
+			level:        LevelWarn,
+			time:         time.Now(),
+			callerInfo:   "callerInfo",
+			message:      "normal-LevelFatal-message",
+			ctx:          context.TODO(),
+			extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
+			preFunc: func() {
+				GetInstance()
+				instance = &mgr{}
+				instance.Start(NewOptions().WithLevel(LevelWarn))
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
+				level:        tt.level,
+				time:         tt.time,
+				callerInfo:   tt.callerInfo,
+				message:      tt.message,
+				ctx:          tt.ctx,
+				extendFields: tt.extendFields,
 			}
-			p.Warnf(tt.args.format, tt.args.v...)
+			tt.preFunc()
+			p.Warnf("this is message:%v", 123)
+			tt.postFunc()
 		})
 	}
 }
 
 func Test_entry_WithContext(t *testing.T) {
-	type fields struct {
-		level        int
-		time         time.Time
-		callerInfo   string
-		message      string
-		ctx          context.Context
-		extendFields extendFields
-	}
-	type args struct {
-		ctx context.Context
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *entry
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
-			}
-			if got := p.WithContext(tt.args.ctx); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithContext() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	instance = new(mgr)
+	_ = GetInstance().Start()
+	_ = newEntry().withContext(context.Background())
+	GetInstance().Stop()
+	return
 }
 
 func Test_entry_WithExtendField(t *testing.T) {
-	type fields struct {
-		level        int
-		time         time.Time
-		callerInfo   string
-		message      string
-		ctx          context.Context
-		extendFields extendFields
-	}
-	type args struct {
-		key   string
-		value interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *entry
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
-			}
-			if got := p.WithExtendField(tt.args.key, tt.args.value); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithExtendField() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	instance = new(mgr)
+	_ = GetInstance().Start()
+	_ = newEntry().withExtendField("key", "value")
+	GetInstance().Stop()
+	return
 }
 
 func Test_entry_WithExtendFields(t *testing.T) {
-	type fields struct {
-		level        int
-		time         time.Time
-		callerInfo   string
-		message      string
-		ctx          context.Context
-		extendFields extendFields
-	}
-	type args struct {
-		fields extendFields
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *entry
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
-			}
-			if got := p.WithExtendFields(tt.args.fields); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithExtendFields() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	instance = new(mgr)
+	_ = GetInstance().Start()
+	fields := extendFields{"key-1", "value-1", "key-2", "value-2"}
+	_ = newEntry().withExtendFields(fields)
+	GetInstance().Stop()
+	return
+}
+
+func Test_entry_WithMessage(t *testing.T) {
+	instance = new(mgr)
+	_ = GetInstance().Start()
+	_ = newEntry().withMessage("message")
+	GetInstance().Stop()
+	return
 }
 
 func Test_entry_formatMessage(t *testing.T) {
-	type fields struct {
-		level        int
-		time         time.Time
-		callerInfo   string
-		message      string
-		ctx          context.Context
-		extendFields extendFields
-	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   string
+		name     string
+		preFunc  func()
+		postFunc func()
 	}{
-		// TODO: Add test cases.
+		{
+			name: "normal",
+			preFunc: func() {
+				instance = new(mgr)
+				_ = GetInstance().Start()
+				ctx := context.Background()
+				ctx = context.WithValue(ctx, TraceIDKey, "traceID-1001")
+				ctx = context.WithValue(ctx, UserIDKey, 1001)
+				_ = newEntry().withContext(ctx).formatMessage()
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
+		{
+			name: "normal",
+			preFunc: func() {
+				instance = new(mgr)
+				_ = GetInstance().Start()
+				ctx := context.Background()
+				ctx = context.WithValue(ctx, TraceIDKey, "traceID-1001")
+				_ = newEntry().withContext(ctx).
+					withExtendFields(extendFields{
+						UserIDKey, 1001,
+						"field-1-key", "field-1-value",
+						2001, "field-3-value",
+						"field-2-key", 9002,
+					}).
+					formatMessage()
+			},
+			postFunc: func() {
+				GetInstance().Stop()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &entry{
-				level:        tt.fields.level,
-				time:         tt.fields.time,
-				callerInfo:   tt.fields.callerInfo,
-				message:      tt.fields.message,
-				ctx:          tt.fields.ctx,
-				extendFields: tt.fields.extendFields,
-			}
-			if got := p.formatMessage(); got != tt.want {
-				t.Errorf("formatMessage() = %v, want %v", got, tt.want)
-			}
+			tt.preFunc()
+			tt.postFunc()
 		})
 	}
 }
@@ -1552,7 +1867,7 @@ func Test_mgr_WithContext(t *testing.T) {
 				timeMgr:         tt.fields.timeMgr,
 			}
 			if got := p.WithContext(tt.args.ctx); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithContext() = %v, want %v", got, tt.want)
+				t.Errorf("withContext() = %v, want %v", got, tt.want)
 			}
 		})
 	}

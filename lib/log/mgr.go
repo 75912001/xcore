@@ -40,18 +40,14 @@ func IsEnable() bool {
 // mgr 日志管理器
 type mgr struct {
 	options         *options
-	loggerSlice     [LevelOn]*log.Logger // 日志实例 note:此处非协程安全
+	loggerSlice     [LevelOn]*log.Logger // 日志实例 [note]:使用时,注意协程安全
 	logChan         chan *entry          // 日志写入通道
 	waitGroupOutPut sync.WaitGroup       // 同步锁 用于日志退出时,等待完全输出
 	logDuration     int                  // 日志分割刻度,变化时,使用新的日志文件 按天或者小时  e.g.:20210819或2021081901
 	openFiles       []*os.File           // 当前打开的文件
 	pool            *sync.Pool
 	timeMgr         *libtime.Mgr
-}
-
-// GetLevel 获取日志等级
-func (p *mgr) GetLevel() int {
-	return *p.options.level
+	newEntry        func() *entry // 创建entry
 }
 
 // Start 开始
@@ -77,6 +73,13 @@ func (p *mgr) Start(opts ...*options) error {
 				return new(entry)
 			},
 		}
+		p.newEntry = func() *entry {
+			return p.pool.Get().(*entry)
+		}
+	} else {
+		p.newEntry = func() *entry {
+			return &entry{}
+		}
 	}
 	p.waitGroupOutPut.Add(1)
 	go func() {
@@ -92,6 +95,22 @@ func (p *mgr) Start(opts ...*options) error {
 		p.doLog()
 	}()
 	return nil
+}
+
+// GetLevel 获取日志等级
+func (p *mgr) GetLevel() int {
+	if p.options == nil {
+		return LevelOn
+	}
+	return *p.options.level
+}
+
+// 是否启用内存池
+func (p *mgr) isEnablePool() bool {
+	if p.options == nil {
+		return false
+	}
+	return *p.options.enablePool
 }
 
 // getLogDuration 取得日志刻度
@@ -220,20 +239,20 @@ func (p *mgr) fireHooks(entry *entry) {
 func (p *mgr) WithField(key string, value interface{}) *entry {
 	entry := newEntry()
 	entry.extendFields = make(extendFields, 0, 4)
-	return entry.WithExtendField(key, value)
+	return entry.withExtendField(key, value)
 }
 
 // WithFields 由fields创建日志信息 默认大小4(cap:4*2=8)
 func (p *mgr) WithFields(f extendFields) *entry {
 	entry := newEntry()
 	entry.extendFields = make(extendFields, 0, 8)
-	return entry.WithExtendFields(f)
+	return entry.withExtendFields(f)
 }
 
 // WithContext 由ctx创建日志信息
 func (p *mgr) WithContext(ctx context.Context) *entry {
 	entry := newEntry()
-	return entry.WithContext(ctx)
+	return entry.withContext(ctx)
 }
 
 // log 记录日志
@@ -249,97 +268,97 @@ func (p *mgr) logf(level int, format string, v ...interface{}) {
 }
 
 // Trace 踪迹日志
-func (p *mgr) Trace(level int, v ...interface{}) {
-	if *p.options.level < LevelTrace {
+func (p *mgr) Trace(v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
 		return
 	}
-	p.log(level, v...)
+	p.log(LevelTrace, v...)
 }
 
 // Tracef 踪迹日志
-func (p *mgr) Tracef(level int, format string, v ...interface{}) {
-	if *p.options.level < LevelTrace {
+func (p *mgr) Tracef(format string, v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
 		return
 	}
-	p.logf(level, format, v...)
+	p.logf(LevelTrace, format, v...)
 }
 
 // Debug 调试日志
-func (p *mgr) Debug(level int, v ...interface{}) {
-	if *p.options.level < LevelDebug {
+func (p *mgr) Debug(v ...interface{}) {
+	if p.GetLevel() < LevelDebug {
 		return
 	}
-	p.log(level, v...)
+	p.log(LevelDebug, v...)
 }
 
 // Debugf 调试日志
-func (p *mgr) Debugf(level int, format string, v ...interface{}) {
-	if *p.options.level < LevelDebug {
+func (p *mgr) Debugf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelDebug {
 		return
 	}
-	p.logf(level, format, v...)
+	p.logf(LevelDebug, format, v...)
 }
 
 // Info 信息日志
-func (p *mgr) Info(level int, v ...interface{}) {
-	if *p.options.level < LevelInfo {
+func (p *mgr) Info(v ...interface{}) {
+	if p.GetLevel() < LevelInfo {
 		return
 	}
-	p.log(level, v...)
+	p.log(LevelInfo, v...)
 }
 
 // Infof 信息日志
-func (p *mgr) Infof(level int, format string, v ...interface{}) {
-	if *p.options.level < LevelInfo {
+func (p *mgr) Infof(format string, v ...interface{}) {
+	if p.GetLevel() < LevelInfo {
 		return
 	}
-	p.logf(level, format, v...)
+	p.logf(LevelInfo, format, v...)
 }
 
 // Warn 警告日志
-func (p *mgr) Warn(level int, v ...interface{}) {
-	if *p.options.level < LevelWarn {
+func (p *mgr) Warn(v ...interface{}) {
+	if p.GetLevel() < LevelWarn {
 		return
 	}
-	p.log(level, v...)
+	p.log(LevelWarn, v...)
 }
 
 // Warnf 警告日志
-func (p *mgr) Warnf(level int, format string, v ...interface{}) {
-	if *p.options.level < LevelWarn {
+func (p *mgr) Warnf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelWarn {
 		return
 	}
-	p.logf(level, format, v...)
+	p.logf(LevelWarn, format, v...)
 }
 
 // Error 错误日志
-func (p *mgr) Error(level int, v ...interface{}) {
-	if *p.options.level < LevelError {
+func (p *mgr) Error(v ...interface{}) {
+	if p.GetLevel() < LevelError {
 		return
 	}
-	p.log(level, v...)
+	p.log(LevelError, v...)
 }
 
 // Errorf 错误日志
-func (p *mgr) Errorf(level int, format string, v ...interface{}) {
-	if *p.options.level < LevelError {
+func (p *mgr) Errorf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelError {
 		return
 	}
-	p.logf(level, format, v...)
+	p.logf(LevelError, format, v...)
 }
 
 // Fatal 致命日志
-func (p *mgr) Fatal(level int, v ...interface{}) {
-	if *p.options.level < LevelFatal {
+func (p *mgr) Fatal(v ...interface{}) {
+	if p.GetLevel() < LevelFatal {
 		return
 	}
-	p.log(level, v...)
+	p.log(LevelFatal, v...)
 }
 
 // Fatalf 致命日志
-func (p *mgr) Fatalf(level int, format string, v ...interface{}) {
-	if *p.options.level < LevelFatal {
+func (p *mgr) Fatalf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelFatal {
 		return
 	}
-	p.logf(level, format, v...)
+	p.logf(LevelFatal, format, v...)
 }

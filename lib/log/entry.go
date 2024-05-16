@@ -12,10 +12,10 @@ import (
 
 //日志条目
 
-// extendFields 日志数据字段,扩展字段
+// 日志数据字段,扩展字段
 type extendFields []interface{}
 
-// entry 日志数据信息
+// 日志数据信息
 type entry struct {
 	level        int       //本条目的日志级别
 	time         time.Time //生成日志的时间
@@ -33,35 +33,41 @@ func (p *entry) reset() {
 	p.extendFields = nil
 }
 
-// newEntry 创建
+// 创建
 func newEntry() *entry {
-	if GetInstance().options.IsEnablePool() {
-		e := GetInstance().pool.Get().(*entry)
-		return e
-	} else {
-		return &entry{}
-	}
+	return GetInstance().newEntry()
 }
 
-// WithContext 由ctx创建Entry
-func (p *entry) WithContext(ctx context.Context) *entry {
+// 由ctx创建Entry
+func (p *entry) withContext(ctx context.Context) *entry {
 	p.ctx = ctx
 	return p
 }
 
-// WithExtendField 由field创建Entry
-func (p *entry) WithExtendField(key string, value interface{}) *entry {
+// 由field创建Entry
+func (p *entry) withExtendField(key string, value interface{}) *entry {
+	if p.extendFields == nil {
+		p.extendFields = make(extendFields, 0, 4)
+	}
 	p.extendFields = append(p.extendFields, key, value)
 	return p
 }
 
-// WithExtendFields 由多个field创建Entry
-func (p *entry) WithExtendFields(fields extendFields) *entry {
+// 由多个field创建Entry
+func (p *entry) withExtendFields(fields extendFields) *entry {
+	if p.extendFields == nil {
+		p.extendFields = make(extendFields, 0, 8)
+	}
 	p.extendFields = append(p.extendFields, fields...)
 	return p
 }
 
-// formatMessage 格式化日志信息
+func (p *entry) withMessage(message string) *entry {
+	p.message = message
+	return p
+}
+
+// 格式化日志信息
 func (p *entry) formatMessage() string {
 	// 格式为  [时间][日志级别][TraceID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
 	var buf bytes.Buffer
@@ -125,7 +131,7 @@ func (p *entry) formatMessage() string {
 	return buf.String()
 }
 
-// log 记录日志
+// 记录日志
 func (p *entry) log(level int, skip int, v ...interface{}) {
 	p.level = level
 	p.time = GetInstance().timeMgr.NowTime()
@@ -144,7 +150,7 @@ func (p *entry) log(level int, skip int, v ...interface{}) {
 	GetInstance().logChan <- p
 }
 
-// log 记录日志
+// 记录日志
 func (p *entry) logf(level int, skip int, format string, v ...interface{}) {
 	p.level = level
 	p.time = GetInstance().timeMgr.NowTime()

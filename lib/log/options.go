@@ -4,8 +4,16 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
+	"sync"
 	libruntime "xcore/lib/runtime"
 )
+
+// 创建entry的内存池选项
+type entryPoolOptions struct {
+	pool         *sync.Pool
+	enablePool   *bool         // 使用内存池 default: true
+	newEntryFunc func() *entry // 创建 entry 的方法
+}
 
 // options contains options to configure a server instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
