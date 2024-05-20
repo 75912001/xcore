@@ -15,7 +15,7 @@ var stdOut = log.New(os.Stdout, "", 0)
 // PrintInfo 输出到os.Stdout
 func PrintInfo(v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
-		instance.log(LevelInfo, v...)
+		instance.log(instance.NewEntry(), LevelInfo, v...)
 	} else {
 		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
@@ -31,7 +31,7 @@ func PrintInfo(v ...interface{}) {
 // PrintfInfo 输出到os.Stdout
 func PrintfInfo(format string, v ...interface{}) {
 	if isEnable() { // 日志已启用,需要放入日志 channel 中
-		instance.logf(LevelInfo, format, v...)
+		instance.logf(instance.NewEntry(), LevelInfo, format, v...)
 	} else {
 		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown

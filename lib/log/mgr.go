@@ -1,11 +1,12 @@
 package log
 
 import (
-	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"io"
 	"log"
 	"os"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 	"sync"
@@ -73,7 +74,6 @@ func (p *mgr) start(opts ...*options) error {
 		p.options.entryPoolOptions.pool = &sync.Pool{
 			New: func() interface{} {
 				element := &entry{}
-				element.mgr = p
 				return element
 			},
 		}
@@ -83,7 +83,6 @@ func (p *mgr) start(opts ...*options) error {
 	} else {
 		p.options.entryPoolOptions.newEntryFunc = func() *entry {
 			element := &entry{}
-			element.mgr = p
 			return element
 		}
 	}
@@ -106,11 +105,6 @@ func (p *mgr) start(opts ...*options) error {
 // GetLevel 获取日志等级
 func (p *mgr) GetLevel() int {
 	return *p.options.level
-}
-
-// 是否启用内存池
-func (p *mgr) isEnablePool() bool {
-	return *p.options.entryPoolOptions.enablePool
 }
 
 // getLogDuration 取得日志刻度
@@ -145,7 +139,7 @@ func (p *mgr) doLog() {
 			}
 		}
 		if *p.options.isWriteFile {
-			p.loggerSlice[v.level].Print(v.formatMessage())
+			p.loggerSlice[v.level].Print(v.formatLogData())
 		}
 		if p.options.IsEnablePool() {
 			v.reset()
@@ -235,36 +229,41 @@ func (p *mgr) fireHooks(entry *entry) {
 	}
 }
 
-// WithField 由field创建日志信息 默认大小2(cap:2*2=4)
-func (p *mgr) WithField(key string, value interface{}) *entry {
+func (p *mgr) NewEntry() *entry {
 	entry := p.options.entryPoolOptions.newEntryFunc()
-	entry.extendFields = make(extendFields, 0, 4)
-	return entry.withExtendField(key, value)
-}
-
-// WithFields 由fields创建日志信息 默认大小4(cap:4*2=8)
-func (p *mgr) WithFields(f extendFields) *entry {
-	entry := p.options.entryPoolOptions.newEntryFunc()
-	entry.extendFields = make(extendFields, 0, 8)
-	return entry.withExtendFields(f)
-}
-
-// WithContext 由ctx创建日志信息
-func (p *mgr) WithContext(ctx context.Context) *entry {
-	entry := p.options.entryPoolOptions.newEntryFunc()
-	return entry.withContext(ctx)
+	return entry
 }
 
 // log 记录日志
-func (p *mgr) log(level int, v ...interface{}) {
-	entry := p.options.entryPoolOptions.newEntryFunc()
-	entry.log(level, calldepth3, v...)
+func (p *mgr) log(entry *entry, level int, v ...interface{}) {
+	entry.withLevel(level).withTime(p.timeMgr.NowTime()).withMessage(fmt.Sprintln(v...))
+	if *p.options.isReportCaller {
+		pc, _, line, ok := runtime.Caller(calldepth2)
+		funcName := libconstants.Unknown
+		if !ok {
+			line = 0
+		} else {
+			funcName = runtime.FuncForPC(pc).Name()
+		}
+		entry.withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName))
+	}
+	p.logChan <- entry
 }
 
 // logf 记录日志
-func (p *mgr) logf(level int, format string, v ...interface{}) {
-	entry := p.options.entryPoolOptions.newEntryFunc()
-	entry.logf(level, calldepth3, format, v...)
+func (p *mgr) logf(entry *entry, level int, format string, v ...interface{}) {
+	entry.withLevel(level).withTime(p.timeMgr.NowTime()).withMessage(fmt.Sprintf(format, v...))
+	if *p.options.isReportCaller {
+		pc, _, line, ok := runtime.Caller(calldepth2)
+		funcName := libconstants.Unknown
+		if !ok {
+			line = 0
+		} else {
+			funcName = runtime.FuncForPC(pc).Name()
+		}
+		entry.withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName))
+	}
+	p.logChan <- entry
 }
 
 // Trace 踪迹日志
@@ -272,7 +271,14 @@ func (p *mgr) Trace(v ...interface{}) {
 	if p.GetLevel() < LevelTrace {
 		return
 	}
-	p.log(LevelTrace, v...)
+	p.log(p.NewEntry(), LevelTrace, v...)
+}
+
+func (p *mgr) TraceWithEntry(entry *entry, v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
+		return
+	}
+	p.log(entry, LevelTrace, v...)
 }
 
 // Tracef 踪迹日志
@@ -280,7 +286,14 @@ func (p *mgr) Tracef(format string, v ...interface{}) {
 	if p.GetLevel() < LevelTrace {
 		return
 	}
-	p.logf(LevelTrace, format, v...)
+	p.logf(p.NewEntry(), LevelTrace, format, v...)
+}
+
+func (p *mgr) TracefWithEntry(entry *entry, format string, v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
+		return
+	}
+	p.logf(entry, LevelTrace, format, v...)
 }
 
 // Debug 调试日志
@@ -288,7 +301,7 @@ func (p *mgr) Debug(v ...interface{}) {
 	if p.GetLevel() < LevelDebug {
 		return
 	}
-	p.log(LevelDebug, v...)
+	p.log(p.NewEntry(), LevelDebug, v...)
 }
 
 // Debugf 调试日志
@@ -296,7 +309,7 @@ func (p *mgr) Debugf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelDebug {
 		return
 	}
-	p.logf(LevelDebug, format, v...)
+	p.logf(p.NewEntry(), LevelDebug, format, v...)
 }
 
 // Info 信息日志
@@ -304,7 +317,7 @@ func (p *mgr) Info(v ...interface{}) {
 	if p.GetLevel() < LevelInfo {
 		return
 	}
-	p.log(LevelInfo, v...)
+	p.log(p.NewEntry(), LevelInfo, v...)
 }
 
 // Infof 信息日志
@@ -312,7 +325,7 @@ func (p *mgr) Infof(format string, v ...interface{}) {
 	if p.GetLevel() < LevelInfo {
 		return
 	}
-	p.logf(LevelInfo, format, v...)
+	p.logf(p.NewEntry(), LevelInfo, format, v...)
 }
 
 // Warn 警告日志
@@ -320,7 +333,7 @@ func (p *mgr) Warn(v ...interface{}) {
 	if p.GetLevel() < LevelWarn {
 		return
 	}
-	p.log(LevelWarn, v...)
+	p.log(p.NewEntry(), LevelWarn, v...)
 }
 
 // Warnf 警告日志
@@ -328,7 +341,7 @@ func (p *mgr) Warnf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelWarn {
 		return
 	}
-	p.logf(LevelWarn, format, v...)
+	p.logf(p.NewEntry(), LevelWarn, format, v...)
 }
 
 // Error 错误日志
@@ -336,7 +349,7 @@ func (p *mgr) Error(v ...interface{}) {
 	if p.GetLevel() < LevelError {
 		return
 	}
-	p.log(LevelError, v...)
+	p.log(p.NewEntry(), LevelError, v...)
 }
 
 // Errorf 错误日志
@@ -344,7 +357,7 @@ func (p *mgr) Errorf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelError {
 		return
 	}
-	p.logf(LevelError, format, v...)
+	p.logf(p.NewEntry(), LevelError, format, v...)
 }
 
 // Fatal 致命日志
@@ -352,7 +365,7 @@ func (p *mgr) Fatal(v ...interface{}) {
 	if p.GetLevel() < LevelFatal {
 		return
 	}
-	p.log(LevelFatal, v...)
+	p.log(p.NewEntry(), LevelFatal, v...)
 }
 
 // Fatalf 致命日志
@@ -360,5 +373,5 @@ func (p *mgr) Fatalf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelFatal {
 		return
 	}
-	p.logf(LevelFatal, format, v...)
+	p.logf(p.NewEntry(), LevelFatal, format, v...)
 }

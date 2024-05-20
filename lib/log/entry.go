@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"runtime"
 	"strconv"
 	"time"
-	libconstants "xcore/lib/constants"
 )
 
 //日志条目
@@ -17,7 +15,6 @@ type extendFields []interface{}
 
 // 日志数据信息
 type entry struct {
-	mgr          *mgr      //日志管理器
 	level        int       //本条目的日志级别
 	time         time.Time //生成日志的时间
 	callerInfo   string    //调用堆栈信息
@@ -27,7 +24,6 @@ type entry struct {
 }
 
 func (p *entry) reset() {
-	p.mgr = nil
 	p.level = LevelOff
 	p.callerInfo = ""
 	p.message = ""
@@ -35,14 +31,29 @@ func (p *entry) reset() {
 	p.extendFields = nil
 }
 
-// 由ctx创建Entry
-func (p *entry) withContext(ctx context.Context) *entry {
+func (p *entry) withLevel(level int) *entry {
+	p.level = level
+	return p
+}
+
+func (p *entry) withTime(nowTime time.Time) *entry {
+	p.time = nowTime
+	return p
+}
+
+func (p *entry) withCallerInfo(callerInfo string) *entry {
+	p.callerInfo = callerInfo
+	return p
+}
+
+// WithContext 由ctx创建Entry
+func (p *entry) WithContext(ctx context.Context) *entry {
 	p.ctx = ctx
 	return p
 }
 
-// 由field创建Entry
-func (p *entry) withExtendField(key string, value interface{}) *entry {
+// WithExtendField 由field创建Entry
+func (p *entry) WithExtendField(key string, value interface{}) *entry {
 	if p.extendFields == nil {
 		p.extendFields = make(extendFields, 0, 4)
 	}
@@ -50,8 +61,8 @@ func (p *entry) withExtendField(key string, value interface{}) *entry {
 	return p
 }
 
-// 由多个field创建Entry
-func (p *entry) withExtendFields(fields extendFields) *entry {
+// WithExtendFields 由多个field创建Entry
+func (p *entry) WithExtendFields(fields extendFields) *entry {
 	if p.extendFields == nil {
 		p.extendFields = make(extendFields, 0, 8)
 	}
@@ -64,8 +75,8 @@ func (p *entry) withMessage(message string) *entry {
 	return p
 }
 
-// 格式化日志信息
-func (p *entry) formatMessage() string {
+// 格式化日志数据
+func (p *entry) formatLogData() string {
 	// 格式为  [时间][日志级别][TraceID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
 	var buf bytes.Buffer
 	buf.Grow(bufferCapacity)
@@ -126,136 +137,4 @@ func (p *entry) formatMessage() string {
 	// 自定义内容
 	buf.WriteString(p.message)
 	return buf.String()
-}
-
-// 记录日志
-func (p *entry) log(level int, skip int, v ...interface{}) {
-	p.level = level
-	p.time = p.mgr.timeMgr.NowTime()
-	if *p.mgr.options.isReportCaller {
-		pc, _, line, ok := runtime.Caller(skip)
-		funcName := libconstants.Unknown
-		if !ok {
-			line = 0
-		} else {
-			funcName = runtime.FuncForPC(pc).Name()
-		}
-		p.callerInfo = fmt.Sprintf(callerInfoFormat, line, funcName)
-	}
-	p.message = fmt.Sprintln(v...)
-	p.mgr.logChan <- p
-}
-
-// 记录日志
-func (p *entry) logf(level int, skip int, format string, v ...interface{}) {
-	p.level = level
-	p.time = p.mgr.timeMgr.NowTime()
-	if *p.mgr.options.isReportCaller {
-		pc, _, line, ok := runtime.Caller(skip)
-		funcName := libconstants.Unknown
-		if !ok {
-			line = 0
-		} else {
-			funcName = runtime.FuncForPC(pc).Name()
-		}
-		p.callerInfo = fmt.Sprintf(callerInfoFormat, line, funcName)
-	}
-	p.message = fmt.Sprintf(format, v...)
-	p.mgr.logChan <- p
-}
-
-// Trace 追踪日志
-func (p *entry) Trace(v ...interface{}) {
-	if p.mgr.GetLevel() < LevelTrace {
-		return
-	}
-	p.log(LevelTrace, calldepth2, v...)
-}
-
-// Tracef 追踪日志
-func (p *entry) Tracef(format string, v ...interface{}) {
-	if p.mgr.GetLevel() < LevelTrace {
-		return
-	}
-	p.logf(LevelTrace, calldepth2, format, v...)
-}
-
-// Debug 调试日志
-func (p *entry) Debug(v ...interface{}) {
-	if p.mgr.GetLevel() < LevelDebug {
-		return
-	}
-	p.log(LevelDebug, calldepth2, v...)
-}
-
-// Debugf 调试日志
-func (p *entry) Debugf(format string, v ...interface{}) {
-	if p.mgr.GetLevel() < LevelDebug {
-		return
-	}
-	p.logf(LevelDebug, calldepth2, format, v...)
-}
-
-// Info 信息日志
-func (p *entry) Info(v ...interface{}) {
-	if p.mgr.GetLevel() < LevelInfo {
-		return
-	}
-	p.log(LevelInfo, calldepth2, v...)
-}
-
-// Infof 信息日志
-func (p *entry) Infof(format string, v ...interface{}) {
-	if p.mgr.GetLevel() < LevelInfo {
-		return
-	}
-	p.logf(LevelInfo, calldepth2, format, v...)
-}
-
-// Warn 警告日志
-func (p *entry) Warn(v ...interface{}) {
-	if p.mgr.GetLevel() < LevelWarn {
-		return
-	}
-	p.log(LevelWarn, calldepth2, v...)
-}
-
-// Warnf 警告日志
-func (p *entry) Warnf(format string, v ...interface{}) {
-	if p.mgr.GetLevel() < LevelWarn {
-		return
-	}
-	p.logf(LevelWarn, calldepth2, format, v...)
-}
-
-// Error 错误日志
-func (p *entry) Error(v ...interface{}) {
-	if p.mgr.GetLevel() < LevelError {
-		return
-	}
-	p.log(LevelError, calldepth2, v...)
-}
-
-// Errorf 错误日志
-func (p *entry) Errorf(format string, v ...interface{}) {
-	if p.mgr.GetLevel() < LevelError {
-		return
-	}
-	p.logf(LevelError, calldepth2, format, v...)
-}
-
-// Fatal 致命日志
-func (p *entry) Fatal(v ...interface{}) {
-	if p.mgr.GetLevel() < LevelFatal {
-		return
-	}
-	p.log(LevelFatal, calldepth2, v...)
-}
-
-// Fatalf 致命日志
-func (p *entry) Fatalf(format string, v ...interface{}) {
-	if p.mgr.GetLevel() < LevelFatal {
-		return
-	}
-	p.logf(LevelFatal, calldepth2, format, v...)
 }

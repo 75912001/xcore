@@ -14,3 +14,6 @@ type ILog interface {
 	//Fatal(v ...interface{})
 	//Fatalf(format string, v ...interface{})
 }
+
+type IEntry interface {
+}

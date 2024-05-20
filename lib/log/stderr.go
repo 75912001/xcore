@@ -12,7 +12,7 @@ var stdErr = log.New(os.Stderr, "", 0)
 // PrintErr 输出到os.Stderr
 func PrintErr(v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
-		instance.log(LevelError, v...)
+		instance.log(instance.NewEntry(), LevelError, v...)
 	} else {
 		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
@@ -28,7 +28,7 @@ func PrintErr(v ...interface{}) {
 // PrintfErr 输出到os.Stderr
 func PrintfErr(format string, v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
-		instance.logf(LevelError, format, v...)
+		instance.logf(instance.NewEntry(), LevelError, format, v...)
 	} else {
 		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
