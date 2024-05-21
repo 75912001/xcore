@@ -42,7 +42,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 	defer func() {
 		if xrutil.IsRelease() {
 			if err := recover(); err != nil {
-				xrlog.PrintErr(xrconstant.GoroutinePanic, err, debug.Stack())
+				xrlog.PrintErr(xrconstant.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
@@ -72,7 +72,7 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if xrutil.IsRelease() {
 			if err := recover(); err != nil {
-				xrlog.PrintErr(xrconstant.GoroutinePanic, err, debug.Stack())
+				xrlog.PrintErr(xrconstant.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
@@ -109,7 +109,7 @@ func (p *Mgr) funcMillisecondNewTicker(ctx context.Context) {
 	defer func() {
 		if xrutil.IsRelease() {
 			if err := recover(); err != nil {
-				xrlog.PrintErr(xrconstant.GoroutinePanic, err, debug.Stack())
+				xrlog.PrintErr(xrconstant.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()

@@ -15,7 +15,7 @@ type entryPoolOptions struct {
 	newEntryFunc func() *entry // 创建 entry 的方法
 }
 
-// options contains options to configure a server instance. Each option can be set through setter functions. See
+// options contains options to configure a server stdInstance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type options struct {
 	level            *int    // 日志等级允许的最小等级 default: LevelOn
@@ -30,6 +30,7 @@ type options struct {
 // NewOptions 新的Options
 func NewOptions() *options {
 	ops := new(options)
+	ops.entryPoolOptions = &entryPoolOptions{}
 	ops.hooks = make(LevelHooks)
 	return ops
 }
@@ -144,6 +145,9 @@ func configure(opts *options) error {
 	if opts.isWriteFile == nil {
 		var writeFile = true
 		opts.isWriteFile = &writeFile
+	}
+	if opts.entryPoolOptions == nil {
+		opts.entryPoolOptions = &entryPoolOptions{}
 	}
 	if opts.entryPoolOptions.enablePool == nil {
 		var enablePool = true

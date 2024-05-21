@@ -23,7 +23,7 @@ type entry struct {
 	extendFields extendFields //[string,interface{}] key,value;key,value...
 }
 
-func (p *entry) reset() {
+func reset(p *entry) {
 	p.level = LevelOff
 	p.callerInfo = ""
 	p.message = ""
@@ -31,17 +31,17 @@ func (p *entry) reset() {
 	p.extendFields = nil
 }
 
-func (p *entry) withLevel(level int) *entry {
+func withLevel(p *entry, level int) *entry {
 	p.level = level
 	return p
 }
 
-func (p *entry) withTime(nowTime time.Time) *entry {
+func withTime(p *entry, nowTime time.Time) *entry {
 	p.time = nowTime
 	return p
 }
 
-func (p *entry) withCallerInfo(callerInfo string) *entry {
+func withCallerInfo(p *entry, callerInfo string) *entry {
 	p.callerInfo = callerInfo
 	return p
 }
@@ -70,13 +70,13 @@ func (p *entry) WithExtendFields(fields extendFields) *entry {
 	return p
 }
 
-func (p *entry) withMessage(message string) *entry {
+func withMessage(p *entry, message string) *entry {
 	p.message = message
 	return p
 }
 
 // 格式化日志数据
-func (p *entry) formatLogData() string {
+func formatLogData(p *entry) string {
 	// 格式为  [时间][日志级别][TraceID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
 	var buf bytes.Buffer
 	buf.Grow(bufferCapacity)
@@ -100,10 +100,10 @@ func (p *entry) formatLogData() string {
 		}
 	}
 	if 0 == uid { //没有找到UID,从field中查找
-		for _, v := range p.extendFields {
+		for idx, v := range p.extendFields {
 			str, ok := v.(string)
 			if ok && str == UserIDKey { //找到
-				uid, _ = v.(uint64)
+				uid, _ = p.extendFields[idx+1].(uint64)
 				break
 			}
 		}

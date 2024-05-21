@@ -17,27 +17,19 @@ import (
 	libtime "xcore/lib/time"
 )
 
-var (
-	instance *mgr
-)
-
-// 是否 开启
-func isEnable() bool {
-	if instance == nil {
-		return false
-	}
-	return true
-}
-
 // NewMgr 创建日志管理器
 func NewMgr(opts ...*options) (*mgr, error) {
 	element := new(mgr)
-	err := element.start(opts...)
+	err := withOptions(element, opts...)
 	if err != nil {
-		instance = nil
+		return nil, err
+	}
+	err = start(element)
+	if err != nil {
+		stdInstance = nil
 		return nil, err
 	} else {
-		instance = element
+		stdInstance = element
 	}
 	return element, nil
 }
@@ -53,12 +45,16 @@ type mgr struct {
 	timeMgr         *libtime.Mgr
 }
 
-// 开始
-func (p *mgr) start(opts ...*options) error {
+func withOptions(p *mgr, opts ...*options) error {
 	p.options = mergeOptions(opts...)
 	if err := configure(p.options); err != nil {
 		return errors.WithMessage(err, libruntime.Location())
 	}
+	return nil
+}
+
+// 开始
+func start(p *mgr) error {
 	// 初始化logger
 	for i := LevelOff; i < LevelOn; i++ {
 		p.loggerSlice[i] = log.New(os.Stdout, "", 0)
@@ -66,7 +62,7 @@ func (p *mgr) start(opts ...*options) error {
 	p.logChan = make(chan *entry, logChannelCapacity)
 	p.timeMgr = &libtime.Mgr{}
 	// 初始化各级别的日志输出
-	if err := p.newWriters(); err != nil {
+	if err := newWriters(p); err != nil {
 		return errors.WithMessage(err, libruntime.Location())
 	}
 	// 内存池
@@ -91,13 +87,13 @@ func (p *mgr) start(opts ...*options) error {
 		defer func() {
 			if libruntime.IsRelease() {
 				if err := recover(); err != nil {
-					PrintErr(libconstants.GoroutinePanic, err, debug.Stack())
+					PrintErr(libconstants.GoroutinePanic, err, string(debug.Stack()))
 				}
 			}
 			p.waitGroupOutPut.Done()
 			PrintInfo(libconstants.GoroutineDone)
 		}()
-		p.doLog()
+		doLog(p)
 	}()
 	return nil
 }
@@ -124,25 +120,25 @@ func (p *mgr) getLogDuration(sec int64) int {
 }
 
 // doLog 处理日志
-func (p *mgr) doLog() {
+func doLog(p *mgr) {
 	for v := range p.logChan {
 		p.fireHooks(v)
 		// 检查自动切换日志
 		if p.logDuration != p.getLogDuration(v.time.Unix()) {
-			if err := p.newWriters(); err != nil {
+			if err := newWriters(p); err != nil {
 				PrintfErr("log duration changed, init writers failed, err:%v", err)
 				if p.options.IsEnablePool() {
-					v.reset()
+					reset(v)
 					p.options.entryPoolOptions.pool.Put(v)
 				}
 				continue
 			}
 		}
 		if *p.options.isWriteFile {
-			p.loggerSlice[v.level].Print(v.formatLogData())
+			p.loggerSlice[v.level].Print(formatLogData(v))
 		}
 		if p.options.IsEnablePool() {
-			v.reset()
+			reset(v)
 			p.options.entryPoolOptions.pool.Put(v)
 		}
 	}
@@ -160,7 +156,7 @@ func (p *mgr) SetLevel(level int) error {
 }
 
 // newWriters 初始化各级别的日志输出
-func (p *mgr) newWriters() error {
+func newWriters(p *mgr) error {
 	// 检查是否要关闭文件
 	for i := range p.openFiles {
 		if err := p.openFiles[i].Close(); err != nil {
@@ -236,7 +232,9 @@ func (p *mgr) NewEntry() *entry {
 
 // log 记录日志
 func (p *mgr) log(entry *entry, level int, v ...interface{}) {
-	entry.withLevel(level).withTime(p.timeMgr.NowTime()).withMessage(fmt.Sprintln(v...))
+	withLevel(entry, level)
+	withTime(entry, p.timeMgr.NowTime())
+	withMessage(entry, fmt.Sprintln(v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
 		funcName := libconstants.Unknown
@@ -245,14 +243,16 @@ func (p *mgr) log(entry *entry, level int, v ...interface{}) {
 		} else {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		entry.withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName))
+		withCallerInfo(entry, fmt.Sprintf(callerInfoFormat, line, funcName))
 	}
 	p.logChan <- entry
 }
 
 // logf 记录日志
 func (p *mgr) logf(entry *entry, level int, format string, v ...interface{}) {
-	entry.withLevel(level).withTime(p.timeMgr.NowTime()).withMessage(fmt.Sprintf(format, v...))
+	withLevel(entry, level)
+	withTime(entry, p.timeMgr.NowTime())
+	withMessage(entry, fmt.Sprintf(format, v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
 		funcName := libconstants.Unknown
@@ -261,7 +261,7 @@ func (p *mgr) logf(entry *entry, level int, format string, v ...interface{}) {
 		} else {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		entry.withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName))
+		withCallerInfo(entry, fmt.Sprintf(callerInfoFormat, line, funcName))
 	}
 	p.logChan <- entry
 }
@@ -301,6 +301,17 @@ func (p *mgr) Debug(v ...interface{}) {
 	if p.GetLevel() < LevelDebug {
 		return
 	}
+	p.log(p.NewEntry(), LevelDebug, v...)
+}
+
+// DebugLazy 调试日志-惰性
+//
+//	等级满足之后才会计算
+func (p *mgr) DebugLazy(vFunc func() []interface{}) {
+	if p.GetLevel() < LevelDebug {
+		return
+	}
+	v := vFunc()
 	p.log(p.NewEntry(), LevelDebug, v...)
 }
 
