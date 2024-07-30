@@ -351,6 +351,7 @@ func TestNewMgr(t *testing.T) {
 			},
 			wantErr: true,
 			preFunc: func(args *args) {
+
 				args.patches = gomonkey.ApplyFunc(withOptions, func(_ *mgr, _ ...*options) error {
 					return errors.New("forced error")
 				})
@@ -469,6 +470,7 @@ func Test_mgr_start(t *testing.T) {
 				withOptions(element)
 			},
 			postFunc: func(args *args) {
+				stdInstance = args.p
 				args.p.Debug("this is debug log")
 				args.p.Stop()
 			},
@@ -481,6 +483,7 @@ func Test_mgr_start(t *testing.T) {
 				withOptions(element, NewOptions().WithEnablePool(false))
 			},
 			postFunc: func(args *args) {
+				stdInstance = args.p
 				args.p.Debug("this is debug log")
 				args.p.Stop()
 			},
@@ -497,6 +500,7 @@ func Test_mgr_start(t *testing.T) {
 				})
 			},
 			postFunc: func(args *args) {
+				stdInstance = args.p
 				args.p.Stop()
 				args.patches.Reset()
 			},
@@ -508,10 +512,12 @@ func Test_mgr_start(t *testing.T) {
 				args.p = element
 				withOptions(element)
 				args.patches = gomonkey.ApplyFunc(doLog, func(_ *mgr) {
+					args.p.logChan = nil
 					panic("forced panic")
 				})
 			},
 			postFunc: func(args *args) {
+				//stdInstance = args.p
 				args.p.Stop()
 				args.patches.Reset()
 			},
