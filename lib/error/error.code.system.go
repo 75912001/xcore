@@ -1,5 +1,6 @@
 package error
 
+// [系统错误码] lib/system 级别的错误码
 var (
 	// Success 成功
 	Success = CreateObject(0x0000).WithName("Success").WithDesc("success")
@@ -7,8 +8,8 @@ var (
 	Link = CreateObject(0xf001).WithName("Link").WithDesc("link error")
 	//// System 系统
 	//System = CreateObject(0xf002, "System", "system error")
-	// Param 参数
-	Param = CreateObject(0xf003).WithName("Param").WithDesc("parameter error")
+	//// Param 参数
+	//Param = CreateObject(0xf003).WithName("Param").WithDesc("parameter error")
 	//// Packet 数据包
 	//Packet = CreateObject(0xf004, "Packet", "packet error")
 	//// Timeout 超时
@@ -27,8 +28,8 @@ var (
 	//TypeMismatch = CreateObject(0xf00b, "TypeMismatch", "type mismatch")
 	//// InvalidPointer 无效指针
 	//InvalidPointer = CreateObject(0xf00c, "InvalidPointer", "invalid pointer")
-	// Level 等级
-	Level = CreateObject(0xf00d).WithName("level").WithDesc("level error")
+	//// Level 等级
+	//Level = CreateObject(0xf00d).WithName("level").WithDesc("level error")
 	//// NonExistent 不存在
 	//NonExistent = CreateObject(0xf00e, "NonExistent", "non-existent")
 	//// Exists 存在
