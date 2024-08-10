@@ -15,15 +15,19 @@ type extendFields []interface{}
 
 // 日志数据信息
 type entry struct {
-	level        int       //本条目的日志级别
-	time         time.Time //生成日志的时间
-	callerInfo   string    //调用堆栈信息
-	message      string    //日志消息
+	level        int       // 本条目的日志级别
+	time         time.Time // 生成日志的时间
+	callerInfo   string    // 调用堆栈信息
+	message      string    // 日志消息
 	ctx          context.Context
-	extendFields extendFields //[string,interface{}] key,value;key,value...
+	extendFields extendFields // [string,interface{}] key,value;key,value...
 }
 
-func reset(p *entry) {
+func newEntry() *entry {
+	return &entry{}
+}
+
+func (p *entry) reset() {
 	p.level = LevelOff
 	p.callerInfo = ""
 	p.message = ""
@@ -46,14 +50,17 @@ func withCallerInfo(p *entry, callerInfo string) *entry {
 	return p
 }
 
-// WithContext 由ctx创建Entry
-func (p *entry) WithContext(ctx context.Context) *entry {
+func withMessage(p *entry, message string) *entry {
+	p.message = message
+	return p
+}
+
+func (p *entry) withContext(ctx context.Context) *entry {
 	p.ctx = ctx
 	return p
 }
 
-// WithExtendField 由field创建Entry
-func (p *entry) WithExtendField(key string, value interface{}) *entry {
+func (p *entry) withExtendField(key string, value interface{}) *entry {
 	if p.extendFields == nil {
 		p.extendFields = make(extendFields, 0, 4)
 	}
@@ -61,54 +68,51 @@ func (p *entry) WithExtendField(key string, value interface{}) *entry {
 	return p
 }
 
-// WithExtendFields 由多个field创建Entry
-func (p *entry) WithExtendFields(fields extendFields) *entry {
+func (p *entry) withExtendFields(fields extendFields) *entry {
 	if p.extendFields == nil {
-		p.extendFields = make(extendFields, 0, 8)
+		fieldsSize := len(fields)
+		p.extendFields = make(extendFields, 0, fieldsSize)
 	}
 	p.extendFields = append(p.extendFields, fields...)
 	return p
 }
 
-func withMessage(p *entry, message string) *entry {
-	p.message = message
-	return p
-}
-
 // 格式化日志数据
 func formatLogData(p *entry) string {
-	// 格式为  [时间][日志级别][TraceID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
+	// 格式为  [时间][日志级别][TID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][日志消息]
 	var buf bytes.Buffer
 	buf.Grow(bufferCapacity)
 	// 时间
 	buf.WriteString(fmt.Sprint("[", p.time.Format(logTimeFormat), "]"))
 	// 日志级别
 	buf.WriteString(fmt.Sprint("[", levelDesc[p.level], "]"))
-	// 处理 ctx TraceID
-	if p.ctx != nil {
-		traceIdVal := p.ctx.Value(TraceIDKey)
+	// TraceID
+	if p.ctx != nil { // 处理 ctx 中的 traceID
+		traceIdVal := p.ctx.Value(traceIDKey)
 		if traceIdVal != nil {
-			buf.WriteString(fmt.Sprint("[", TraceIDKey, ":", traceIdVal.(string), "]"))
+			buf.WriteString(fmt.Sprint("[", traceIDKey, ":", traceIdVal.(string), "]"))
 		}
+	} else { // 没有 ctx , 则 traceID 为0
+		buf.WriteString(fmt.Sprint("[", traceIDKey, ":0]"))
 	}
 	// UID 优先从 ctx 查找,其次查找 field 当 UID 不存在时也需要占位 值为0
 	var uid uint64
 	if p.ctx != nil {
-		uidVal := p.ctx.Value(UserIDKey)
+		uidVal := p.ctx.Value(userIDKey)
 		if uidVal != nil {
 			uid, _ = uidVal.(uint64)
 		}
 	}
-	if 0 == uid { //没有找到UID,从field中查找
+	if 0 == uid { //没有找到UID,从fields中查找,找到第一个
 		for idx, v := range p.extendFields {
 			str, ok := v.(string)
-			if ok && str == UserIDKey { //找到
+			if ok && str == userIDKey { //找到
 				uid, _ = p.extendFields[idx+1].(uint64)
 				break
 			}
 		}
 	}
-	buf.WriteString(fmt.Sprint("[", UserIDKey, ":", strconv.FormatUint(uid, 10), "]"))
+	buf.WriteString(fmt.Sprint("[", userIDKey, ":", strconv.FormatUint(uid, 10), "]"))
 	// 堆栈
 	buf.WriteString(fmt.Sprint("[", p.callerInfo, "]"))
 	// 处理fields
@@ -134,7 +138,7 @@ func formatLogData(p *entry) string {
 		}
 	}
 	buf.WriteString(fmt.Sprint("]"))
-	// 自定义内容
+	// 日志消息
 	buf.WriteString(p.message)
 	return buf.String()
 }

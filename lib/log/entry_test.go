@@ -107,7 +107,7 @@ func Test_entry_WithContext(t *testing.T) {
 	expectedCtx := context.WithValue(context.Background(), "key", "value")
 
 	// 调用WithContext方法
-	e.WithContext(expectedCtx)
+	e.withContext(expectedCtx)
 
 	// 检查上下文是否已经被设置为预期的值
 	if e.ctx != expectedCtx {
@@ -124,7 +124,7 @@ func Test_entry_WithExtendField(t *testing.T) {
 	expectedValue := "value"
 
 	// 调用WithExtendField方法
-	e.WithExtendField(expectedKey, expectedValue)
+	e.withExtendField(expectedKey, expectedValue)
 
 	// 检查扩展字段是否已经被设置为预期的值
 	if len(e.extendFields) != 2 || e.extendFields[0] != expectedKey || e.extendFields[1] != expectedValue {
@@ -140,7 +140,7 @@ func Test_entry_WithExtendFields(t *testing.T) {
 	expectedFields := extendFields{"key1", "value1", "key2", "value2"}
 
 	// 调用WithExtendFields方法
-	e.WithExtendFields(expectedFields)
+	e.withExtendFields(expectedFields)
 
 	// 检查扩展字段是否已经被设置为预期的值
 	if len(e.extendFields) != len(expectedFields) {
@@ -189,8 +189,8 @@ func Test_entry_formatLogData(t *testing.T) {
 				expectedTime := time.Now()
 				expectedCallerInfo := "callerInfo"
 				expectedMessage := "test message"
-				expectedCtx := context.WithValue(context.Background(), TraceIDKey, "TraceIDKey-Value")
-				expectedCtx = context.WithValue(expectedCtx, UserIDKey, uid)
+				expectedCtx := context.WithValue(context.Background(), traceIDKey, "TraceIDKey-Value")
+				expectedCtx = context.WithValue(expectedCtx, userIDKey, uid)
 				expectedFields := extendFields{"key1", "value1", "key2", "value2", uid, "uid-value"}
 
 				// 调用各种方法来设置日志级别、时间、调用者信息、消息、上下文和扩展字段
@@ -198,15 +198,15 @@ func Test_entry_formatLogData(t *testing.T) {
 				withTime(e, expectedTime)
 				withCallerInfo(e, expectedCallerInfo)
 				withMessage(e, expectedMessage).
-					WithContext(expectedCtx).
-					WithExtendFields(expectedFields)
+					withContext(expectedCtx).
+					withExtendFields(expectedFields)
 
 				// 调用formatLogData方法来格式化日志数据
 				formattedLogData := formatLogData(e)
 
 				// 检查返回的字符串是否符合预期
 				expectedLogData := fmt.Sprintf("[%v][INF][%v:%v][%v:%v][callerInfo][{key1:value1}{key2:value2}{%v:uid-value}]test message",
-					expectedTime.Format(logTimeFormat), TraceIDKey, "TraceIDKey-Value", UserIDKey, uid, uid)
+					expectedTime.Format(logTimeFormat), traceIDKey, "TraceIDKey-Value", userIDKey, uid, uid)
 				if formattedLogData != expectedLogData {
 					t.Errorf("Expected log data to be %s, but got %s", expectedLogData, formattedLogData)
 				}
@@ -225,24 +225,24 @@ func Test_entry_formatLogData(t *testing.T) {
 				expectedTime := time.Now()
 				expectedCallerInfo := "callerInfo"
 				expectedMessage := "test message"
-				expectedCtx := context.WithValue(context.Background(), TraceIDKey, "TraceIDKey-Value")
+				expectedCtx := context.WithValue(context.Background(), traceIDKey, "TraceIDKey-Value")
 				//expectedCtx = context.WithValue(expectedCtx, UserIDKey, uid)
-				expectedFields := extendFields{"key1", "value1", UserIDKey, uid}
+				expectedFields := extendFields{"key1", "value1", userIDKey, uid}
 
 				// 调用各种方法来设置日志级别、时间、调用者信息、消息、上下文和扩展字段
 				withLevel(e, expectedLevel)
 				withTime(e, expectedTime)
 				withCallerInfo(e, expectedCallerInfo)
 				withMessage(e, expectedMessage)
-				e.WithContext(expectedCtx).
-					WithExtendFields(expectedFields)
+				e.withContext(expectedCtx).
+					withExtendFields(expectedFields)
 
 				// 调用formatLogData方法来格式化日志数据
 				formattedLogData := formatLogData(e)
 
 				// 检查返回的字符串是否符合预期
 				expectedLogData := fmt.Sprintf("[%v][INF][%v:%v][%v:%v][callerInfo][{key1:value1}{%v:%v}]test message",
-					expectedTime.Format(logTimeFormat), TraceIDKey, "TraceIDKey-Value", UserIDKey, uid, UserIDKey, uid)
+					expectedTime.Format(logTimeFormat), traceIDKey, "TraceIDKey-Value", userIDKey, uid, userIDKey, uid)
 				if formattedLogData != expectedLogData {
 					t.Errorf("Expected log data to be %s, but got %s", expectedLogData, formattedLogData)
 				}
@@ -274,7 +274,7 @@ func (h *myHook) Fire(entry *entry) error {
 }
 
 func TestLevelHooks_add(t *testing.T) {
-	levelHooks := make(LevelHooks)
+	levelHooks := make(LevelHookMap)
 	myHook := new(myHook)
 	levelHooks.add(myHook)
 	if len(levelHooks) != 6 {
@@ -283,7 +283,7 @@ func TestLevelHooks_add(t *testing.T) {
 }
 
 func TestLevelHooks_fire(t *testing.T) {
-	levelHooks := make(LevelHooks)
+	levelHooks := make(LevelHookMap)
 	myHook := new(myHook)
 	levelHooks.add(myHook)
 	if len(levelHooks) != 6 {
@@ -340,14 +340,14 @@ func TestNewMgr(t *testing.T) {
 		{
 			name: "Test NewMgr with default options",
 			args: args{
-				//opts: []*options{NewOptions()},
+				//opts: []*options{newOptions()},
 			},
 			wantErr: false,
 		},
 		{
 			name: "Test NewMgr with error",
 			args: args{
-				//opts: []*options{NewOptions()},
+				//opts: []*options{newOptions()},
 			},
 			wantErr: true,
 			preFunc: func(args *args) {
@@ -363,7 +363,7 @@ func TestNewMgr(t *testing.T) {
 		{
 			name: "Test NewMgr with error",
 			args: args{
-				//opts: []*options{NewOptions()},
+				//opts: []*options{newOptions()},
 			},
 			wantErr: true,
 			preFunc: func(args *args) {
@@ -441,7 +441,7 @@ func Test_withOptions(t *testing.T) {
 				tt.preFunc(&tt.args)
 			}
 			if err := withOptions(tt.args.p, tt.args.opts...); (err != nil) != tt.wantErr {
-				t.Errorf("withOptions() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("handleOptions() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if tt.postFunc != nil {
 				tt.postFunc(&tt.args)
@@ -470,7 +470,7 @@ func Test_mgr_start(t *testing.T) {
 				withOptions(element)
 			},
 			postFunc: func(args *args) {
-				stdInstance = args.p
+				mgrInstance = args.p
 				args.p.Debug("this is debug log")
 				args.p.Stop()
 			},
@@ -480,10 +480,10 @@ func Test_mgr_start(t *testing.T) {
 			preFunc: func(args *args) {
 				element := new(mgr)
 				args.p = element
-				withOptions(element, NewOptions().WithEnablePool(false))
+				withOptions(element, newOptions().WithEnablePool(false))
 			},
 			postFunc: func(args *args) {
-				stdInstance = args.p
+				mgrInstance = args.p
 				args.p.Debug("this is debug log")
 				args.p.Stop()
 			},
@@ -500,7 +500,7 @@ func Test_mgr_start(t *testing.T) {
 				})
 			},
 			postFunc: func(args *args) {
-				stdInstance = args.p
+				mgrInstance = args.p
 				args.p.Stop()
 				args.patches.Reset()
 			},
@@ -517,7 +517,7 @@ func Test_mgr_start(t *testing.T) {
 				})
 			},
 			postFunc: func(args *args) {
-				//stdInstance = args.p
+				//mgrInstance = args.p
 				args.p.Stop()
 				args.patches.Reset()
 			},
@@ -817,8 +817,8 @@ func Test_mgr_NewEntry(t *testing.T) {
 				openFiles:       tt.fields.openFiles,
 				timeMgr:         tt.fields.timeMgr,
 			}
-			if got := p.NewEntry(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewEntry() = %v, want %v", got, tt.want)
+			if got := p.newEntry(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newEntry() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -1450,8 +1450,8 @@ func TestNewOptions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewOptions(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewOptions() = %v, want %v", got, tt.want)
+			if got := newOptions(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newOptions() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -1465,7 +1465,7 @@ func Test_options_WithLevel(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		level int
@@ -1487,7 +1487,7 @@ func Test_options_WithLevel(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithLevel(tt.args.level); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithLevel() = %v, want %v", got, tt.want)
@@ -1504,7 +1504,7 @@ func Test_options_WithAbsPath(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		absPath string
@@ -1526,7 +1526,7 @@ func Test_options_WithAbsPath(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithAbsPath(tt.args.absPath); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithAbsPath() = %v, want %v", got, tt.want)
@@ -1543,7 +1543,7 @@ func Test_options_WithIsReportCaller(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		isReportCaller bool
@@ -1565,7 +1565,7 @@ func Test_options_WithIsReportCaller(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithIsReportCaller(tt.args.isReportCaller); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithIsReportCaller() = %v, want %v", got, tt.want)
@@ -1582,7 +1582,7 @@ func Test_options_WithNamePrefix(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		namePrefix string
@@ -1604,7 +1604,7 @@ func Test_options_WithNamePrefix(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithNamePrefix(tt.args.namePrefix); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithNamePrefix() = %v, want %v", got, tt.want)
@@ -1621,10 +1621,10 @@ func Test_options_WithHooks(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
-		hooks LevelHooks
+		hooks LevelHookMap
 	}
 	tests := []struct {
 		name   string
@@ -1643,7 +1643,7 @@ func Test_options_WithHooks(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithHooks(tt.args.hooks); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithHooks() = %v, want %v", got, tt.want)
@@ -1660,7 +1660,7 @@ func Test_options_WithIsWriteFile(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		isWriteFile bool
@@ -1682,7 +1682,7 @@ func Test_options_WithIsWriteFile(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithIsWriteFile(tt.args.isWriteFile); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithIsWriteFile() = %v, want %v", got, tt.want)
@@ -1699,7 +1699,7 @@ func Test_options_WithEnablePool(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		enablePool bool
@@ -1721,7 +1721,7 @@ func Test_options_WithEnablePool(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.WithEnablePool(tt.args.enablePool); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("WithEnablePool() = %v, want %v", got, tt.want)
@@ -1738,7 +1738,7 @@ func Test_options_IsEnablePool(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	tests := []struct {
 		name   string
@@ -1756,7 +1756,7 @@ func Test_options_IsEnablePool(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
 			if got := p.IsEnablePool(); got != tt.want {
 				t.Errorf("IsEnablePool() = %v, want %v", got, tt.want)
@@ -1773,7 +1773,7 @@ func Test_options_AddHooks(t *testing.T) {
 		namePrefix       *string
 		isWriteFile      *bool
 		entryPoolOptions *entryPoolOptions
-		hooks            LevelHooks
+		hooks            LevelHookMap
 	}
 	type args struct {
 		hook Hook
@@ -1795,10 +1795,10 @@ func Test_options_AddHooks(t *testing.T) {
 				namePrefix:       tt.fields.namePrefix,
 				isWriteFile:      tt.fields.isWriteFile,
 				entryPoolOptions: tt.fields.entryPoolOptions,
-				hooks:            tt.fields.hooks,
+				hookMap:          tt.fields.hooks,
 			}
-			if got := p.AddHooks(tt.args.hook); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AddHooks() = %v, want %v", got, tt.want)
+			if got := p.AddHook(tt.args.hook); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddHook() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -1818,7 +1818,7 @@ func Test_mergeOptions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := mergeOptions(tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("mergeOptions() = %v, want %v", got, tt.want)
+				t.Errorf("merge() = %v, want %v", got, tt.want)
 			}
 		})
 	}

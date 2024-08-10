@@ -43,15 +43,16 @@ func (p *object) WithDesc(desc string) *object {
 	return p
 }
 
-// CreateObject 创建错误码对象,初始化程序的时候创建,创建失败会 panic.
-func CreateObject(code uint32) *object {
+// NewError 创建错误码,初始化程序的时候创建,创建失败会 panic.
+func NewError(code uint32) *object {
 	newError := newObject(code)
 	e := checkDuplication(newError)
 	if e != nil {
 		panic(
-			errors.WithMessage(e, fmt.Sprintf("create error object duplicates %v %#x", code, code)),
+			errors.WithMessage(e, fmt.Sprintf("new error object duplicates %v %#x", code, code)),
 		)
 	}
+	errMap[code] = struct{}{}
 	return newError
 }
 
@@ -64,7 +65,6 @@ func checkDuplication(err *object) error {
 	if _, ok := errMap[err.code]; ok { // 重复
 		return errors.WithStack(errors.Errorf("duplicate err, code:%v %#x", err.code, err.code))
 	}
-	errMap[err.code] = struct{}{}
 	return nil
 }
 

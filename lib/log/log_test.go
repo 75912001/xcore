@@ -20,18 +20,18 @@ package log
 //}
 //
 //func TestIsEnable(t *testing.T) {
-//    // 当 stdInstance 为 nil 时，isEnable 应返回 false
-//    stdInstance = nil
+//    // 当 mgrInstance 为 nil 时，isEnable 应返回 false
+//    mgrInstance = nil
 //    if isEnable() != false {
 //        t.Errorf("Expected isEnable to return false, but it returned true")
 //    }
-//    // 当 stdInstance 不为 nil 时， stdInstance.logChan == nil, 此时 isEnable 应返回 false
-//    stdInstance = &mgr{}
+//    // 当 mgrInstance 不为 nil 时， mgrInstance.logChan == nil, 此时 isEnable 应返回 false
+//    mgrInstance = &mgr{}
 //    if isEnable() != false {
 //        t.Errorf("Expected isEnable to return false, but it returned true")
 //    }
-//    // 启动, 使 stdInstance.logChan 不为 nil, 此时 isEnable 应返回 true
-//    err := stdInstance.start()
+//    // 启动, 使 mgrInstance.logChan 不为 nil, 此时 isEnable 应返回 true
+//    err := mgrInstance.start()
 //    if err != nil {
 //        t.Errorf("start() returned error: %v", err)
 //    }
@@ -39,13 +39,13 @@ package log
 //        t.Errorf("Expected isEnable to return true, but it returned false")
 //    }
 //
-//    // Reset stdInstance to nil after the test
-//    stdInstance = nil
+//    // Reset mgrInstance to nil after the test
+//    mgrInstance = nil
 //}
 //
 //
 //func TestNewOptions(t *testing.T) {
-//    NewOptions()
+//    newOptions()
 //}
 //
 //func TestPrintErr(t *testing.T) {
@@ -60,8 +60,8 @@ package log
 //            input: []interface{}{"test"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelFatal)) // LevelFatal is less than LevelError
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelFatal)) // LevelFatal is less than LevelError
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -72,7 +72,7 @@ package log
 //            input: []interface{}{"test"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = nil
+//                mgrInstance = nil
 //            },
 //            postFunc: func() {
 //            },
@@ -109,8 +109,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelInfo))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelInfo))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -126,8 +126,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelDebug))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelDebug))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -173,8 +173,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelInfo))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelInfo))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -190,8 +190,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelDebug))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelDebug))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -237,8 +237,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelFatal))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelFatal))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -254,8 +254,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelError))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelError))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -301,8 +301,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelFatal))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelFatal))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -318,8 +318,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelError))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelError))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -365,8 +365,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelOff))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelOff))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -382,8 +382,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelFatal))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelFatal))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -429,8 +429,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelOff))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelOff))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -446,8 +446,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelFatal))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelFatal))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -493,8 +493,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelWarn))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelWarn))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -510,8 +510,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelInfo))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelInfo))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -557,8 +557,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelWarn))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelWarn))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -574,8 +574,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelInfo))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelInfo))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -621,8 +621,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelDebug))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelDebug))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -638,8 +638,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelTrace))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelTrace))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -685,8 +685,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelDebug))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelDebug))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -702,8 +702,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelTrace))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelTrace))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -749,8 +749,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelError))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelError))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -766,8 +766,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelWarn))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelWarn))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -813,8 +813,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelError))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelError))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -830,8 +830,8 @@ package log
 //            extendFields: extendFields{"key-1", "value-1", "key-2", "value-2"},
 //            preFunc: func() {
 //                GetInstance()
-//                stdInstance = &mgr{}
-//                stdInstance.start(NewOptions().WithLevel(LevelWarn))
+//                mgrInstance = &mgr{}
+//                mgrInstance.start(newOptions().WithLevel(LevelWarn))
 //            },
 //            postFunc: func() {
 //                GetInstance().Stop()
@@ -856,7 +856,7 @@ package log
 //}
 //
 //func Test_entry_WithContext(t *testing.T) {
-//    stdInstance = new(mgr)
+//    mgrInstance = new(mgr)
 //    _ = GetInstance().Start()
 //    _ = newEntry().withContext(context.Background())
 //    GetInstance().Stop()
@@ -864,7 +864,7 @@ package log
 //}
 //
 //func Test_entry_WithExtendField(t *testing.T) {
-//    stdInstance = new(mgr)
+//    mgrInstance = new(mgr)
 //    _ = GetInstance().Start()
 //    _ = newEntry().withExtendField("key", "value")
 //    GetInstance().Stop()
@@ -872,7 +872,7 @@ package log
 //}
 //
 //func Test_entry_WithExtendFields(t *testing.T) {
-//    stdInstance = new(mgr)
+//    mgrInstance = new(mgr)
 //    _ = GetInstance().Start()
 //    fields := extendFields{"key-1", "value-1", "key-2", "value-2"}
 //    _ = newEntry().withExtendFields(fields)
@@ -881,7 +881,7 @@ package log
 //}
 //
 //func Test_entry_WithMessage(t *testing.T) {
-//    stdInstance = new(mgr)
+//    mgrInstance = new(mgr)
 //    _ = GetInstance().Start()
 //    _ = newEntry().withMessage("message")
 //    GetInstance().Stop()

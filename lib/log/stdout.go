@@ -12,65 +12,44 @@ import (
 
 var stdOut = log.New(os.Stdout, "", 0)
 
-var (
-	stdInstance *mgr
-)
-
-// 是否 开启
-func isEnable() bool {
-	if stdInstance == nil {
-		return false
-	}
-	if stdInstance.logChan == nil {
-		return false
-	}
-	return true
-}
-
 // PrintInfo 输出到os.Stdout
 func PrintInfo(v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
-		stdInstance.log(stdInstance.NewEntry(), LevelInfo, v...)
+		mgrInstance.log(mgrInstance.newEntry(), LevelInfo, v...)
 	} else {
-		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
-		if !ok {
-			line = 0
-		} else {
+		pc, _, line, ok := runtime.Caller(calldepth1)
+		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(LevelInfo, line, funcName, v...)
+		formatAndPrint(stdOut, LevelInfo, line, funcName, v...)
 	}
 }
 
 // PrintfInfo 输出到os.Stdout
 func PrintfInfo(format string, v ...interface{}) {
 	if isEnable() { // 日志已启用,需要放入日志 channel 中
-		stdInstance.logf(stdInstance.NewEntry(), LevelInfo, format, v...)
+		mgrInstance.logf(mgrInstance.newEntry(), LevelInfo, format, v...)
 	} else {
-		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
-		if !ok {
-			line = 0
-		} else {
+		pc, _, line, ok := runtime.Caller(calldepth1)
+		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(LevelInfo, line, funcName, v...)
+		formatAndPrint(stdOut, LevelInfo, line, funcName, v...)
 	}
 }
 
-func formatAndPrint(level int, line int, funcName string, v ...interface{}) {
+func formatAndPrint(logger *log.Logger, level int, line int, funcName string, v ...interface{}) {
 	var buf bytes.Buffer
 	buf.Grow(bufferCapacity)
-	// 格式为  [时间][日志级别][TraceID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
+	// 格式为  [时间][日志级别][TID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
 	buf.WriteString(fmt.Sprint("[", time.Now().Format(logTimeFormat), "]"))
 	buf.WriteString(fmt.Sprint("[", levelDesc[level], "]"))
-	buf.WriteString("[TraceID:0]")
-	buf.WriteString("[UID:0]")
+	buf.WriteString(traceIDKeyString0)
+	buf.WriteString(userIDKeyString0)
 	buf.WriteString(fmt.Sprint("[", fmt.Sprintf(callerInfoFormat, line, funcName), "]"))
 	buf.WriteString("[]")
-	buf.WriteString("[")
-	buf.WriteString(fmt.Sprint(v...))
-	buf.WriteString("]")
-	_ = stdErr.Output(calldepth3, buf.String())
+	buf.WriteString(fmt.Sprintf("%s%s%s", "[", fmt.Sprint(v...), "]"))
+	_ = logger.Output(calldepth3, buf.String())
 }

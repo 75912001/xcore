@@ -104,6 +104,6 @@ func TestCreateObject(t *testing.T) {
 		}
 	}()
 
-	_ = CreateObject(Unknown.code).WithName(Unknown.name).WithDesc(Unknown.desc)
+	_ = NewError(Unknown.code).WithName(Unknown.name).WithDesc(Unknown.desc)
 	t.Errorf("期望的 panic 没有出现")
 }

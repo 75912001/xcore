@@ -12,31 +12,27 @@ var stdErr = log.New(os.Stderr, "", 0)
 // PrintErr 输出到os.Stderr
 func PrintErr(v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
-		stdInstance.log(stdInstance.NewEntry(), LevelError, v...)
+		mgrInstance.log(mgrInstance.newEntry(), LevelError, v...)
 	} else {
-		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
-		if !ok {
-			line = 0
-		} else {
+		pc, _, line, ok := runtime.Caller(calldepth1)
+		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(LevelError, line, funcName, v...)
+		formatAndPrint(stdErr, LevelError, line, funcName, v...)
 	}
 }
 
 // PrintfErr 输出到os.Stderr
 func PrintfErr(format string, v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
-		stdInstance.logf(stdInstance.NewEntry(), LevelError, format, v...)
+		mgrInstance.logf(mgrInstance.newEntry(), LevelError, format, v...)
 	} else {
-		pc, _, line, ok := runtime.Caller(calldepth1)
 		funcName := libconstants.Unknown
-		if !ok {
-			line = 0
-		} else {
+		pc, _, line, ok := runtime.Caller(calldepth1)
+		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(LevelError, line, funcName, v...)
+		formatAndPrint(stdErr, LevelError, line, funcName, v...)
 	}
 }

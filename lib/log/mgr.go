@@ -17,21 +17,36 @@ import (
 	libtime "xcore/lib/time"
 )
 
+var (
+	mgrInstance *mgr
+)
+
+// 是否 启用
+func isEnable() bool {
+	if mgrInstance == nil {
+		return false
+	}
+	if mgrInstance.logChan == nil {
+		return false
+	}
+	return true
+}
+
 // NewMgr 创建日志管理器
 func NewMgr(opts ...*options) (*mgr, error) {
-	element := new(mgr)
-	err := withOptions(element, opts...)
+	m := &mgr{}
+	err := m.handleOptions(opts...)
 	if err != nil {
 		return nil, err
 	}
-	err = start(element)
+	err = m.start()
 	if err != nil {
-		stdInstance = nil
+		mgrInstance = nil
 		return nil, err
 	} else {
-		stdInstance = element
+		mgrInstance = m
 	}
-	return element, nil
+	return m, nil
 }
 
 // 日志管理器
@@ -40,47 +55,30 @@ type mgr struct {
 	loggerSlice     [LevelOn]*log.Logger // 日志实例 [note]:使用时,注意协程安全
 	logChan         chan *entry          // 日志写入通道
 	waitGroupOutPut sync.WaitGroup       // 同步锁 用于日志退出时,等待完全输出
-	logDuration     int                  // 日志分割刻度,变化时,使用新的日志文件 按天或者小时  e.g.:20210819或2021081901
+	logDuration     int                  // 日志分割刻度,变化时,使用新的日志文件 按天或者小时  e.g.: 20210819 或 2021081901
 	openFiles       []*os.File           // 当前打开的文件
 	timeMgr         *libtime.Mgr
 }
 
-func withOptions(p *mgr, opts ...*options) error {
-	p.options = mergeOptions(opts...)
-	if err := configure(p.options); err != nil {
+func (p *mgr) handleOptions(opts ...*options) error {
+	p.options = newOptions().merge(opts...)
+	if err := p.options.configure(); err != nil {
 		return errors.WithMessage(err, libruntime.Location())
 	}
 	return nil
 }
 
 // 开始
-func start(p *mgr) error {
+func (p *mgr) start() error {
 	// 初始化logger
 	for i := LevelOff; i < LevelOn; i++ {
 		p.loggerSlice[i] = log.New(os.Stdout, "", 0)
 	}
-	p.logChan = make(chan *entry, logChannelCapacity)
+	p.logChan = make(chan *entry, logChannelEntryCapacity)
 	p.timeMgr = &libtime.Mgr{}
 	// 初始化各级别的日志输出
 	if err := newWriters(p); err != nil {
 		return errors.WithMessage(err, libruntime.Location())
-	}
-	// 内存池
-	if p.options.IsEnablePool() {
-		p.options.entryPoolOptions.pool = &sync.Pool{
-			New: func() interface{} {
-				element := &entry{}
-				return element
-			},
-		}
-		p.options.entryPoolOptions.newEntryFunc = func() *entry {
-			return p.options.entryPoolOptions.pool.Get().(*entry)
-		}
-	} else {
-		p.options.entryPoolOptions.newEntryFunc = func() *entry {
-			element := &entry{}
-			return element
-		}
 	}
 	p.waitGroupOutPut.Add(1)
 	go func() {
@@ -127,20 +125,14 @@ func doLog(p *mgr) {
 		if p.logDuration != p.getLogDuration(v.time.Unix()) {
 			if err := newWriters(p); err != nil {
 				PrintfErr("log duration changed, init writers failed, err:%v", err)
-				if p.options.IsEnablePool() {
-					reset(v)
-					p.options.entryPoolOptions.pool.Put(v)
-				}
+				p.options.entryPoolOptions.put(v)
 				continue
 			}
 		}
 		if *p.options.isWriteFile {
 			p.loggerSlice[v.level].Print(formatLogData(v))
 		}
-		if p.options.IsEnablePool() {
-			reset(v)
-			p.options.entryPoolOptions.pool.Put(v)
-		}
+		p.options.entryPoolOptions.put(v)
 	}
 	// goroutine 退出,再设置chan为nil, (如果没有退出就设置为nil, 读chan == nil  会 block)
 	p.logChan = nil
@@ -149,7 +141,7 @@ func doLog(p *mgr) {
 // SetLevel 设置日志等级
 func (p *mgr) SetLevel(level int) error {
 	if level < LevelOff || LevelOn < level {
-		return errors.WithMessage(liberror.Level, libruntime.Location())
+		return errors.WithMessage(liberror.LogLevel, libruntime.Location())
 	}
 	p.options.WithLevel(level)
 	return nil
@@ -185,12 +177,10 @@ func newWriters(p *mgr) error {
 	p.loggerSlice[LevelInfo].SetOutput(normalWriter)
 	p.loggerSlice[LevelDebug].SetOutput(normalWriter)
 	p.loggerSlice[LevelTrace].SetOutput(normalWriter)
-
 	// 记录打开的文件
 	p.openFiles = p.openFiles[0:0]
 	p.openFiles = append(p.openFiles, normalWriter)
 	p.openFiles = append(p.openFiles, errorWriter)
-
 	return nil
 }
 
@@ -202,7 +192,6 @@ func (p *mgr) Stop() error {
 		// 等待logChan 的for range 退出.
 		p.waitGroupOutPut.Wait()
 	}
-
 	// 检查是否要关闭文件
 	if len(p.openFiles) > 0 {
 		for i := range p.openFiles {
@@ -215,17 +204,16 @@ func (p *mgr) Stop() error {
 
 // fireHooks 处理钩子
 func (p *mgr) fireHooks(entry *entry) {
-	if 0 == len(p.options.hooks) {
+	if 0 == len(p.options.hookMap) {
 		return
 	}
-
-	err := p.options.hooks.fire(entry)
+	err := p.options.hookMap.fire(entry)
 	if err != nil {
 		PrintfErr("failed to fire hook. err:%v", err)
 	}
 }
 
-func (p *mgr) NewEntry() *entry {
+func (p *mgr) newEntry() *entry {
 	entry := p.options.entryPoolOptions.newEntryFunc()
 	return entry
 }
@@ -271,7 +259,7 @@ func (p *mgr) Trace(v ...interface{}) {
 	if p.GetLevel() < LevelTrace {
 		return
 	}
-	p.log(p.NewEntry(), LevelTrace, v...)
+	p.log(p.newEntry(), LevelTrace, v...)
 }
 
 func (p *mgr) TraceWithEntry(entry *entry, v ...interface{}) {
@@ -286,7 +274,7 @@ func (p *mgr) Tracef(format string, v ...interface{}) {
 	if p.GetLevel() < LevelTrace {
 		return
 	}
-	p.logf(p.NewEntry(), LevelTrace, format, v...)
+	p.logf(p.newEntry(), LevelTrace, format, v...)
 }
 
 func (p *mgr) TracefWithEntry(entry *entry, format string, v ...interface{}) {
@@ -301,7 +289,7 @@ func (p *mgr) Debug(v ...interface{}) {
 	if p.GetLevel() < LevelDebug {
 		return
 	}
-	p.log(p.NewEntry(), LevelDebug, v...)
+	p.log(p.newEntry(), LevelDebug, v...)
 }
 
 // DebugLazy 调试日志-惰性
@@ -312,7 +300,7 @@ func (p *mgr) DebugLazy(vFunc func() []interface{}) {
 		return
 	}
 	v := vFunc()
-	p.log(p.NewEntry(), LevelDebug, v...)
+	p.log(p.newEntry(), LevelDebug, v...)
 }
 
 // Debugf 调试日志
@@ -320,7 +308,7 @@ func (p *mgr) Debugf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelDebug {
 		return
 	}
-	p.logf(p.NewEntry(), LevelDebug, format, v...)
+	p.logf(p.newEntry(), LevelDebug, format, v...)
 }
 
 // Info 信息日志
@@ -328,7 +316,7 @@ func (p *mgr) Info(v ...interface{}) {
 	if p.GetLevel() < LevelInfo {
 		return
 	}
-	p.log(p.NewEntry(), LevelInfo, v...)
+	p.log(p.newEntry(), LevelInfo, v...)
 }
 
 // Infof 信息日志
@@ -336,7 +324,7 @@ func (p *mgr) Infof(format string, v ...interface{}) {
 	if p.GetLevel() < LevelInfo {
 		return
 	}
-	p.logf(p.NewEntry(), LevelInfo, format, v...)
+	p.logf(p.newEntry(), LevelInfo, format, v...)
 }
 
 // Warn 警告日志
@@ -344,7 +332,7 @@ func (p *mgr) Warn(v ...interface{}) {
 	if p.GetLevel() < LevelWarn {
 		return
 	}
-	p.log(p.NewEntry(), LevelWarn, v...)
+	p.log(p.newEntry(), LevelWarn, v...)
 }
 
 // Warnf 警告日志
@@ -352,7 +340,7 @@ func (p *mgr) Warnf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelWarn {
 		return
 	}
-	p.logf(p.NewEntry(), LevelWarn, format, v...)
+	p.logf(p.newEntry(), LevelWarn, format, v...)
 }
 
 // Error 错误日志
@@ -360,7 +348,7 @@ func (p *mgr) Error(v ...interface{}) {
 	if p.GetLevel() < LevelError {
 		return
 	}
-	p.log(p.NewEntry(), LevelError, v...)
+	p.log(p.newEntry(), LevelError, v...)
 }
 
 // Errorf 错误日志
@@ -368,7 +356,7 @@ func (p *mgr) Errorf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelError {
 		return
 	}
-	p.logf(p.NewEntry(), LevelError, format, v...)
+	p.logf(p.newEntry(), LevelError, format, v...)
 }
 
 // Fatal 致命日志
@@ -376,7 +364,7 @@ func (p *mgr) Fatal(v ...interface{}) {
 	if p.GetLevel() < LevelFatal {
 		return
 	}
-	p.log(p.NewEntry(), LevelFatal, v...)
+	p.log(p.newEntry(), LevelFatal, v...)
 }
 
 // Fatalf 致命日志
@@ -384,5 +372,5 @@ func (p *mgr) Fatalf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelFatal {
 		return
 	}
-	p.logf(p.NewEntry(), LevelFatal, format, v...)
+	p.logf(p.newEntry(), LevelFatal, format, v...)
 }
