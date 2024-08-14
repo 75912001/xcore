@@ -25,7 +25,7 @@ func TestBytePool(t *testing.T) {
 //
 //	go func() {
 //		for d := range dataChan {
-//			time.Sleep(time.Millisecond * 150)
+//			time.Sleep(time.millisecond * 150)
 //			_, err := util.ReleaseByteSlice(d)
 //			fmt.Println("ReleaseByteSlice, get d:", d)
 //			if err != nil {
@@ -40,7 +40,7 @@ func TestBytePool(t *testing.T) {
 //		copy(buf[:len(data)], data)
 //		buf = append(buf, byte(i))
 //		dataChan <- buf
-//		time.Sleep(time.Millisecond * 100)
+//		time.Sleep(time.millisecond * 100)
 //	}
 //	time.Sleep(time.Second)
 //}

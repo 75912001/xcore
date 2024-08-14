@@ -8,8 +8,8 @@ var (
 	Link = NewError(0xf001).WithName("Link").WithDesc("link error")
 	//// System 系统
 	//System = NewError(0xf002, "System", "system error")
-	//// Param 参数
-	//Param = NewError(0xf003).WithName("Param").WithDesc("parameter error")
+	// Param 参数
+	Param = NewError(0xf003).WithName("Param").WithDesc("parameter error")
 	//// Packet 数据包
 	//Packet = NewError(0xf004, "Packet", "packet error")
 	//// Timeout 超时

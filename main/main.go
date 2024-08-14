@@ -32,11 +32,45 @@
 
 package main
 
-import "xcore/lib/log"
+import (
+	"context"
+	"time"
+	"xcore/lib/log"
+	"xcore/lib/timer"
+)
 
 func main() {
-	element, _ := log.NewMgr()
-	element.Debug("this is debug log")
-	element.Stop()
+	//l, _ := log.NewMgr()
+	//l.Debug("this is debug log")
+	log.PrintInfo("this is info log")
+	log.PrintErr("this is error log")
+	//l.Stop()
+	busChannel := make(chan interface{}, 100)
+	if true {
+		// 测试 定时器
+		timerMgr := timer.NewMgr()
+		err := timerMgr.Start(context.Background(),
+			timer.NewOptions().
+				WithOutgoingTimerOutChan(busChannel))
+		if err != nil {
+			panic(err)
+		}
+		timerMgr.AddSecond(func(arg interface{}) {
+			argValue := arg.(string)
+			log.PrintInfo("second timer %s", argValue)
+		}, "1", time.Now().Unix()+10)
+
+	}
+
+	for {
+		// busChannel 取出数据
+		select {
+		case v := <-busChannel:
+			switch t := v.(type) {
+			case *timer.Second:
+				t.Function(t.Arg)
+			}
+		}
+	}
 	return
 }

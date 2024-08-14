@@ -2,7 +2,7 @@ package timer
 
 import "time"
 
-const (
-	ScanSecondDurationDefault      = time.Millisecond * 100
-	ScanMillisecondDurationDefault = time.Millisecond * 25
+var (
+	scanSecondDurationDefault      = time.Millisecond * 100
+	scanMillisecondDurationDefault = time.Millisecond * 25
 )

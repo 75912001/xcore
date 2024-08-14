@@ -5,33 +5,29 @@ package timer
 import (
 	"container/list"
 	"context"
-	xrconstant "dawn-server/impl/xr/lib/constant"
-	xrlog "dawn-server/impl/xr/lib/log"
-	xrutil "dawn-server/impl/xr/lib/util"
+	"github.com/pkg/errors"
 	"math"
 	"runtime/debug"
 	"sync"
 	"time"
-
-	"github.com/pkg/errors"
+	"xcore/lib/constants"
+	"xcore/lib/log"
+	"xcore/lib/runtime"
 )
-
-var SecondOffset int64 // 时间偏移量-秒
 
 // Mgr 定时器管理器
 type Mgr struct {
-	options         *Options
-	secondSlice     [cycleSize]cycle // 秒,数据
+	opts            *options
+	secondSlice     [cycleSize]cycle // 时间轮-数组. 秒,数据
 	millisecondList list.List        // 毫秒,数据
 	cancelFunc      context.CancelFunc
-	waitGroup       sync.WaitGroup // Stop 等待信号
-	milliSecondChan chan interface{}
-	secondChan      chan interface{}
+	waitGroup       sync.WaitGroup   // Stop 等待信号
+	milliSecondChan chan interface{} // 毫秒, channel
+	secondChan      chan interface{} // 秒, channel
 }
 
-// ShadowTimeSecond 叠加偏移量的秒
-func (p *Mgr) ShadowTimeSecond() int64 {
-	return time.Now().Unix() + SecondOffset
+func NewMgr() *Mgr {
+	return &Mgr{}
 }
 
 // OnFun 回调定时器函数(使用协程回调)
@@ -40,29 +36,29 @@ type OnFun func(arg interface{})
 // 每秒更新
 func (p *Mgr) funcSecond(ctx context.Context) {
 	defer func() {
-		if xrutil.IsRelease() {
+		if runtime.IsRelease() {
 			if err := recover(); err != nil {
-				xrlog.PrintErr(xrconstant.GoroutinePanic, err, string(debug.Stack()))
+				log.PrintErr(constants.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
-		xrlog.PrintInfo(xrconstant.GoroutineDone)
+		log.PrintInfo(constants.GoroutineDone)
 	}()
-	idleDelay := time.NewTimer(*p.options.scanSecondDuration)
+	idleDelay := time.NewTimer(*p.opts.scanSecondDuration)
 	defer func() {
 		idleDelay.Stop()
 	}()
 	for {
 		select {
 		case <-ctx.Done():
-			xrlog.PrintInfo(xrconstant.GoroutineDone)
+			log.PrintInfo(constants.GoroutineDone)
 			return
 		case v := <-p.secondChan:
 			s := v.(*Second)
-			p.pushBackCycle(s, binarySearchCycleIdxIteration(s.expire-p.ShadowTimeSecond()))
+			p.pushBackCycle(s, binarySearchCycleIdxIteration(s.expire-ShadowTimestamp()))
 		case <-idleDelay.C:
-			idleDelay.Reset(*p.options.scanSecondDuration)
-			p.scanSecond(p.ShadowTimeSecond())
+			idleDelay.Reset(*p.opts.scanSecondDuration)
+			p.scanSecond(ShadowTimestamp())
 		}
 	}
 }
@@ -70,15 +66,15 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 // 每millisecond个毫秒更新
 func (p *Mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
-		if xrutil.IsRelease() {
+		if runtime.IsRelease() {
 			if err := recover(); err != nil {
-				xrlog.PrintErr(xrconstant.GoroutinePanic, err, string(debug.Stack()))
+				log.PrintErr(constants.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
-		xrlog.PrintInfo(xrconstant.GoroutineDone)
+		log.PrintInfo(constants.GoroutineDone)
 	}()
-	scanMillisecondDuration := *p.options.scanMillisecondDuration
+	scanMillisecondDuration := *p.opts.scanMillisecondDuration
 	scanMillisecond := scanMillisecondDuration / time.Millisecond
 	idleDelay := time.NewTimer(scanMillisecondDuration)
 	defer func() {
@@ -89,7 +85,7 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			xrlog.PrintInfo(xrconstant.GoroutineDone)
+			log.PrintInfo(constants.GoroutineDone)
 			return
 		case v := <-p.milliSecondChan:
 			p.millisecondList.PushBack(v)
@@ -104,46 +100,19 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 	}
 }
 
-// Deprecated: [bug]当扫描频率的毫秒数较低的时候,来不及处理,会累加...  每millisecond个毫秒更新
-func (p *Mgr) funcMillisecondNewTicker(ctx context.Context) {
-	defer func() {
-		if xrutil.IsRelease() {
-			if err := recover(); err != nil {
-				xrlog.PrintErr(xrconstant.GoroutinePanic, err, string(debug.Stack()))
-			}
-		}
-		p.waitGroup.Done()
-		xrlog.PrintInfo(xrconstant.GoroutineDone)
-	}()
-	ticker := time.NewTicker(*p.options.scanMillisecondDuration)
-	defer func() {
-		ticker.Stop()
-	}()
-	for {
-		select {
-		case <-ctx.Done():
-			xrlog.PrintInfo(xrconstant.GoroutineDone)
-			return
-		case v := <-p.milliSecondChan:
-			p.millisecondList.PushBack(v)
-		case <-ticker.C:
-			p.scanMillisecond(time.Now().UnixMilli())
-		}
-	}
-}
-
 // Start
 // [NOTE] 处理定时器相关数据,必须与该timeoutChan线性处理.如:在同一个goroutine select中处理数据
-func (p *Mgr) Start(ctx context.Context, opts ...*Options) error {
-	p.options = mergeOptions(opts...)
-	if err := p.configure(p.options); err != nil {
-		return errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
+func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
+	p.opts = &options{}
+	p.opts = p.opts.merge(opts...)
+	if err := p.opts.configure(); err != nil {
+		return errors.WithMessage(err, runtime.Location())
 	}
 
 	ctxWithCancel, cancelFunc := context.WithCancel(ctx)
 	p.cancelFunc = cancelFunc
 
-	if p.options.scanSecondDuration != nil {
+	if p.opts.scanSecondDuration != nil {
 		p.secondChan = make(chan interface{}, 100)
 		for idx := range p.secondSlice {
 			p.secondSlice[idx].init()
@@ -152,7 +121,7 @@ func (p *Mgr) Start(ctx context.Context, opts ...*Options) error {
 
 		go p.funcSecond(ctxWithCancel)
 	}
-	if p.options.scanMillisecondDuration != nil {
+	if p.opts.scanMillisecondDuration != nil {
 		p.milliSecondChan = make(chan interface{}, 100)
 		p.waitGroup.Add(1)
 
@@ -165,26 +134,22 @@ func (p *Mgr) Start(ctx context.Context, opts ...*Options) error {
 func (p *Mgr) Stop() {
 	if p.cancelFunc != nil {
 		p.cancelFunc()
-		// 等待 second, milliSecond goroutine退出.
+		// 等待 Second, milliSecond goroutine退出.
 		p.waitGroup.Wait()
 		p.cancelFunc = nil
 	}
-}
-
-func (p *Mgr) push2TimeOutChan(i interface{}) {
-	p.options.timeoutChan <- i
 }
 
 // AddMillisecond 添加毫秒级定时器
 //
 //	参数:
 //		cb:回调函数
-//		arg:回调参数
+//		Arg:回调参数
 //		expireMillisecond:过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *Millisecond {
-	t := &Millisecond{
+func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *millisecond {
+	t := &millisecond{
 		Arg:      arg,
 		Function: cb,
 		expire:   expireMillisecond,
@@ -197,18 +162,18 @@ func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64)
 // 扫描毫秒级定时器
 //
 //	参数:
-//		millisecond:到期毫秒数
-func (p *Mgr) scanMillisecond(millisecond int64) {
+//		ms:到期毫秒数
+func (p *Mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
-		timerMillisecond := e.Value.(*Millisecond)
-		if !timerMillisecond.IsValid() {
+		timerMillisecond := e.Value.(*millisecond)
+		if !timerMillisecond.isValid() {
 			next = e.Next()
 			p.millisecondList.Remove(e)
 			continue
 		}
-		if timerMillisecond.expire <= millisecond {
-			p.push2TimeOutChan(timerMillisecond)
+		if timerMillisecond.expire <= ms {
+			p.opts.outgoingTimeoutChan <- timerMillisecond
 			next = e.Next()
 			p.millisecondList.Remove(e)
 			continue
@@ -221,13 +186,13 @@ func (p *Mgr) scanMillisecond(millisecond int64) {
 //
 //	参数:
 //		cb:回调函数
-//		arg:回调参数
+//		Arg:回调参数
 //		expire:过期秒数
 //	返回值:
 //		秒定时器
 func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
 	t := &Second{
-		Millisecond{
+		millisecond{
 			Arg:      arg,
 			Function: cb,
 			expire:   expire,
@@ -245,7 +210,6 @@ func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
 //		cycleIdx:轮序号
 func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int) {
 	p.secondSlice[cycleIdx].data.PushBack(timerSecond)
-
 	if timerSecond.expire < p.secondSlice[cycleIdx].minExpire {
 		p.secondSlice[cycleIdx].minExpire = timerSecond.expire
 	}
@@ -253,23 +217,22 @@ func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int) {
 
 // 扫描秒级定时器
 //
-//	second:到期秒数
-func (p *Mgr) scanSecond(second int64) {
+//	timestamp:到期时间戳
+func (p *Mgr) scanSecond(timestamp int64) {
 	var next *list.Element
-
 	cycle0 := &p.secondSlice[0]
-	if cycle0.minExpire <= second {
+	if cycle0.minExpire <= timestamp {
 		// 更新最小过期时间戳
 		cycle0.minExpire = math.MaxInt64
 		for e := cycle0.data.Front(); nil != e; e = next {
 			t := e.Value.(*Second)
-			if !t.IsValid() {
+			if !t.isValid() {
 				next = e.Next()
 				cycle0.data.Remove(e)
 				continue
 			}
-			if t.expire <= second {
-				p.push2TimeOutChan(t)
+			if t.expire <= timestamp {
+				p.opts.outgoingTimeoutChan <- t
 				next = e.Next()
 				cycle0.data.Remove(e)
 				continue
@@ -286,22 +249,22 @@ func (p *Mgr) scanSecond(second int64) {
 			break
 		}
 		c := &p.secondSlice[idx]
-		if (c.minExpire - second) <= gCycleDuration[idx-1] {
+		if (c.minExpire - timestamp) <= gCycleDuration[idx-1] {
 			c.minExpire = math.MaxInt64
 			for e := c.data.Front(); e != nil; e = next {
 				t := e.Value.(*Second)
-				if !t.IsValid() {
+				if !t.isValid() {
 					next = e.Next()
 					c.data.Remove(e)
 					continue
 				}
-				if t.expire <= second {
-					p.push2TimeOutChan(t)
+				if t.expire <= timestamp {
+					p.opts.outgoingTimeoutChan <- t
 					next = e.Next()
 					c.data.Remove(e)
 					continue
 				}
-				if newIdx := findPrevCycleIdx(t.expire-second, idx); idx != newIdx {
+				if newIdx := findPrevCycleIdx(t.expire-timestamp, idx); idx != newIdx {
 					next = e.Next()
 					c.data.Remove(e)
 					p.pushBackCycle(t, newIdx)

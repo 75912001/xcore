@@ -41,23 +41,23 @@ func genDuration(idx int) int64 {
 	return int64(1 << uint(idx+shift))
 }
 
-// 根据 时长 找到时间轮的序号
-// (当前为从头依次判断,适用于大多数数据 符合头部条件,若数据均匀分布,则适用于使用二分查找)
-//
-//	参数:
-//		duration:时长
-//	返回值:
-//		轮序号
-func findCycleIdx(duration int64) (idx int) {
-	for k, v := range gCycleDuration {
-		if duration <= v {
-			return k
-		} else {
-			idx++
-		}
-	}
-	return len(gCycleDuration) - 1
-}
+//// 根据 时长 找到时间轮的序号
+//// (当前为从头依次判断,适用于大多数数据 符合头部条件,若数据均匀分布,则适用于使用二分查找)
+////
+////	参数:
+////		duration:时长
+////	返回值:
+////		轮序号
+//func findCycleIdx(duration int64) (idx int) {
+//	for k, v := range gCycleDuration {
+//		if duration <= v {
+//			return k
+//		} else {
+//			idx++
+//		}
+//	}
+//	return len(gCycleDuration) - 1
+//}
 
 // 根据 时长 找到时间轮的序号 二分查找 (递归)
 //func binarySearchCycleIdxRecursion(low, high int, duration int64) int {
