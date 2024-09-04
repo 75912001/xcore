@@ -1,3 +1,5 @@
+// 文件
+
 package file
 
 import (
