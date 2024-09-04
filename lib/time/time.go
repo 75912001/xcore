@@ -1,31 +1,41 @@
+// 时间
+// 程序运行过程中,会使用时间.计算时间.
+
 package time
 
 import (
 	"time"
+	"xcore/lib/util"
 )
 
 // Mgr 时间管理器
 type Mgr struct {
-	timestampSecond       int64     //上一次调用Update更新的时间戳-秒
-	timestampMillisecond  int64     //上一次调用Update更新的时间戳-毫秒
-	time                  time.Time //上一次调用Update更新的时间
-	timestampSecondOffset int64     //时间戳偏移量-秒
-	utcAble               bool      //是否使用UTC时间
+	timestampSecond       int64        // 上一次调用Update更新的时间戳-秒
+	timestampMillisecond  int64        // 上一次调用Update更新的时间戳-毫秒
+	time                  time.Time    // 上一次调用Update更新的时间
+	timestampSecondOffset int64        // 时间戳偏移量-秒
+	utcSwitch             util.ISwitch // UTC 时间开关
+}
+
+func NewMgr() *Mgr {
+	return &Mgr{
+		utcSwitch: util.NewDefaultSwitch(),
+	}
 }
 
 // AbleUTC 使用UTC时间
 func (p *Mgr) AbleUTC() {
-	p.utcAble = true
+	p.utcSwitch.Enable()
 }
 
 // DisableUTC 不使用UTC时间
 func (p *Mgr) DisableUTC() {
-	p.utcAble = false
+	p.utcSwitch.Disable()
 }
 
 // NowTime 获取当前时间
 func (p *Mgr) NowTime() time.Time {
-	if p.utcAble {
+	if p.utcSwitch.IsEnabled() {
 		return time.Now().UTC()
 	}
 	return time.Now()
