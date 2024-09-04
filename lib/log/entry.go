@@ -15,7 +15,7 @@ type extendFields []interface{}
 
 // 日志数据信息
 type entry struct {
-	level        int       // 本条目的日志级别
+	level        uint32    // 本条目的日志级别
 	time         time.Time // 生成日志的时间
 	callerInfo   string    // 调用堆栈信息
 	message      string    // 日志消息
@@ -35,7 +35,7 @@ func (p *entry) reset() {
 	p.extendFields = nil
 }
 
-func withLevel(p *entry, level int) *entry {
+func withLevel(p *entry, level uint32) *entry {
 	p.level = level
 	return p
 }

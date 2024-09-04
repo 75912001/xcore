@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"os"
-	libruntime "xcore/lib/runtime"
+	xruntime "xcore/lib/runtime"
 )
 
 // 生成 normal log Writer
@@ -22,7 +22,7 @@ func newFileWriter(filePath string, namePrefix string, logDuration int, fileBase
 	fileName := fmt.Sprintf(fileFormat, filePath, namePrefix, logDuration, fileBaseName)
 	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.FileMode(0644))
 	if err != nil {
-		return nil, errors.WithMessage(err, libruntime.Location())
+		return nil, errors.WithMessage(err, xruntime.Location())
 	}
 	return file, nil
 }

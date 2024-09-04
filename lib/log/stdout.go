@@ -7,7 +7,7 @@ import (
 	"os"
 	"runtime"
 	"time"
-	libconstants "xcore/lib/constants"
+	xconstants "xcore/lib/constants"
 )
 
 var stdOut = log.New(os.Stdout, "", 0)
@@ -17,7 +17,7 @@ func PrintInfo(v ...interface{}) {
 	if isEnable() { // 日志已启用,使用日志打印
 		mgrInstance.log(mgrInstance.newEntry(), LevelInfo, v...)
 	} else {
-		funcName := libconstants.Unknown
+		funcName := xconstants.Unknown
 		pc, _, line, ok := runtime.Caller(calldepth1)
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
@@ -31,7 +31,7 @@ func PrintfInfo(format string, v ...interface{}) {
 	if isEnable() { // 日志已启用,需要放入日志 channel 中
 		mgrInstance.logf(mgrInstance.newEntry(), LevelInfo, format, v...)
 	} else {
-		funcName := libconstants.Unknown
+		funcName := xconstants.Unknown
 		pc, _, line, ok := runtime.Caller(calldepth1)
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
@@ -40,7 +40,7 @@ func PrintfInfo(format string, v ...interface{}) {
 	}
 }
 
-func formatAndPrint(logger *log.Logger, level int, line int, funcName string, v ...interface{}) {
+func formatAndPrint(logger *log.Logger, level uint32, line int, funcName string, v ...interface{}) {
 	var buf bytes.Buffer
 	buf.Grow(bufferCapacity)
 	// 格式为  [时间][日志级别][TID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]

@@ -1,3 +1,9 @@
+// 日志
+// 使用系统log,自带锁
+// 使用协程操作io输出日志
+// release 每小时自动创建新的日志文件
+// debug 每天自动创建新的日志文件
+
 package log
 
 import (
@@ -11,10 +17,10 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	libconstants "xcore/lib/constants"
-	liberror "xcore/lib/error"
-	libruntime "xcore/lib/runtime"
-	libtime "xcore/lib/time"
+	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
+	xruntime "xcore/lib/runtime"
+	xtime "xcore/lib/time"
 )
 
 var (
@@ -57,13 +63,13 @@ type mgr struct {
 	waitGroupOutPut sync.WaitGroup       // 同步锁 用于日志退出时,等待完全输出
 	logDuration     int                  // 日志分割刻度,变化时,使用新的日志文件 按天或者小时  e.g.: 20210819 或 2021081901
 	openFiles       []*os.File           // 当前打开的文件
-	timeMgr         *libtime.Mgr
+	timeMgr         *xtime.Mgr
 }
 
 func (p *mgr) handleOptions(opts ...*options) error {
 	p.options = newOptions().merge(opts...)
 	if err := p.options.configure(); err != nil {
-		return errors.WithMessage(err, libruntime.Location())
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
 }
@@ -75,21 +81,21 @@ func (p *mgr) start() error {
 		p.loggerSlice[i] = log.New(os.Stdout, "", 0)
 	}
 	p.logChan = make(chan *entry, logChannelEntryCapacity)
-	p.timeMgr = &libtime.Mgr{}
+	p.timeMgr = &xtime.Mgr{}
 	// 初始化各级别的日志输出
 	if err := newWriters(p); err != nil {
-		return errors.WithMessage(err, libruntime.Location())
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.waitGroupOutPut.Add(1)
 	go func() {
 		defer func() {
-			if libruntime.IsRelease() {
+			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					PrintErr(libconstants.GoroutinePanic, err, string(debug.Stack()))
+					PrintErr(xconstants.GoroutinePanic, err, string(debug.Stack()))
 				}
 			}
 			p.waitGroupOutPut.Done()
-			PrintInfo(libconstants.GoroutineDone)
+			PrintInfo(xconstants.GoroutineDone)
 		}()
 		doLog(p)
 	}()
@@ -97,14 +103,14 @@ func (p *mgr) start() error {
 }
 
 // GetLevel 获取日志等级
-func (p *mgr) GetLevel() int {
+func (p *mgr) GetLevel() uint32 {
 	return *p.options.level
 }
 
 // getLogDuration 取得日志刻度
 func (p *mgr) getLogDuration(sec int64) int {
 	var logFormat string
-	if libruntime.IsRelease() {
+	if xruntime.IsRelease() {
 		logFormat = "2006010215" //年月日小时
 	} else {
 		logFormat = "20060102" //年月日
@@ -139,9 +145,9 @@ func doLog(p *mgr) {
 }
 
 // SetLevel 设置日志等级
-func (p *mgr) SetLevel(level int) error {
+func (p *mgr) SetLevel(level uint32) error {
 	if level < LevelOff || LevelOn < level {
-		return errors.WithMessage(liberror.LogLevel, libruntime.Location())
+		return errors.WithMessage(xerror.LogLevel, xruntime.Location())
 	}
 	p.options.WithLevel(level)
 	return nil
@@ -152,18 +158,18 @@ func newWriters(p *mgr) error {
 	// 检查是否要关闭文件
 	for i := range p.openFiles {
 		if err := p.openFiles[i].Close(); err != nil {
-			return errors.WithMessage(err, libruntime.Location())
+			return errors.WithMessage(err, xruntime.Location())
 		}
 	}
 	second := p.timeMgr.NowTime().Unix()
 	logDuration := p.getLogDuration(second)
 	normalWriter, err := newNormalFileWriter(*p.options.absPath, *p.options.namePrefix, logDuration)
 	if err != nil {
-		return errors.WithMessage(err, libruntime.Location())
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	errorWriter, err := newErrorFileWriter(*p.options.absPath, *p.options.namePrefix, logDuration)
 	if err != nil {
-		return errors.WithMessage(err, libruntime.Location())
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.logDuration = logDuration
 	allWriter := io.MultiWriter(normalWriter, errorWriter)
@@ -219,13 +225,13 @@ func (p *mgr) newEntry() *entry {
 }
 
 // log 记录日志
-func (p *mgr) log(entry *entry, level int, v ...interface{}) {
+func (p *mgr) log(entry *entry, level uint32, v ...interface{}) {
 	withLevel(entry, level)
 	withTime(entry, p.timeMgr.NowTime())
 	withMessage(entry, fmt.Sprintln(v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
-		funcName := libconstants.Unknown
+		funcName := xconstants.Unknown
 		if !ok {
 			line = 0
 		} else {
@@ -237,13 +243,13 @@ func (p *mgr) log(entry *entry, level int, v ...interface{}) {
 }
 
 // logf 记录日志
-func (p *mgr) logf(entry *entry, level int, format string, v ...interface{}) {
+func (p *mgr) logf(entry *entry, level uint32, format string, v ...interface{}) {
 	withLevel(entry, level)
 	withTime(entry, p.timeMgr.NowTime())
 	withMessage(entry, fmt.Sprintf(format, v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
-		funcName := libconstants.Unknown
+		funcName := xconstants.Unknown
 		if !ok {
 			line = 0
 		} else {

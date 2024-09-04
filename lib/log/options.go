@@ -4,13 +4,13 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
-	libruntime "xcore/lib/runtime"
+	xruntime "xcore/lib/runtime"
 )
 
 // options contains options to configure a server mgrInstance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type options struct {
-	level            *int              // 日志等级允许的最小等级 default: LevelOn
+	level            *uint32           // 日志等级允许的最小等级 default: LevelOn
 	absPath          *string           // 日志绝对路径 default: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
 	isReportCaller   *bool             // 是否打印调用信息 default: true
 	namePrefix       *string           // 日志名 前缀 default: 当前执行的程序名称
@@ -24,7 +24,7 @@ func newOptions() *options {
 	return &options{}
 }
 
-func (p *options) WithLevel(level int) *options {
+func (p *options) WithLevel(level uint32) *options {
 	p.level = &level
 	return p
 }
@@ -100,24 +100,24 @@ func (p *options) configure() error {
 		p.level = &level
 	}
 	if p.absPath == nil {
-		executablePath, err := libruntime.GetExecutablePath()
+		executablePath, err := xruntime.GetExecutablePath()
 		if err != nil {
-			return errors.WithMessage(err, libruntime.Location())
+			return errors.WithMessage(err, xruntime.Location())
 		}
 		executablePath = filepath.Join(executablePath, "log")
 		p.absPath = &executablePath
 	}
 	if err := os.MkdirAll(*p.absPath, os.ModePerm); err != nil {
-		return errors.WithMessage(err, libruntime.Location())
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.isReportCaller == nil {
 		var reportCaller = true
 		p.isReportCaller = &reportCaller
 	}
 	if p.namePrefix == nil {
-		executableName, err := libruntime.GetExecutableName()
+		executableName, err := xruntime.GetExecutableName()
 		if err != nil {
-			return errors.WithMessage(err, libruntime.Location())
+			return errors.WithMessage(err, xruntime.Location())
 		}
 		p.namePrefix = &executableName
 	}

@@ -2,14 +2,14 @@ package log
 
 // 日志等级
 const (
-	LevelOff   int = 0 //关闭
-	LevelFatal int = 1 //致命
-	LevelError int = 2 //错误
-	LevelWarn  int = 3 //警告
-	LevelInfo  int = 4 //信息
-	LevelDebug int = 5 //调试
-	LevelTrace int = 6 //跟踪
-	LevelOn    int = 7 //全部打开
+	LevelOff   uint32 = 0 //关闭
+	LevelFatal uint32 = 1 //致命
+	LevelError uint32 = 2 //错误
+	LevelWarn  uint32 = 3 //警告
+	LevelInfo  uint32 = 4 //信息
+	LevelDebug uint32 = 5 //调试
+	LevelTrace uint32 = 6 //跟踪
+	LevelOn    uint32 = 7 //全部打开
 )
 
 // 等级描述

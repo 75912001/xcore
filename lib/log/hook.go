@@ -2,7 +2,7 @@ package log
 
 import (
 	"github.com/pkg/errors"
-	libruntime "xcore/lib/runtime"
+	xruntime "xcore/lib/runtime"
 )
 
 // Hook 钩子
@@ -26,7 +26,7 @@ func (p LevelHookMap) add(hook Hook) {
 func (p LevelHookMap) fire(entry *entry) error {
 	for _, hook := range p[entry.level] {
 		if err := hook.Fire(entry); err != nil {
-			return errors.WithMessage(err, libruntime.Location())
+			return errors.WithMessage(err, xruntime.Location())
 		}
 	}
 	return nil
