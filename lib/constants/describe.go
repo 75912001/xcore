@@ -25,18 +25,16 @@ const (
 	GoroutineDone  = "goroutine-done"  // 协程结束
 	FunctionPanic  = "function-panic"  // 函数 panic
 	FunctionDone   = "function-done"   // 函数结束
-
-	Timeout    = "time-out"     // 超时
-	Retry      = "retry"        // 重试
-	OutOfRange = "out-of-range" // 超出范围
-
-	Parameter = "parameter" // 参数
-	Etcd      = "etcd"      // Etcd
-	Redis     = "redis"     // Redis
-	Mongodb   = "mongodb"   // Mongodb
-	Mysql     = "mysql"     // Mysql
-	Kafka     = "kafka"     // Kafka
-	Nats      = "nats"      // Nats
-
-	Unknown = "unknown" // 未知
+	Timeout        = "time-out"        // 超时
+	Retry          = "retry"           // 重试
+	OutOfRange     = "out-of-range"    // 超出范围
+	Parameter      = "parameter"       // 参数
+	Etcd           = "etcd"            // Etcd
+	Redis          = "redis"           // Redis
+	Mongodb        = "mongodb"         // Mongodb
+	Mysql          = "mysql"           // Mysql
+	Kafka          = "kafka"           // Kafka
+	Nats           = "nats"            // Nats
+	Nil            = "nil"             // 空
+	Unknown        = "unknown"         // 未知
 )
