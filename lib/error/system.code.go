@@ -29,7 +29,7 @@ var (
 	//// InvalidPointer 无效指针
 	//InvalidPointer = NewError(0xf00c, "InvalidPointer", "invalid pointer")
 	// LogLevel 日志等级
-	LogLevel = NewError(0xf00d).WithName("log level").WithDesc("log level error")
+	LogLevel = NewError(0xf00d).WithName("LogLevel").WithDesc("log level error")
 	//// NonExistent 不存在
 	//NonExistent = NewError(0xf00e, "NonExistent", "non-existent")
 	//// Exists 存在
@@ -80,10 +80,10 @@ var (
 	//OverloadWarning = NewError(0xf025, "OverloadWarning", "overload warning")
 	//// OverloadError 过载-错误
 	//OverloadError = NewError(0xf026, "OverloadError", "overload error")
-	//// MessageIDDisable 消息ID禁用
-	//MessageIDDisable = NewError(0xf027, "MessageIDDisable", "message id is disabled")
-	//// MessageIDExistent 消息ID 存在
-	//MessageIDExistent = NewError(0xf028, "MessageIDExistent", "message id existent")
+	// MessageIDDisable 消息ID禁用
+	MessageIDDisable = NewError(0xf027).WithName("MessageIDDisable").WithDesc("message id is disabled")
+	// MessageIDExistent 消息ID 存在
+	MessageIDExistent = NewError(0xf028).WithName("MessageIDExistent").WithDesc("message id existent")
 	//// ModeMismatch 模式 不匹配
 	//ModeMismatch = NewError(0xf029, "ModeMismatch", "mode mismatch")
 	//// FormatMismatch 格式 不匹配
@@ -94,8 +94,8 @@ var (
 	//VersionMismatch = NewError(0xf02c, "VersionMismatch", "version mismatch")
 	//// Unavailable 不可用
 	//Unavailable = NewError(0xf02d, "Unavailable", "unavailable")
-	//// NotImplemented 未实现
-	//NotImplemented = NewError(0xf02e, "NotImplemented", "not implemented")
+	// NotImplemented 未实现
+	NotImplemented = NewError(0xf02e).WithName("NotImplemented").WithDesc("not implemented")
 	//// PacketHeaderLength 数据包头长度
 	//PacketHeaderLength = NewError(0xf02f, "PacketHeaderLength", "packet header length error")
 	//// ChannelClosed 通道 已关闭
