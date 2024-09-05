@@ -27,18 +27,11 @@ type rootJson struct {
 	Etcd Etcd `json:"etcd"` // todo menglc [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
 }
 
-func (p *rootJson) Parse(pathFile string) error {
-	file, err := os.Open(pathFile)
-	if err != nil {
+func (p *rootJson) Parse(strJson string) error {
+	if err := json.Unmarshal([]byte(strJson), &p); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	defer file.Close()
 
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(p)
-	if err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
 	if p.Etcd.TTL == nil {
 		defaultValue := common.TtlSecondDefault
 		p.Etcd.TTL = &defaultValue
