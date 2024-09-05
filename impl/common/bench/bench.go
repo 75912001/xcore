@@ -18,6 +18,8 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
+// 配置-主项,用户服务的基本配置
+
 type Mgr struct {
 	RootJson rootJson
 	Json     benchJson

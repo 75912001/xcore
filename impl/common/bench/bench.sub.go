@@ -7,6 +7,8 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
+// 配置-子项,用于各服务具体配置
+
 type IBenchSub interface {
 	Unmarshal(strJson string) error
 }
