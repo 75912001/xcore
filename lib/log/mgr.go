@@ -67,7 +67,7 @@ type mgr struct {
 }
 
 func (p *mgr) handleOptions(opts ...*options) error {
-	p.options = newOptions().merge(opts...)
+	p.options = NewOptions().merge(opts...)
 	if err := p.options.configure(); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}

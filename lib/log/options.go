@@ -19,8 +19,8 @@ type options struct {
 	hookMap          LevelHookMap      // 各日志级别对应的钩子 default: make(LevelHookMap)
 }
 
-// newOptions 新的Options
-func newOptions() *options {
+// NewOptions 新的Options
+func NewOptions() *options {
 	return &options{}
 }
 
