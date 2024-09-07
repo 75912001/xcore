@@ -40,6 +40,9 @@ func isEnable() bool {
 
 // NewMgr 创建日志管理器
 func NewMgr(opts ...*options) (*mgr, error) {
+	if isEnable() {
+		return mgrInstance, nil
+	}
 	m := &mgr{}
 	err := m.handleOptions(opts...)
 	if err != nil {
@@ -191,19 +194,19 @@ func newWriters(p *mgr) error {
 }
 
 // Stop 停止
-func (p *mgr) Stop() error {
-	if p.logChan != nil {
+func Stop() error {
+	if mgrInstance.logChan != nil {
 		// close chan, for range 读完chan会退出.
-		close(p.logChan)
+		close(mgrInstance.logChan)
 		// 等待logChan 的for range 退出.
-		p.waitGroupOutPut.Wait()
+		mgrInstance.waitGroupOutPut.Wait()
 	}
 	// 检查是否要关闭文件
-	if len(p.openFiles) > 0 {
-		for i := range p.openFiles {
-			_ = p.openFiles[i].Close()
+	if len(mgrInstance.openFiles) > 0 {
+		for i := range mgrInstance.openFiles {
+			_ = mgrInstance.openFiles[i].Close()
 		}
-		p.openFiles = p.openFiles[0:0]
+		mgrInstance.openFiles = mgrInstance.openFiles[0:0]
 	}
 	return nil
 }
@@ -261,122 +264,122 @@ func (p *mgr) logf(entry *entry, level uint32, format string, v ...interface{}) 
 }
 
 // Trace 踪迹日志
-func (p *mgr) Trace(v ...interface{}) {
-	if p.GetLevel() < LevelTrace {
+func Trace(v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelTrace {
 		return
 	}
-	p.log(p.newEntry(), LevelTrace, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelTrace, v...)
 }
 
-func (p *mgr) TraceWithEntry(entry *entry, v ...interface{}) {
-	if p.GetLevel() < LevelTrace {
+func TraceWithEntry(entry *entry, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelTrace {
 		return
 	}
-	p.log(entry, LevelTrace, v...)
+	mgrInstance.log(entry, LevelTrace, v...)
 }
 
 // Tracef 踪迹日志
-func (p *mgr) Tracef(format string, v ...interface{}) {
-	if p.GetLevel() < LevelTrace {
+func Tracef(format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelTrace {
 		return
 	}
-	p.logf(p.newEntry(), LevelTrace, format, v...)
+	mgrInstance.logf(mgrInstance.newEntry(), LevelTrace, format, v...)
 }
 
-func (p *mgr) TracefWithEntry(entry *entry, format string, v ...interface{}) {
-	if p.GetLevel() < LevelTrace {
+func TracefWithEntry(entry *entry, format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelTrace {
 		return
 	}
-	p.logf(entry, LevelTrace, format, v...)
+	mgrInstance.logf(entry, LevelTrace, format, v...)
 }
 
 // Debug 调试日志
-func (p *mgr) Debug(v ...interface{}) {
-	if p.GetLevel() < LevelDebug {
+func Debug(v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelDebug {
 		return
 	}
-	p.log(p.newEntry(), LevelDebug, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelDebug, v...)
 }
 
 // DebugLazy 调试日志-惰性
 //
 //	等级满足之后才会计算
-func (p *mgr) DebugLazy(vFunc func() []interface{}) {
-	if p.GetLevel() < LevelDebug {
+func DebugLazy(vFunc func() []interface{}) {
+	if mgrInstance.GetLevel() < LevelDebug {
 		return
 	}
 	v := vFunc()
-	p.log(p.newEntry(), LevelDebug, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelDebug, v...)
 }
 
 // Debugf 调试日志
-func (p *mgr) Debugf(format string, v ...interface{}) {
-	if p.GetLevel() < LevelDebug {
+func Debugf(format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelDebug {
 		return
 	}
-	p.logf(p.newEntry(), LevelDebug, format, v...)
+	mgrInstance.logf(mgrInstance.newEntry(), LevelDebug, format, v...)
 }
 
 // Info 信息日志
-func (p *mgr) Info(v ...interface{}) {
-	if p.GetLevel() < LevelInfo {
+func Info(v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelInfo {
 		return
 	}
-	p.log(p.newEntry(), LevelInfo, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelInfo, v...)
 }
 
 // Infof 信息日志
-func (p *mgr) Infof(format string, v ...interface{}) {
-	if p.GetLevel() < LevelInfo {
+func Infof(format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelInfo {
 		return
 	}
-	p.logf(p.newEntry(), LevelInfo, format, v...)
+	mgrInstance.logf(mgrInstance.newEntry(), LevelInfo, format, v...)
 }
 
 // Warn 警告日志
-func (p *mgr) Warn(v ...interface{}) {
-	if p.GetLevel() < LevelWarn {
+func Warn(v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelWarn {
 		return
 	}
-	p.log(p.newEntry(), LevelWarn, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelWarn, v...)
 }
 
 // Warnf 警告日志
-func (p *mgr) Warnf(format string, v ...interface{}) {
-	if p.GetLevel() < LevelWarn {
+func Warnf(format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelWarn {
 		return
 	}
-	p.logf(p.newEntry(), LevelWarn, format, v...)
+	mgrInstance.logf(mgrInstance.newEntry(), LevelWarn, format, v...)
 }
 
 // Error 错误日志
-func (p *mgr) Error(v ...interface{}) {
-	if p.GetLevel() < LevelError {
+func Error(v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelError {
 		return
 	}
-	p.log(p.newEntry(), LevelError, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelError, v...)
 }
 
 // Errorf 错误日志
-func (p *mgr) Errorf(format string, v ...interface{}) {
-	if p.GetLevel() < LevelError {
+func Errorf(format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelError {
 		return
 	}
-	p.logf(p.newEntry(), LevelError, format, v...)
+	mgrInstance.logf(mgrInstance.newEntry(), LevelError, format, v...)
 }
 
 // Fatal 致命日志
-func (p *mgr) Fatal(v ...interface{}) {
-	if p.GetLevel() < LevelFatal {
+func Fatal(v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelFatal {
 		return
 	}
-	p.log(p.newEntry(), LevelFatal, v...)
+	mgrInstance.log(mgrInstance.newEntry(), LevelFatal, v...)
 }
 
 // Fatalf 致命日志
-func (p *mgr) Fatalf(format string, v ...interface{}) {
-	if p.GetLevel() < LevelFatal {
+func Fatalf(format string, v ...interface{}) {
+	if mgrInstance.GetLevel() < LevelFatal {
 		return
 	}
-	p.logf(p.newEntry(), LevelFatal, format, v...)
+	mgrInstance.logf(mgrInstance.newEntry(), LevelFatal, format, v...)
 }
