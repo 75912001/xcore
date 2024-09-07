@@ -1,5 +1,5 @@
 // 服务配置
-// bench.json 配置文件, 用于配置服务的基本信息.
+// 服务配置文件, 用于配置服务的基本信息.
 // 该配置文件与可执行程序在同一目录下.
 
 package bench
@@ -57,7 +57,9 @@ func (p *benchJson) Parse(pathFile string) error {
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(p)
@@ -81,7 +83,7 @@ func (p *benchJson) Parse(pathFile string) error {
 		p.Base.LogAbsPath = &defaultValue
 	}
 	if p.Base.GoMaxProcess == nil {
-		defaultValue := uint32(runtime.NumCPU())
+		defaultValue := runtime.NumCPU()
 		p.Base.GoMaxProcess = &defaultValue
 	}
 	if p.Base.BusChannelCapacity == nil {
@@ -135,7 +137,7 @@ type Base struct {
 	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]:nil 不使用
 	LogLevel           *uint32 `json:"logLevel"`           // 日志等级 [default]: xlog.LevelOn
 	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: common.LogAbsPath
-	GoMaxProcess       *uint32 `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
+	GoMaxProcess       *int    `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
 	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量. [default]: xconstants.BusChannelCapacityDefault
 	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]:8192
 	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]:1000
