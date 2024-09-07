@@ -1,11 +1,11 @@
 syntax="proto3";
 
-option go_package = "./";
+option go_package = "../protobuf/error";
 
 // [0x10000,0x1ffff]
 enum ErrorCodeLogin
 {
-    EC_LoginSuccess = 0x0000;//成功
+    EC_LoginDefault = 0x0000;//占位
     EC_LoginParam = 0x10000;//参数错误
     EC_LoginNotInWhiteList = 0x10001;//不在白名单
     EC_LoginInBlackList = 0x10002;//在黑名单
@@ -14,13 +14,13 @@ enum ErrorCodeLogin
 // [0x20000,0x2ffff]
 enum ErrorCodeGateway
 {
-    EC_GatewaySuccess = 0x0000;//成功
+    EC_GatewayDefault = 0x0000;//占位
     EC_GatewayParam = 0x20000;//参数错误
 }
 
 // [0x30000,0x3ffff]
 enum ErrorCodeLogic
 {
-    EC_LogicSuccess = 0x0000;//成功
+    EC_LogicDefault = 0x0000;//占位
     EC_LogicParam = 0x30000;//参数错误
 }
