@@ -64,10 +64,3 @@ func main() {
 	}
 	return
 }
-
-var gIService IService
-
-type IService interface {
-	Start() (err error)
-	Stop() (err error)
-}
