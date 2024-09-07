@@ -5,30 +5,22 @@ option go_package = "./";
 // [0x10000,0x1ffff]
 enum ErrorCodeLogin
 {
-    // 成功
-    ErrorCodeLoginSuccess = 0x0000;
-    // 参数错误
-    ErrorCodeLoginParam = 0x10000;
-    // 不在白名单
-    ErrorCodeLoginNotInWhiteList = 0x10001;
-    // 在黑名单
-    ErrorCodeLoginInBlackList = 0x10002;
+    EC_LoginSuccess = 0x0000;//成功
+    EC_LoginParam = 0x10000;//参数错误
+    EC_LoginNotInWhiteList = 0x10001;//不在白名单
+    EC_LoginInBlackList = 0x10002;//在黑名单
 }
 
 // [0x20000,0x2ffff]
 enum ErrorCodeGateway
 {
-    // 成功
-    ErrorCodeGatewaySuccess = 0x0000;
-    // 参数错误
-    ErrorCodeGatewayParam = 0x20000;
+    EC_GatewaySuccess = 0x0000;//成功
+    EC_GatewayParam = 0x20000;//参数错误
 }
 
 // [0x30000,0x3ffff]
 enum ErrorCodeLogic
 {
-    // 成功
-    ErrorCodeLogicSuccess = 0x0000;
-    // 参数错误
-    ErrorCodeLogicParam = 0x30000;
+    EC_LogicSuccess = 0x0000;//成功
+    EC_LogicParam = 0x30000;//参数错误
 }
