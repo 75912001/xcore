@@ -5,9 +5,12 @@
 - go mod init xcore
 ## 安装包
 - go get github.com/pkg/errors@v0.9.1
-- go get google.golang.org/protobuf/proto@v1.32.0
 - go get go.etcd.io/etcd/client/v3@v3.5.15
 - go get github.com/google/uuid@v1.6.0
+
+- go get google.golang.org/protobuf/proto@v1.32.0
+- go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.32.0 (生成: protoc-gen-go.exe)
+
 ## 代码测试工具
 - $ go get github.com/agiledragon/gomonkey@v2.0.2
 ## 代码检测工具
@@ -15,6 +18,7 @@
 - go get -u golang.org/x/lint/golint (未使用)
 - go install honnef.co/go/tools/cmd/staticcheck@v0.4.7 (未使用)
 - go get honnef.co/go/tools/cmd/staticcheck@latest (未使用)
+- go install google.golang.org/protobuf/cmd/protoc-gen-go@latest(未使用)
 
 ## 清理依赖
 - go mod tidy
@@ -54,7 +58,11 @@
 - login: [0x10000,0x1ffff]
 - gateway: [0x20000,0x2ffff]
 - logic: [0x30000,0x3ffff]
-- 
+
+## google protobuf gen:
+### protoc-gen-go.v1.34.2.windows.amd64.zip
+###  https://github.com/protocolbuffers/protobuf-go/releases
+
 ## ETCD
 ### etcd-v3.5.15-windows-amd64.zip
 ### 下载地址: https://github.com/etcd-io/etcd/releases
