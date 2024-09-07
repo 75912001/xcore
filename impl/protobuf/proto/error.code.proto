@@ -1,0 +1,34 @@
+syntax="proto3";
+
+option go_package = "./";
+
+// [0x10000,0x1ffff]
+enum ErrorCodeLogin
+{
+    // 成功
+    ErrorCodeLoginSuccess = 0x0000;
+    // 参数错误
+    ErrorCodeLoginParam = 0x10000;
+    // 不在白名单
+    ErrorCodeLoginNotInWhiteList = 0x10001;
+    // 在黑名单
+    ErrorCodeLoginInBlackList = 0x10002;
+}
+
+// [0x20000,0x2ffff]
+enum ErrorCodeGateway
+{
+    // 成功
+    ErrorCodeGatewaySuccess = 0x0000;
+    // 参数错误
+    ErrorCodeGatewayParam = 0x20000;
+}
+
+// [0x30000,0x3ffff]
+enum ErrorCodeLogic
+{
+    // 成功
+    ErrorCodeLogicSuccess = 0x0000;
+    // 参数错误
+    ErrorCodeLogicParam = 0x30000;
+}
