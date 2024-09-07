@@ -10,13 +10,13 @@ import (
 // options contains options to configure a server mgrInstance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type options struct {
-	level            *uint32           // 日志等级允许的最小等级 default: LevelOn
-	absPath          *string           // 日志绝对路径 default: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
-	isReportCaller   *bool             // 是否打印调用信息 default: true
-	namePrefix       *string           // 日志名 前缀 default: 当前执行的程序名称
-	isWriteFile      *bool             // 是否写文件 default: true
-	entryPoolOptions *entryPoolOptions // entry的内存池选项 default: newEntryPoolOptions()
-	hookMap          LevelHookMap      // 各日志级别对应的钩子 default: make(LevelHookMap)
+	level            *uint32           // 日志等级允许的最小等级 [default]: LevelOn
+	absPath          *string           // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
+	isReportCaller   *bool             // 是否打印调用信息 [default]: true
+	namePrefix       *string           // 日志名 前缀 [default]: 当前执行的程序名称
+	isWriteFile      *bool             // 是否写文件 [default]: true
+	entryPoolOptions *entryPoolOptions // entry的内存池选项 [default]: newEntryPoolOptions()
+	hookMap          LevelHookMap      // 各日志级别对应的钩子 [default]: make(LevelHookMap)
 }
 
 // NewOptions 新的Options
