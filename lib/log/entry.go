@@ -93,6 +93,8 @@ func formatLogData(p *entry) string {
 		traceIdVal := p.ctx.Value(traceIDKey)
 		if traceIdVal != nil {
 			buf.WriteString(fmt.Sprint("[", traceIDKey, ":", traceIdVal.(string), "]"))
+		} else {
+			buf.WriteString(fmt.Sprint("[", traceIDKey, ":traceIdVal is nil]"))
 		}
 	} else { // 没有 ctx , 则 traceID 为0
 		buf.WriteString(fmt.Sprint("[", traceIDKey, ":0]"))

@@ -1,8 +1,5 @@
 package log
 
-type ctxKeyTraceID struct{} // todo menglc 替代 traceIDKey
-type ctxKeyUserID struct{}  // todo menglc 替代 userIDKey
-
 const (
 	traceIDKey = "TID" // 日志traceId key
 	userIDKey  = "UID" // 日志用户ID key
