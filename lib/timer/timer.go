@@ -63,7 +63,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 	}
 }
 
-// 每millisecond个毫秒更新
+// 每 millisecond 个毫秒更新
 func (p *Mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if runtime.IsRelease() {
@@ -101,7 +101,7 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 }
 
 // Start
-// [NOTE] 处理定时器相关数据,必须与该timeoutChan线性处理.如:在同一个goroutine select中处理数据
+// [NOTE] 处理定时器相关数据,必须与该 timeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
 func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
 	p.opts = &options{}
 	p.opts = p.opts.merge(opts...)
@@ -143,9 +143,9 @@ func (p *Mgr) Stop() {
 // AddMillisecond 添加毫秒级定时器
 //
 //	参数:
-//		cb:回调函数
-//		Arg:回调参数
-//		expireMillisecond:过期毫秒数
+//		cb: 回调函数
+//		Arg: 回调参数
+//		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
 func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *millisecond {
@@ -162,7 +162,7 @@ func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64)
 // 扫描毫秒级定时器
 //
 //	参数:
-//		ms:到期毫秒数
+//		ms: 到期毫秒数
 func (p *Mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
@@ -185,9 +185,9 @@ func (p *Mgr) scanMillisecond(ms int64) {
 // AddSecond 添加秒级定时器
 //
 //	参数:
-//		cb:回调函数
-//		Arg:回调参数
-//		expire:过期秒数
+//		cb: 回调函数
+//		Arg: 回调参数
+//		expire: 过期秒数
 //	返回值:
 //		秒定时器
 func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
@@ -206,8 +206,8 @@ func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
 // 将秒级定时器,添加到轮转IDX的末尾.
 //
 //	参数:
-//		timerSecond:秒定时器
-//		cycleIdx:轮序号
+//		timerSecond: 秒定时器
+//		cycleIdx: 轮序号
 func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int) {
 	p.secondSlice[cycleIdx].data.PushBack(timerSecond)
 	if timerSecond.expire < p.secondSlice[cycleIdx].minExpire {
@@ -217,7 +217,7 @@ func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int) {
 
 // 扫描秒级定时器
 //
-//	timestamp:到期时间戳
+//	timestamp: 到期时间戳
 func (p *Mgr) scanSecond(timestamp int64) {
 	var next *list.Element
 	cycle0 := &p.secondSlice[0]
