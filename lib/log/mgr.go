@@ -110,6 +110,10 @@ func (p *mgr) GetLevel() uint32 {
 	return *p.options.level
 }
 
+func (p *mgr) AddHook(hook IHook) {
+	p.options.hookMap.add(hook)
+}
+
 // getLogDuration 取得日志刻度
 func (p *mgr) getLogDuration(sec int64) int {
 	var logFormat string
