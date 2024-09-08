@@ -55,7 +55,7 @@ func (p *options) WithEntryPoolOptions(entryPoolOptions *entryPoolOptions) *opti
 }
 
 // AddHook 添加钩子
-func (p *options) AddHook(hook Hook) *options {
+func (p *options) AddHook(hook IHook) *options {
 	p.hookMap.add(hook)
 	return p
 }
