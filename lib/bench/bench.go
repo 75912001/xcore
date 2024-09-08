@@ -66,6 +66,10 @@ func (p *benchJson) Parse(pathFile string) error {
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
+	if p.Base.ProjectName == nil {
+		defaultValue := xconstants.ProjectNameDefault
+		p.Base.ProjectName = &defaultValue
+	}
 	if p.Base.Version == nil {
 		defaultValue := "0.0.1.beta.2024.09.03.2034"
 		p.Base.Version = &defaultValue
@@ -137,15 +141,16 @@ func (p *benchJson) Parse(pathFile string) error {
 }
 
 type Base struct {
+	ProjectName        *string `json:"projectName"`        // 项目名称. [default]: xconstants.ProjectNameDefault
 	Version            *string `json:"version"`            // 版本号. [default]: 0.0.1.beta.2024.09.03.2034
-	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]:nil 不使用
+	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]: nil 不使用
 	LogLevel           *uint32 `json:"logLevel"`           // 日志等级 [default]: xlog.LevelOn
 	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
 	GoMaxProcess       *int    `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
 	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量. [default]: xconstants.BusChannelCapacityDefault
-	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]:8192
-	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]:1000
-	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]:0,release
+	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]: 8192
+	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]: 1000
+	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]: 0,release
 }
 
 type Timer struct {
