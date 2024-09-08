@@ -7,6 +7,7 @@ type ISwitch interface {
 	Enable()
 	Disable()
 	IsEnabled() bool
+	IsDisabled() bool
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,4 +33,9 @@ func (s *defaultSwitch) Disable() {
 // IsEnabled checks if the switch is enabled
 func (s *defaultSwitch) IsEnabled() bool {
 	return s.enabled
+}
+
+// IsDisabled checks if the switch is disabled
+func (s *defaultSwitch) IsDisabled() bool {
+	return !s.enabled
 }
