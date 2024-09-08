@@ -46,7 +46,7 @@
 ## 服务资源
 ### 服务类型
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
-- gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
+- gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff] [tcp:3${gateway.type:02}${gateway.id:01}]
 - logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
 ### 端口占用
 - login 30101
