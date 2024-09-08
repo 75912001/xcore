@@ -4,40 +4,40 @@ package util
 
 // ISwitch interface
 type ISwitch interface {
-    Enable()
-    Disable()
-    IsEnabled() bool
-    IsDisabled() bool
+	Enable()
+	Disable()
+	IsEnabled() bool
+	IsDisabled() bool
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 type defaultSwitch struct {
-    enabled bool // [default:true] 是否启用
+	enabled bool // [default:true] 是否启用
 }
 
 // NewDefaultSwitch creates a new defaultSwitch
 func NewDefaultSwitch() *defaultSwitch {
-    s := new(defaultSwitch)
-    s.Enable()
-    return s
+	s := new(defaultSwitch)
+	s.Enable()
+	return s
 }
 
 // Enable the switch
 func (s *defaultSwitch) Enable() {
-    s.enabled = true
+	s.enabled = true
 }
 
 // Disable the switch
 func (s *defaultSwitch) Disable() {
-    s.enabled = false
+	s.enabled = false
 }
 
 // IsEnabled checks if the switch is enabled
 func (s *defaultSwitch) IsEnabled() bool {
-    return s.enabled
+	return s.enabled
 }
 
 // IsDisabled checks if the switch is disabled
 func (s *defaultSwitch) IsDisabled() bool {
-    return !s.enabled
+	return !s.enabled
 }
