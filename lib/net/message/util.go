@@ -1,4 +1,4 @@
-package packet
+package message
 
 import (
 	"github.com/pkg/errors"
