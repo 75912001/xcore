@@ -54,3 +54,15 @@ func GetExecutableName() (string, error) {
 	// 返回程序名称
 	return filepath.Base(path), nil
 }
+
+func GetCurrentPath() (currentPath string, err error) {
+	exePath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	exePath, err = filepath.EvalSymlinks(exePath)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Dir(exePath), nil
+}
