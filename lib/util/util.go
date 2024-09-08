@@ -7,5 +7,5 @@ func IsLittleEndian() bool {
 	u := unsafe.Pointer(&i)
 	pb := (*byte)(u)
 	b := *pb
-	return (b == 0x04)
+	return b == 0x04
 }
