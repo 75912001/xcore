@@ -19,7 +19,7 @@ type Mgr struct {
 
 func NewMgr() *Mgr {
 	return &Mgr{
-		utcSwitch: util.NewDefaultSwitch(),
+		utcSwitch: util.NewDefaultSwitch(false),
 	}
 }
 
