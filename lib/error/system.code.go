@@ -48,8 +48,8 @@ var (
 	//Delete = NewError(0xf015, "Delete", "delete error")
 	//// Duplicate 重复
 	//Duplicate = NewError(0xf016, "Duplicate", "duplicate error")
-	//// Config 配置
-	//Config = NewError(0xf017, "Config", "config error")
+	// Config 配置
+	Config = NewError(0xf017).WithName("Config").WithDesc("config error")
 	//// InvalidOperation 无效操作
 	//InvalidOperation = NewError(0xf018, "InvalidOperation", "invalid operation")
 	//// IllConditioned 条件不足
