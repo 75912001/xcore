@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	xconstants "xcore/lib/constants"
 	xetcd "xcore/lib/etcd"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
@@ -123,7 +124,7 @@ func configure(opts *options) error {
 		opts.Path = &pathValue
 	}
 	if opts.BenchPath == nil {
-		benchPath := path.Join(*opts.Path, "bench.json")
+		benchPath := path.Join(*opts.Path, xconstants.ServiceConfigFile)
 		opts.BenchPath = &benchPath
 	}
 	return nil
