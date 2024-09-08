@@ -1,9 +1,9 @@
 package message
 
 import (
-    "context"
-    "google.golang.org/protobuf/proto"
-    "xcore/lib/net/packet"
+	"context"
+	"google.golang.org/protobuf/proto"
+	"xcore/lib/net/packet"
 )
 
 // Handler 处理函数
