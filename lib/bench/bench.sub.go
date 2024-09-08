@@ -11,6 +11,10 @@ import (
 
 type IBenchSub interface {
 	Unmarshal(strJson string) error
+	GetJaeger() *Jaeger
+	GetMongoDB() *MongoDB
+	GetRedis() *Redis
+	GetNATS() *NATS
 }
 
 type DefaultBenchSub struct {
@@ -25,6 +29,22 @@ func (p *DefaultBenchSub) Unmarshal(strJson string) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
+}
+
+func (p *DefaultBenchSub) GetJaeger() *Jaeger {
+	return &p.Jaeger
+}
+
+func (p *DefaultBenchSub) GetMongoDB() *MongoDB {
+	return &p.MongoDB
+}
+
+func (p *DefaultBenchSub) GetRedis() *Redis {
+	return &p.Redis
+}
+
+func (p *DefaultBenchSub) GetNATS() *NATS {
+	return &p.NATS
 }
 
 type Jaeger struct {
