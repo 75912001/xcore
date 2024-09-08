@@ -108,10 +108,10 @@ func configure(opts *Message) error {
 		opts.name = xconstants.Unknown
 	}
 	if opts.stateSwitch == nil {
-		opts.stateSwitch = xutil.NewDefaultSwitch()
+		opts.stateSwitch = xutil.NewDefaultSwitch(false)
 	}
 	if opts.passThroughSwitch == nil {
-		opts.passThroughSwitch = xutil.NewDefaultSwitch()
+		opts.passThroughSwitch = xutil.NewDefaultSwitch(false)
 	}
 	if opts.passThroughSwitch.IsDisabled() { // 非 透传
 		if opts.handler == nil { // 没有处理函数
