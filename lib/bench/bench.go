@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
-	"xcore/impl/common"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
@@ -36,7 +35,7 @@ func (p *rootJson) Parse(strJson string) error {
 	}
 
 	if p.Etcd.TTL == nil {
-		defaultValue := common.TtlSecondDefault
+		defaultValue := xconstants.EtcdTtlSecondDefault
 		p.Etcd.TTL = &defaultValue
 	}
 	return nil
@@ -44,7 +43,7 @@ func (p *rootJson) Parse(strJson string) error {
 
 type Etcd struct {
 	Addrs []string `json:"addrs"`
-	TTL   *int64   `json:"ttl"` // ttl 秒 [default]: common.TtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
+	TTL   *int64   `json:"ttl"` // ttl 秒 [default]: xconstants.EtcdTtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
 }
 
 type benchJson struct {
