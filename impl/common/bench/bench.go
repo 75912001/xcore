@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 	"xcore/impl/common"
@@ -79,8 +80,12 @@ func (p *benchJson) Parse(pathFile string) error {
 		p.Base.LogLevel = &defaultValue
 	}
 	if p.Base.LogAbsPath == nil {
-		defaultValue := common.LogAbsPath
-		p.Base.LogAbsPath = &defaultValue
+		executablePath, err := xruntime.GetExecutablePath()
+		if err != nil {
+			return errors.WithMessage(err, xruntime.Location())
+		}
+		executablePath = filepath.Join(executablePath, "log")
+		p.Base.LogAbsPath = &executablePath
 	}
 	if p.Base.GoMaxProcess == nil {
 		defaultValue := runtime.NumCPU()
@@ -136,7 +141,7 @@ type Base struct {
 	Version            *string `json:"version"`            // 版本号. [default]: 0.0.1.beta.2024.09.03.2034
 	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]:nil 不使用
 	LogLevel           *uint32 `json:"logLevel"`           // 日志等级 [default]: xlog.LevelOn
-	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: common.LogAbsPath
+	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
 	GoMaxProcess       *int    `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
 	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量. [default]: xconstants.BusChannelCapacityDefault
 	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]:8192
