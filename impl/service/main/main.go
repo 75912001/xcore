@@ -46,10 +46,9 @@ func main() {
 	}
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
-		s := &gateway.Service{
+		gIService = &gateway.Service{
 			DefaultService: defaultService,
 		}
-		gIService = s
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
