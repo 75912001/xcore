@@ -45,9 +45,9 @@
 
 ## 服务资源
 ### 服务类型
-- login 1
-- gateway 2
-- logic 3
+- login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
+- gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
+- logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
 ### 端口占用
 - login 30101
 - gateway 30201
@@ -55,9 +55,9 @@
 
 ## 错误码
 ### 业务错误码: [0x10000,0x1fffffff]
-- login: [0x10000,0x1ffff]
-- gateway: [0x20000,0x2ffff]
-- logic: [0x30000,0x3ffff]
+
+## 消息码
+### 业务消息码: [0x10000,0x1fffffff]
 
 ## google protobuf gen:
 ### protoc-gen-go.v1.34.2.windows.amd64.zip
