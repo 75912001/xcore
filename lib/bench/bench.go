@@ -111,24 +111,16 @@ func (p *benchJson) Parse(pathFile string) error {
 		p.Base.RunMode = &defaultValue
 	}
 	if p.Timer.ScanSecondDuration == nil {
-		t := time.Millisecond * 100
-		p.Timer.ScanSecondDuration = &t
+		defaultValue := time.Millisecond * 100
+		p.Timer.ScanSecondDuration = &defaultValue
 	}
 	if p.Timer.ScanMillisecondDuration == nil {
-		t := time.Millisecond * 25
-		p.Timer.ScanMillisecondDuration = &t
+		defaultValue := time.Millisecond * 25
+		p.Timer.ScanMillisecondDuration = &defaultValue
 	}
-	if p.ServiceNet.Domain == nil {
+	if p.ServiceNet.Addr == nil {
 		defaultValue := ""
-		p.ServiceNet.Domain = &defaultValue
-	}
-	if p.ServiceNet.IP == nil {
-		defaultValue := ""
-		p.ServiceNet.IP = &defaultValue
-	}
-	if p.ServiceNet.Port == nil {
-		defaultValue := uint16(0)
-		p.ServiceNet.Port = &defaultValue
+		p.ServiceNet.Addr = &defaultValue
 	}
 	if p.ServiceNet.Type == nil {
 		defaultValue := "tcp"
@@ -161,8 +153,6 @@ type Timer struct {
 }
 
 type ServiceNet struct {
-	Domain *string `json:"domain"` // If domain is configured, it is used preferentially
-	IP     *string `json:"ip"`
-	Port   *uint16 `json:"port"`
-	Type   *string `json:"type"` // [tcp, udp] [default]: tcp
+	Addr *string `json:"addr"` // e.g.: 127.0.0.0:8989
+	Type *string `json:"type"` // [tcp, udp] [default]: tcp
 }
