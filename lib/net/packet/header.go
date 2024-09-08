@@ -1,4 +1,4 @@
-package message
+package packet
 
 type IHeader interface {
 }
