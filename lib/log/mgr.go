@@ -129,6 +129,7 @@ func (p *mgr) getLogDuration(sec int64) int {
 // doLog 处理日志
 func doLog(p *mgr) {
 	for v := range p.logChan {
+		v.outString = formatLogData(v)
 		p.fireHooks(v)
 		// 检查自动切换日志
 		if p.logDuration != p.getLogDuration(v.time.Unix()) {
@@ -139,7 +140,7 @@ func doLog(p *mgr) {
 			}
 		}
 		if *p.options.isWriteFile {
-			p.loggerSlice[v.level].Print(formatLogData(v))
+			p.loggerSlice[v.level].Print(v.outString)
 		}
 		p.options.entryPoolOptions.put(v)
 	}

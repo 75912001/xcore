@@ -9,8 +9,8 @@ import (
 // 钩子是一个接口，它定义了x个日志级别的钩子函数
 // e.g.: 修改entry的内容, 将 entry 发送至其他目标地
 type Hook interface {
-	Levels() []uint32        // 需要hook的等级列表
-	Fire(entry *entry) error // 执行的方法
+	Levels() []uint32            // 需要 hook 的等级列表
+	Fire(outString string) error // 执行的方法 (outString: 输出的字符串)
 }
 
 type LevelHookMap map[uint32][]Hook // key: 日志等级, value: 钩子
@@ -25,7 +25,7 @@ func (p LevelHookMap) add(hook Hook) {
 // fire 处理钩子
 func (p LevelHookMap) fire(entry *entry) error {
 	for _, hook := range p[entry.level] {
-		if err := hook.Fire(entry); err != nil {
+		if err := hook.Fire(entry.outString); err != nil {
 			return errors.WithMessage(err, xruntime.Location())
 		}
 	}

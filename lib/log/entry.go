@@ -21,6 +21,8 @@ type entry struct {
 	message      string    // 日志消息
 	ctx          context.Context
 	extendFields extendFields // [string,interface{}] key,value;key,value...
+
+	outString string // 输出的字符串
 }
 
 func newEntry() *entry {
