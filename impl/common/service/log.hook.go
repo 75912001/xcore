@@ -1,19 +1,27 @@
 package service
 
 import (
-	"fmt"
-	xlog "xcore/lib/log"
+    "fmt"
+    xlog "xcore/lib/log"
+    xruntime "xcore/lib/runtime"
 )
 
-// TerminalHook 终端钩子
-type TerminalHook struct {
+// 终端钩子
+type terminalHook struct {
 }
 
-func (p *TerminalHook) Levels() []uint32 {
-	return []uint32{xlog.LevelFatal, xlog.LevelError, xlog.LevelWarn}
+// 创建终端钩子
+func newTerminalHook() xlog.IHook {
+    return &terminalHook{}
 }
 
-func (p *TerminalHook) Fire(outString string) error {
-	fmt.Println(outString)
-	return nil
+func (p *terminalHook) Levels() []uint32 {
+    return []uint32{xlog.LevelFatal, xlog.LevelError, xlog.LevelWarn}
+}
+
+func (p *terminalHook) Fire(outString string) error {
+    if xruntime.IsDebug() {
+        fmt.Println(outString)
+    }
+    return nil
 }
