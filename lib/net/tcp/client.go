@@ -10,7 +10,7 @@ import (
 
 // Client 客户端
 type Client struct {
-	IEvent
+	Event   IEvent
 	Remote  DefaultRemote
 	options *ClientOptions
 }
@@ -48,7 +48,9 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 	if err := clientConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent.eventChan = p.options.eventChan
+	p.Event = &DefaultEvent{
+		eventChan: p.options.eventChan,
+	}
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *p.options.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -61,7 +63,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 	p.Remote.sendChan = make(chan interface{}, *p.options.sendChanCapacity)
 	p.Remote.Owner = p
 	p.Remote.Packet = p.options.packet
-	p.Remote.start(&p.options.connOptions)
+	p.Remote.start(&p.options.connOptions, p.Event)
 	return nil
 }
 
