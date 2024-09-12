@@ -12,7 +12,7 @@ type IEvent struct {
 }
 
 // Connect 连接
-func (p *IEvent) Connect(remote *Remote) error {
+func (p *IEvent) Connect(remote *DefaultRemote) error {
 	select {
 	case p.eventChan <- &EventConnect{
 		Remote: remote,
@@ -25,7 +25,7 @@ func (p *IEvent) Connect(remote *Remote) error {
 }
 
 // Disconnect 断开链接
-func (p *IEvent) Disconnect(remote *Remote) error {
+func (p *IEvent) Disconnect(remote *DefaultRemote) error {
 	select {
 	case p.eventChan <- &EventDisconnect{Remote: remote}:
 	default:

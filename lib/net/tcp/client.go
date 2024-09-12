@@ -11,26 +11,26 @@ import (
 // Client 客户端
 type Client struct {
 	IEvent
-	Remote  Remote
+	Remote  DefaultRemote
 	options *ClientOptions
 }
 
-func (p *Client) OnConnect(_ *Remote) error {
+func (p *Client) OnConnect(_ *DefaultRemote) error {
 	return nil
 }
 func (p *Client) OnCheckPacketLength(_ uint32) error {
 	return nil
 }
-func (p *Client) OnCheckPacketLimit(_ *Remote) error {
+func (p *Client) OnCheckPacketLimit(_ *DefaultRemote) error {
 	return nil
 }
-func (p *Client) OnUnmarshalPacket(remote *Remote, data []byte) (*Packet, error) {
+func (p *Client) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*Packet, error) {
 	return p.options.OnUnmarshalPacket(remote, data)
 }
 func (p *Client) OnPacket(packet *Packet) error {
 	return p.options.OnPacket(packet)
 }
-func (p *Client) OnDisconnect(remote *Remote) error {
+func (p *Client) OnDisconnect(remote *DefaultRemote) error {
 	if err := p.options.OnDisconnect(remote); err != nil {
 		return err
 	}
