@@ -10,6 +10,7 @@ import (
 
 // Client 客户端
 type Client struct {
+	Handler IHandler
 	Event   IEvent
 	Remote  DefaultRemote
 	options *ClientOptions
@@ -32,7 +33,7 @@ func (p *Client) OnPacket(packet *Packet) error {
 }
 func (p *Client) OnDisconnect(remote *DefaultRemote) error {
 	if err := p.options.OnDisconnect(remote); err != nil {
-		return err
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if remote.IsConn() {
 		remote.stop()
