@@ -18,7 +18,7 @@ type Client struct {
 func (p *Client) OnConnect(_ *Remote) error {
 	return nil
 }
-func (p *Client) OnCheckLength(_ uint32) error {
+func (p *Client) OnCheckPacketLength(_ uint32) error {
 	return nil
 }
 func (p *Client) OnCheckPacketLimit(_ *Remote) error {
