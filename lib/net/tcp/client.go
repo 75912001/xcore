@@ -35,7 +35,7 @@ func (p *Client) OnDisconnect(remote *DefaultRemote) error {
 	if err := p.options.OnDisconnect(remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	if remote.IsConn() {
+	if remote.IsConnect() {
 		remote.stop()
 	}
 	return nil
@@ -70,7 +70,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 
 // ActiveDisconnect 主动断开连接
 func (p *Client) ActiveDisconnect() error {
-	if !p.Remote.IsConn() {
+	if !p.Remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
 	p.Remote.ActiveDisconnection = true
