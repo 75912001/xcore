@@ -15,48 +15,48 @@ type IPacket interface {
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-type defaultPacket struct {
+type DefaultPacket struct {
 	CTX             context.Context // ctx
 	Header          IHeader         // 包头
 	Message         proto.Message   // 数据
 	PassThroughBody []byte          // 透传数据
 }
 
-func NewDefaultPacket() *defaultPacket {
-	return &defaultPacket{}
+func NewDefaultPacket() *DefaultPacket {
+	return &DefaultPacket{}
 }
 
-func (p *defaultPacket) Marshal() (data []byte, err error) {
+func (p *DefaultPacket) Marshal() (data []byte, err error) {
 	return nil, xerror.NotImplemented
 }
 
-func (p *defaultPacket) Unmarshal(data []byte) (header IHeader, message proto.Message, err error) {
+func (p *DefaultPacket) Unmarshal(data []byte) (header IHeader, message proto.Message, err error) {
 	return nil, nil, xerror.NotImplemented
 }
 
-func (p *defaultPacket) WithCTX(ctx context.Context) *defaultPacket {
+func (p *DefaultPacket) WithCTX(ctx context.Context) *DefaultPacket {
 	p.CTX = ctx
 	return p
 }
 
-func (p *defaultPacket) WithHeader(header IHeader) *defaultPacket {
+func (p *DefaultPacket) WithHeader(header IHeader) *DefaultPacket {
 	p.Header = header
 	return p
 }
 
-func (p *defaultPacket) WithMessage(message proto.Message) *defaultPacket {
+func (p *DefaultPacket) WithMessage(message proto.Message) *DefaultPacket {
 	p.Message = message
 	return p
 }
 
-func (p *defaultPacket) WithPassThroughBody(passThroughBody []byte) *defaultPacket {
+func (p *DefaultPacket) WithPassThroughBody(passThroughBody []byte) *DefaultPacket {
 	p.PassThroughBody = passThroughBody
 	return p
 }
 
 // IsPassThrough 是否透传
-// 是: defaultPacket.PassThroughBody 可用
-// 否: defaultPacket.Message 可用
-func (p *defaultPacket) IsPassThrough() bool {
+// 是: DefaultPacket.PassThroughBody 可用
+// 否: DefaultPacket.Message 可用
+func (p *DefaultPacket) IsPassThrough() bool {
 	return p.PassThroughBody != nil
 }
