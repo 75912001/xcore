@@ -37,7 +37,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 	}
 	p.Remote.Conn = conn
 	p.Remote.sendChan = make(chan interface{}, *p.options.sendChanCapacity)
-	//p.Remote.DefaultPacket = p.options.packet
+	p.Remote.Packet = p.options.packet
 	p.Remote.start(&p.options.connOptions, p.Event, p.Handler)
 	return nil
 }
