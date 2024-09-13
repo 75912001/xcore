@@ -15,13 +15,7 @@ type ServerOptions struct {
 	sendChanCapacity *uint32            // 发送 channel 大小
 	packet           xnetpacket.IPacket
 	connOptions      ConnOptions
-
-	OnCheckPacketLength OnCheckPacketLength // 检查长度,包头中
-	OnCheckPacketLimit  OnCheckPacketLimit  // 检查包限制,限流
-	OnConnect           OnConnect           // 连接成功
-	OnUnmarshalPacket   OnUnmarshalPacket   // 解析数据包
-	OnPacket            OnPacket            // 数据包
-	OnDisconnect        OnDisconnect        // 断开连接
+	handler          IHandler
 }
 
 // NewServerOptions 新的ServerOptions
@@ -59,33 +53,8 @@ func (p *ServerOptions) SetWriteBuffer(writeBuffer int) *ServerOptions {
 	return p
 }
 
-func (p *ServerOptions) SetOnCheckLength(onCheckLength OnCheckPacketLength) *ServerOptions {
-	p.OnCheckPacketLength = onCheckLength
-	return p
-}
-
-func (p *ServerOptions) SetOnCheckPacketLimit(onCheckPacketLimit OnCheckPacketLimit) *ServerOptions {
-	p.OnCheckPacketLimit = onCheckPacketLimit
-	return p
-}
-
-func (p *ServerOptions) SetOnConnect(onConnFromClient OnConnect) *ServerOptions {
-	p.OnConnect = onConnFromClient
-	return p
-}
-
-func (p *ServerOptions) SetOnUnmarshalPacket(onUnmarshalPacket OnUnmarshalPacket) *ServerOptions {
-	p.OnUnmarshalPacket = onUnmarshalPacket
-	return p
-}
-
-func (p *ServerOptions) SetOnPacket(onPacket OnPacket) *ServerOptions {
-	p.OnPacket = onPacket
-	return p
-}
-
-func (p *ServerOptions) SetOnDisconnect(onDisconnect OnDisconnect) *ServerOptions {
-	p.OnDisconnect = onDisconnect
+func (p *ServerOptions) SetHandler(handler IHandler) *ServerOptions {
+	p.handler = handler
 	return p
 }
 
@@ -110,29 +79,14 @@ func mergeServerOptions(opts ...*ServerOptions) *ServerOptions {
 		if opt.packet != nil {
 			newOptions.SetPacket(opt.packet)
 		}
-		if opt.OnCheckPacketLength != nil {
-			newOptions.SetOnCheckLength(opt.OnCheckPacketLength)
-		}
-		if opt.OnCheckPacketLimit != nil {
-			newOptions.SetOnCheckPacketLimit(opt.OnCheckPacketLimit)
-		}
-		if opt.OnConnect != nil {
-			newOptions.SetOnConnect(opt.OnConnect)
-		}
-		if opt.OnUnmarshalPacket != nil {
-			newOptions.SetOnUnmarshalPacket(opt.OnUnmarshalPacket)
-		}
-		if opt.OnPacket != nil {
-			newOptions.SetOnPacket(opt.OnPacket)
-		}
-		if opt.OnDisconnect != nil {
-			newOptions.SetOnDisconnect(opt.OnDisconnect)
-		}
 		if opt.connOptions.readBuffer != nil {
 			newOptions.SetReadBuffer(*opt.connOptions.readBuffer)
 		}
 		if opt.connOptions.writeBuffer != nil {
 			newOptions.SetWriteBuffer(*opt.connOptions.writeBuffer)
+		}
+		if opt.handler != nil {
+			newOptions.SetHandler(opt.handler)
 		}
 	}
 	return newOptions
@@ -152,16 +106,7 @@ func serverConfigure(opts *ServerOptions) error {
 	if opts.packet == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
-	if opts.OnConnect == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.OnUnmarshalPacket == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.OnPacket == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.OnDisconnect == nil {
+	if opts.handler == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	return nil
