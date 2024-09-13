@@ -17,36 +17,12 @@ type Packet struct {
 	CTX             context.Context
 }
 
-// OnCheckPacketLength 检查长度是否合法(包头中)
-type OnCheckPacketLength func(length uint32) error
-
-// OnCheckPacketLimit 限流
-//
-//	返回:
-//		nil:不限流
-type OnCheckPacketLimit func(remote *DefaultRemote) error
-
-// OnUnmarshalPacket [multithreading] 反序列化数据包
-// data:数据 [NOTE] 如果保存该参数 则 需要copy
-// 返回值: 包头, 消息, 包体数据(不带包头)
-// [NOTE] 多协程调用
-type OnUnmarshalPacket func(remote *DefaultRemote, data []byte) (*Packet, error)
-
-// OnPacket 处理数据包
-type OnPacket func(parsePacket *Packet) error
-
 // EventDisconnect 事件-断开链接
 type EventDisconnect struct {
 	Remote *DefaultRemote
 }
 
-// OnDisconnect 处理断开链接
-type OnDisconnect func(remote *DefaultRemote) error
-
 // EventConnect 事件-链接成功
 type EventConnect struct {
 	Remote *DefaultRemote
 }
-
-// OnConnect 处理-链接成功
-type OnConnect func(remote *DefaultRemote) error
