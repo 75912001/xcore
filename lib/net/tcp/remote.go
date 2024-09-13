@@ -29,8 +29,8 @@ type DefaultRemote struct {
 	Conn                *net.TCPConn     // 连接
 	sendChan            chan interface{} // 发送管道
 	cancelFunc          context.CancelFunc
-	ActiveDisconnection bool          // 主动断开连接
-	Object              xutil.IObject // 保存 应用层数据
+	ActiveDisconnection bool        // 主动断开连接
+	Object              interface{} // 保存 应用层数据
 	Packet              xnetpacket.IPacket
 }
 
