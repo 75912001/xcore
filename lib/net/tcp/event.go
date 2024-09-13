@@ -46,10 +46,27 @@ func (p *DefaultEvent) Disconnect(remote *DefaultRemote) error {
 // Packet 数据包
 func (p *DefaultEvent) Packet(packet *Packet) error {
 	select {
-	case p.eventChan <- packet:
+	case p.eventChan <- &EventPacket{
+		Packet: packet,
+	}:
 	default:
 		xlog.PrintfErr("push Packet failed with eventChan full. remote:%v", packet.Remote)
 		return errors.WithMessage(xerror.ChannelFull, xruntime.Location())
 	}
 	return nil
+}
+
+// EventDisconnect 事件-断开链接
+type EventDisconnect struct {
+	Remote *DefaultRemote
+}
+
+// EventConnect 事件-链接成功
+type EventConnect struct {
+	Remote *DefaultRemote
+}
+
+// EventPacket 事件-数据包
+type EventPacket struct {
+	Packet *Packet
 }
