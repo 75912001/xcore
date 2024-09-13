@@ -8,8 +8,8 @@ import (
 	"xcore/lib/net/packet"
 )
 
-// Packet 数据包
-type Packet struct {
+// DefaultPacket 数据包
+type DefaultPacket struct {
 	Remote          *DefaultRemote
 	Header          packet.IHeader // 包头
 	Message         proto.Message  // 解析出的数据
@@ -18,20 +18,17 @@ type Packet struct {
 	CTX             context.Context
 }
 
-func (p *Packet) Marshal() (data []byte, err error) {
+func (p *DefaultPacket) Marshal() (data []byte, err error) {
 	return nil, xerror.NotImplemented
 }
 
-func (p *Packet) Unmarshal(data []byte) (header packet.IHeader, message proto.Message, err error) {
+func (p *DefaultPacket) Unmarshal(data []byte) (header packet.IHeader, message proto.Message, err error) {
 	return nil, nil, xerror.NotImplemented
 }
 
-// EventDisconnect 事件-断开链接
-type EventDisconnect struct {
-	Remote *DefaultRemote
-}
-
-// EventConnect 事件-链接成功
-type EventConnect struct {
-	Remote *DefaultRemote
+// IsPassThrough 是否透传
+// 是: DefaultPacket.PassThroughBody 可用
+// 否: DefaultPacket.Message 可用
+func (p *DefaultPacket) IsPassThrough() bool {
+	return p.PassThroughData != nil
 }

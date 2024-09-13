@@ -10,7 +10,7 @@ import (
 type IEvent interface {
 	Connect(remote *DefaultRemote) error    // 链接 放入 事件中
 	Disconnect(remote *DefaultRemote) error // 断开链接 放入 事件中
-	Packet(packet *Packet) error            // 数据包 放入 事件中
+	Packet(packet *DefaultPacket) error     // 数据包 放入 事件中
 }
 
 type DefaultEvent struct {
@@ -43,14 +43,14 @@ func (p *DefaultEvent) Disconnect(remote *DefaultRemote) error {
 	return nil
 }
 
-// Packet 数据包
-func (p *DefaultEvent) Packet(packet *Packet) error {
+// DefaultPacket 数据包
+func (p *DefaultEvent) Packet(packet *DefaultPacket) error {
 	select {
 	case p.eventChan <- &EventPacket{
 		Packet: packet,
 	}:
 	default:
-		xlog.PrintfErr("push Packet failed with eventChan full. remote:%v", packet.Remote)
+		xlog.PrintfErr("push DefaultPacket failed with eventChan full. remote:%v", packet.Remote)
 		return errors.WithMessage(xerror.ChannelFull, xruntime.Location())
 	}
 	return nil
@@ -68,5 +68,5 @@ type EventConnect struct {
 
 // EventPacket 事件-数据包
 type EventPacket struct {
-	Packet *Packet
+	Packet *DefaultPacket
 }

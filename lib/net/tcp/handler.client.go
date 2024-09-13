@@ -16,10 +16,10 @@ func (p *DefaultHandlerClient) OnCheckPacketLength(_ uint32) error {
 func (p *DefaultHandlerClient) OnCheckPacketLimit(_ *DefaultRemote) error {
 	return nil
 }
-func (p *DefaultHandlerClient) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*Packet, error) {
+func (p *DefaultHandlerClient) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*DefaultPacket, error) {
 	return nil, xerror.NotImplemented
 }
-func (p *DefaultHandlerClient) OnPacket(packet *Packet) error {
+func (p *DefaultHandlerClient) OnPacket(packet *DefaultPacket) error {
 	return xerror.NotImplemented
 }
 func (p *DefaultHandlerClient) OnDisconnect(remote *DefaultRemote) error {
