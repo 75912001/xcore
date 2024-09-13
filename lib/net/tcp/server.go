@@ -13,12 +13,26 @@ import (
 	xutil "xcore/lib/util"
 )
 
-// Server 己方作为服务端
-type Server struct {
+var gServer *server
+
+func GetServer() *server {
+	if gServer == nil {
+		gServer = newServer()
+	}
+	return gServer
+}
+
+// 己方作为服务端
+type server struct {
 	Handler  IHandler // 需要的话, 可以设置
 	Event    IEvent
 	listener *net.TCPListener //监听
 	options  *ServerOptions
+}
+
+// newServer 新建服务
+func newServer() *server {
+	return &server{}
 }
 
 // 网络 错误 暂时
@@ -35,7 +49,7 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *Server) Start(_ context.Context, opts ...*ServerOptions) error {
+func (p *server) Start(_ context.Context, opts ...*ServerOptions) error {
 	p.options = mergeServerOptions(opts...)
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -81,7 +95,7 @@ func (p *Server) Start(_ context.Context, opts ...*ServerOptions) error {
 }
 
 // Stop 停止 AcceptTCP
-func (p *Server) Stop() {
+func (p *server) Stop() {
 	if p.listener != nil {
 		err := p.listener.Close()
 		if err != nil {
@@ -92,7 +106,7 @@ func (p *Server) Stop() {
 }
 
 // ActiveDisconnect 逻辑层 主动 断开连接
-func (p *Server) ActiveDisconnect(remote *DefaultRemote) error {
+func (p *server) ActiveDisconnect(remote *DefaultRemote) error {
 	if remote == nil || !remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
@@ -103,7 +117,7 @@ func (p *Server) ActiveDisconnect(remote *DefaultRemote) error {
 	return nil
 }
 
-func (p *Server) handleConn(conn *net.TCPConn) {
+func (p *server) handleConn(conn *net.TCPConn) {
 	remote := &DefaultRemote{
 		Conn:     conn,
 		sendChan: make(chan interface{}, *p.options.sendChanCapacity),
