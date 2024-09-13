@@ -113,5 +113,5 @@ func (p *Server) handleConn(conn *net.TCPConn) {
 		xlog.PrintfErr("Event.Connect err:%v", err)
 		return
 	}
-	remote.start(&p.options.connOptions, p.Event)
+	remote.start(&p.options.connOptions, p.Event, p.Handler)
 }
