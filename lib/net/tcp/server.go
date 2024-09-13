@@ -17,8 +17,8 @@ import (
 type Server struct {
 	Handler  IHandler // 需要的话, 可以设置
 	Event    IEvent
-	options  *ServerOptions
 	listener *net.TCPListener //监听
+	options  *ServerOptions
 }
 
 // 网络 错误 暂时
@@ -91,49 +91,13 @@ func (p *Server) Stop() {
 	}
 }
 
-func (p *Server) OnConnect(remote *DefaultRemote) error {
-	return p.options.OnConnect(remote)
-}
-
-func (p *Server) OnCheckPacketLength(length uint32) error {
-	if p.options.OnCheckPacketLength == nil {
-		return nil
-	}
-	return p.options.OnCheckPacketLength(length)
-}
-
-func (p *Server) OnCheckPacketLimit(remote *DefaultRemote) error {
-	if p.options.OnCheckPacketLimit == nil {
-		return nil
-	}
-	return p.options.OnCheckPacketLimit(remote)
-}
-
-func (p *Server) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*Packet, error) {
-	return p.options.OnUnmarshalPacket(remote, data)
-}
-
-func (p *Server) OnPacket(parsePacket *Packet) error {
-	return p.options.OnPacket(parsePacket)
-}
-
-func (p *Server) OnDisconnect(remote *DefaultRemote) error {
-	if err := p.options.OnDisconnect(remote); err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
-	if remote.IsConn() {
-		remote.stop()
-	}
-	return nil
-}
-
 // ActiveDisconnect 逻辑层 主动 断开连接
 func (p *Server) ActiveDisconnect(remote *DefaultRemote) error {
-	if remote == nil || !remote.IsConn() {
+	if remote == nil || !remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
 	remote.ActiveDisconnection = true
-	if err := p.OnDisconnect(remote); err != nil {
+	if err := p.Handler.OnDisconnect(remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
