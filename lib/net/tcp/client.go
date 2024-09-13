@@ -16,29 +16,31 @@ type Client struct {
 	options *ClientOptions
 }
 
-func (p *Client) OnConnect(_ *DefaultRemote) error {
+type DefaultHandlerClient struct {
+}
+
+func (p *DefaultHandlerClient) OnConnect(_ *DefaultRemote) error {
 	return nil
 }
-func (p *Client) OnCheckPacketLength(_ uint32) error {
+func (p *DefaultHandlerClient) OnCheckPacketLength(_ uint32) error {
 	return nil
 }
-func (p *Client) OnCheckPacketLimit(_ *DefaultRemote) error {
+func (p *DefaultHandlerClient) OnCheckPacketLimit(_ *DefaultRemote) error {
 	return nil
 }
-func (p *Client) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*Packet, error) {
-	return p.options.OnUnmarshalPacket(remote, data)
+func (p *DefaultHandlerClient) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*Packet, error) {
+	return nil, xerror.NotImplemented
 }
-func (p *Client) OnPacket(packet *Packet) error {
-	return p.options.OnPacket(packet)
+func (p *DefaultHandlerClient) OnPacket(packet *Packet) error {
+	return xerror.NotImplemented
 }
-func (p *Client) OnDisconnect(remote *DefaultRemote) error {
-	if err := p.options.OnDisconnect(remote); err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
-	if remote.IsConnect() {
-		remote.stop()
-	}
-	return nil
+func (p *DefaultHandlerClient) OnDisconnect(remote *DefaultRemote) error {
+	return xerror.NotImplemented
+	// 下面是断开连接后需要做的事情
+	//if remote.IsConnect() {
+	//	remote.stop()
+	//}
+	//return nil
 }
 
 // Connect 连接
@@ -62,7 +64,6 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 	}
 	p.Remote.Conn = conn
 	p.Remote.sendChan = make(chan interface{}, *p.options.sendChanCapacity)
-	p.Handler = p
 	p.Remote.Packet = p.options.packet
 	p.Remote.start(&p.options.connOptions, p.Event)
 	return nil
@@ -74,7 +75,7 @@ func (p *Client) ActiveDisconnect() error {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
 	p.Remote.ActiveDisconnection = true
-	if err := p.OnDisconnect(&p.Remote); err != nil {
+	if err := p.Handler.OnDisconnect(&p.Remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
