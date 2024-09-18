@@ -62,7 +62,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 	}
 }
 
-// 每 millisecond 个毫秒更新
+// 每 Millisecond 个毫秒更新
 func (p *Mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if runtime.IsRelease() {
@@ -104,10 +104,10 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 // e.g.: 1,2,2,3,4,4,3 => 1,2,2,3,3,4,4 [将最后一个元素移动到4的前面]
 func moveLastElementToProperPosition(l *list.List) {
 	lastElement := l.Back() // 获取最后一个元素
-	target := lastElement.Value.(*millisecond)
+	target := lastElement.Value.(*Millisecond)
 	var element *list.Element
 	for element = lastElement.Prev(); element != nil; element = element.Prev() {
-		current := element.Value.(*millisecond)
+		current := element.Value.(*Millisecond)
 		if current.expire <= target.expire {
 			l.MoveAfter(lastElement, element)
 			return
@@ -164,8 +164,8 @@ func (p *Mgr) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *millisecond {
-	t := &millisecond{
+func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *Millisecond {
+	t := &Millisecond{
 		Arg:      arg,
 		Function: cb,
 		expire:   expireMillisecond,
@@ -182,7 +182,7 @@ func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64)
 func (p *Mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
-		timerMillisecond := e.Value.(*millisecond)
+		timerMillisecond := e.Value.(*Millisecond)
 		if !timerMillisecond.isValid() {
 			next = e.Next()
 			p.millisecondList.Remove(e)
@@ -208,7 +208,7 @@ func (p *Mgr) scanMillisecond(ms int64) {
 //		秒定时器
 func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
 	t := &Second{
-		millisecond{
+		Millisecond{
 			Arg:      arg,
 			Function: cb,
 			expire:   expire,
