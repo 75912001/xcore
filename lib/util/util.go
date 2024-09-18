@@ -15,6 +15,7 @@ func IsLittleEndian() bool {
 
 // If 三目运算符
 // [NOTE] 传递的实参,会在调用时计算所有参数
+// e.g.: If(true, 1, 2) => 1
 func If(condition bool, trueVal interface{}, falseVal interface{}) interface{} {
 	if condition {
 		return trueVal
@@ -23,6 +24,7 @@ func If(condition bool, trueVal interface{}, falseVal interface{}) interface{} {
 }
 
 // IsDuplicateUint32 是否有重复uint32
+// e.g.: [1, 2, 3, 4, 5, 1] => true
 func IsDuplicateUint32(uint32Slice []uint32) bool {
 	set := make(map[uint32]struct{})
 	for _, v := range uint32Slice {

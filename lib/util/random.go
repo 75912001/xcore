@@ -43,6 +43,8 @@ func RandomString(len uint32) (container string, err error) {
 //		weights:权重
 //	返回值:
 //		idx:weights 的序号 idx
+//
+// e.g.: weights = [1, 2, 3], 则返回 0, 1, 2 的概率分别为 1/6, 2/6, 3/6
 func RandomWeighted(weights []uint32) (idx int, err error) {
 	var sum int64
 	for _, v := range weights {
@@ -68,6 +70,8 @@ func RandomWeighted(weights []uint32) (idx int, err error) {
 //		slice:从该slice中随机一个,与except不重复
 //	返回值:
 //		slice 中的值
+//
+// e.g.: except = [1, 2, 3], slice = [1, 2, 3, 4, 5], 则返回 4 或 5
 func RandomValueBySlice(except []interface{}, slice []interface{}, equals func(a, b interface{}) bool) (interface{}, error) {
 	var newSlice []interface{}
 	for _, v := range slice {
