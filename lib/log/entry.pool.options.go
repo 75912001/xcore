@@ -14,8 +14,7 @@ type entryPoolOptions struct {
 
 // newEntryPoolOptions 新的entryPoolOptions
 func newEntryPoolOptions() *entryPoolOptions {
-	s := xutil.NewDefaultSwitch()
-	s.Enable()
+	s := xutil.NewDefaultSwitch(true)
 	pool := &sync.Pool{
 		New: func() interface{} {
 			return newEntry()
