@@ -4,7 +4,7 @@ package timer
 type millisecond struct {
 	Arg      interface{} // 参数
 	Function OnFun       // 超时调用的函数
-	expire   int64       // 过期时间戳
+	expire   int64       // 过期时间
 	valid    bool        // 有效(false:不执行,扫描时自动删除)
 }
 

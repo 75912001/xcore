@@ -1,7 +1,6 @@
 package timer
 
 import (
-	"container/list"
 	"math"
 )
 
@@ -19,15 +18,6 @@ func init() { //nolint:all // 初始化
 		gCycleDuration[i] = genDuration(i)
 	}
 	gCycleDuration[cycleSize-1] = math.MaxInt64
-}
-
-type cycle struct {
-	data      list.List
-	minExpire int64 // 最小到期时间
-}
-
-func (p *cycle) init() {
-	p.minExpire = math.MaxInt64
 }
 
 // 生成一个轮的时长
