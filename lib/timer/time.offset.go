@@ -2,14 +2,14 @@ package timer
 
 import "time"
 
-var secondOffset int64 // 时间偏移量-秒
+var timestampOffset int64 // 时间戳偏移量
 
-// SetSecondOffset 设置时间偏移量-秒
-func SetSecondOffset(offset int64) {
-	secondOffset = offset
+// SetTimestampOffset 设置时间戳偏移量
+func SetTimestampOffset(offset int64) {
+	timestampOffset = offset
 }
 
 // ShadowTimestamp 叠加偏移量的时间戳-秒
 func ShadowTimestamp() int64 {
-	return time.Now().Unix() + secondOffset
+	return time.Now().Unix() + timestampOffset
 }
