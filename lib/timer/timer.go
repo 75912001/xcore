@@ -55,7 +55,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 			return
 		case v := <-p.secondChan:
 			s := v.(*Second)
-			p.pushBackCycle(s, binarySearchCycleIdxIteration(s.expire-ShadowTimestamp()))
+			p.pushBackCycle(s, searchCycleIdxIteration(s.expire-ShadowTimestamp()))
 		case <-idleDelay.C:
 			idleDelay.Reset(*p.opts.scanSecondDuration)
 			p.scanSecond(ShadowTimestamp())

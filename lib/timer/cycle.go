@@ -79,7 +79,7 @@ func genDuration(idx int) int64 {
 //}
 
 // 根据 时长 找到时间轮的序号 二分查找 (迭代)
-func binarySearchCycleIdxIteration(duration int64) int {
+func searchCycleIdxIteration(duration int64) int {
 	low, high := 0, len(gCycleDuration)-1
 	for low <= high {
 		mid := low + (high-low)/2 //nolint:all // 二分法,2:从中间取
