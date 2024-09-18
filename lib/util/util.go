@@ -23,13 +23,15 @@ func If(condition bool, trueVal interface{}, falseVal interface{}) interface{} {
 	return falseVal
 }
 
-// IsDuplicateUint32 是否有重复uint32
-// e.g.: [1, 2, 3, 4, 5, 1] => true
-func IsDuplicateUint32(uint32Slice []uint32) bool {
-	set := make(map[uint32]struct{})
-	for _, v := range uint32Slice {
-		if _, ok := set[v]; ok {
-			return true
+// IsDuplicate 是否有重复
+// e.g.: [1, 2, 3, 1] => true
+func IsDuplicate(slice []interface{}, equals func(a, b interface{}) bool) bool {
+	set := make(map[interface{}]struct{})
+	for _, v := range slice {
+		for k := range set {
+			if equals(k, v) {
+				return true
+			}
 		}
 		set[v] = struct{}{}
 	}
