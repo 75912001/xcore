@@ -1,19 +1,19 @@
 syntax="proto3";
 
 // [0x20000,0x2ffff]
-enum ErrorCode
-{
-    Success = 0x0000;								//成功
-    AccountNonExistent = 0x20000;					//账号不存在
-    Logined = 0x20001;								//已登录
-    NotLogined = 0x20002;							//未登录
-    TokenInvalid = 0x20003;							//令牌无效
-    TokenExpired = 0x20004;							//令牌过期
-    TokenNotVerify = 0x20005;						//令牌未验证
-    NameInvalid = 0x20006;							//名字无效
-    AccountExistent = 0x20007;						//账号已存在
-    LoginRepeat = 0x20008;							//重复登录
-    NotExistent = 0x20009;							//不存在
-    UserNumberMax = 0x2000a;						//用户数量已达上限
-    ServiceBusy = 0x2000b;							//服务器繁忙
-}
+//enum ErrorCode
+//{
+//    Success = 0x0000;								//成功
+//    AccountNonExistent = 0x20000;					//账号不存在
+//    Logined = 0x20001;								//已登录
+//    NotLogined = 0x20002;							//未登录
+//    TokenInvalid = 0x20003;							//令牌无效
+//    TokenExpired = 0x20004;							//令牌过期
+//    TokenNotVerify = 0x20005;						//令牌未验证
+//    NameInvalid = 0x20006;							//名字无效
+//    AccountExistent = 0x20007;						//账号已存在
+//    LoginRepeat = 0x20008;							//重复登录
+//    NotExistent = 0x20009;							//不存在
+//    UserNumberMax = 0x2000a;						//用户数量已达上限
+//    ServiceBusy = 0x2000b;							//服务器繁忙
+//}
