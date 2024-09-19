@@ -6,8 +6,8 @@ var (
 	Success = NewError(0x0000).WithName("Success").WithDesc("success")
 	// Link 链接
 	Link = NewError(0xf001).WithName("Link").WithDesc("link error")
-	//// System 系统
-	//System = NewError(0xf002, "System", "system error")
+	// System 系统
+	System = NewError(0xf002).WithName("System").WithDesc("system error")
 	// Param 参数
 	Param = NewError(0xf003).WithName("Param").WithDesc("parameter error")
 	//// Packet 数据包
@@ -16,8 +16,8 @@ var (
 	//Timeout = NewError(0xf005, "Timeout", "time out")
 	//// ChannelFull 通道 满
 	//ChannelFull = NewError(0xf006, "ChannelFull", "channel full")
-	//// ChannelEmpty 通道 空
-	//ChannelEmpty = NewError(0xf007, "ChannelEmpty", "channel empty")
+	// ChannelEmpty 通道 空
+	ChannelEmpty = NewError(0xf007).WithName("ChannelEmpty").WithDesc("channel empty")
 	//// OutOfRange 超出范围
 	//OutOfRange = NewError(0xf008, "OutOfRange", "out of range")
 	//// InvalidValue 无效数值
@@ -30,8 +30,8 @@ var (
 	//InvalidPointer = NewError(0xf00c, "InvalidPointer", "invalid pointer")
 	// LogLevel 日志等级
 	LogLevel = NewError(0xf00d).WithName("LogLevel").WithDesc("log level error")
-	//// NonExistent 不存在
-	//NonExistent = NewError(0xf00e, "NonExistent", "non-existent")
+	// NonExistent 不存在
+	NonExistent = NewError(0xf00e).WithName("NonExistent").WithDesc("non-existent")
 	//// Exists 存在
 	//Exists = NewError(0xf00f, "Exists", "exists")
 	//// Marshal 序列化
@@ -102,6 +102,8 @@ var (
 	//ChannelClosed = NewError(0xf030, "ChannelClosed", "channel closed")
 	//// Unregistered 未注册
 	//Unregistered = NewError(0xf031, "Unregistered", "unregistered")
+	// ChannelNil 通道 为空
+	ChannelNil = NewError(0xf032).WithName("ChannelNil").WithDesc("channel is nil")
 	// Unknown 未知
 	Unknown = NewError(0xffff).WithName("Unknown").WithDesc("unknown error")
 	// 0xffff

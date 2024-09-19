@@ -1,8 +1,10 @@
 package timer
 
 import (
+	"github.com/pkg/errors"
 	"time"
-	liberror "xcore/lib/error"
+	xerror "xcore/lib/error"
+	xruntime "xcore/lib/runtime"
 )
 
 // NewOptions 新的Options
@@ -64,7 +66,7 @@ func (p *options) configure() error {
 		p.scanMillisecondDuration = &scanMillisecondDurationDefault
 	}
 	if p.outgoingTimeoutChan == nil {
-		return liberror.Param
+		return errors.WithMessagef(xerror.ChannelNil, xruntime.Location())
 	}
 	return nil
 }

@@ -36,3 +36,10 @@ func (p *Mgr) GetYMDFromTimestamp(timestamp int64) int {
 	ymd, _ := strconv.Atoi(strYMD)
 	return ymd
 }
+
+// GenYYYYMMDD 获取yyyymmdd
+func GenYYYYMMDD(timestamp int64) (yyyymmdd int) {
+	strYYYYMMDD := time.Unix(timestamp, 0).Format("20060102")
+	yyyymmdd, _ = strconv.Atoi(strYYYYMMDD)
+	return
+}

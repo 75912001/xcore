@@ -1,7 +1,6 @@
 package timer
 
 import (
-	"container/list"
 	"math"
 )
 
@@ -19,15 +18,6 @@ func init() { //nolint:all // 初始化
 		gCycleDuration[i] = genDuration(i)
 	}
 	gCycleDuration[cycleSize-1] = math.MaxInt64
-}
-
-type cycle struct {
-	data      list.List
-	minExpire int64 // 最小到期时间
-}
-
-func (p *cycle) init() {
-	p.minExpire = math.MaxInt64
 }
 
 // 生成一个轮的时长
@@ -59,27 +49,8 @@ func genDuration(idx int) int64 {
 //	return len(gCycleDuration) - 1
 //}
 
-// 根据 时长 找到时间轮的序号 二分查找 (递归)
-//func binarySearchCycleIdxRecursion(low, high int, duration int64) int {
-//	mid := low + (high-low)/2
-//	if duration <= gCycleDuration[mid] {
-//		if mid == 0 {
-//			return mid
-//		}
-//		if gCycleDuration[mid-1] < duration {
-//			return mid
-//		}
-//		return binarySearchCycleIdxRecursion(low, mid-1, duration)
-//	} else {
-//		if duration <= gCycleDuration[mid+1] {
-//			return mid + 1
-//		}
-//		return binarySearchCycleIdxRecursion(mid+1, high, duration)
-//	}
-//}
-
 // 根据 时长 找到时间轮的序号 二分查找 (迭代)
-func binarySearchCycleIdxIteration(duration int64) int {
+func searchCycleIdxIteration(duration int64) int {
 	low, high := 0, len(gCycleDuration)-1
 	for low <= high {
 		mid := low + (high-low)/2 //nolint:all // 二分法,2:从中间取

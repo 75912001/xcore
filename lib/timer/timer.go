@@ -1,12 +1,11 @@
 // Package timer 定时器
-// 优先级:加入顺序,到期
+// 优先级: 到期时间,加入顺序
 package timer
 
 import (
 	"container/list"
 	"context"
 	"github.com/pkg/errors"
-	"math"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -18,8 +17,8 @@ import (
 // Mgr 定时器管理器
 type Mgr struct {
 	opts            *options
-	secondSlice     [cycleSize]cycle // 时间轮-数组. 秒,数据
-	millisecondList list.List        // 毫秒,数据
+	secondSlice     [cycleSize]list.List // 时间轮-数组. 秒,数据
+	millisecondList list.List            // 毫秒,数据
 	cancelFunc      context.CancelFunc
 	waitGroup       sync.WaitGroup   // Stop 等待信号
 	milliSecondChan chan interface{} // 毫秒, channel
@@ -55,7 +54,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 			return
 		case v := <-p.secondChan:
 			s := v.(*Second)
-			p.pushBackCycle(s, binarySearchCycleIdxIteration(s.expire-ShadowTimestamp()))
+			p.pushBackCycle(s, searchCycleIdxIteration(s.expire), true)
 		case <-idleDelay.C:
 			idleDelay.Reset(*p.opts.scanSecondDuration)
 			p.scanSecond(ShadowTimestamp())
@@ -63,7 +62,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 	}
 }
 
-// 每 millisecond 个毫秒更新
+// 每 Millisecond 个毫秒更新
 func (p *Mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if runtime.IsRelease() {
@@ -89,6 +88,7 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 			return
 		case v := <-p.milliSecondChan:
 			p.millisecondList.PushBack(v)
+			moveLastElementToProperPosition(&p.millisecondList)
 		case <-idleDelay.C:
 			nowMillisecond := time.Now().UnixMilli()
 			reset := scanMillisecondDuration - (time.Duration(nowMillisecond)-nextMillisecond)*time.Millisecond
@@ -97,6 +97,25 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 			nextMillisecond += scanMillisecond
 			p.scanMillisecond(nowMillisecond)
 		}
+	}
+}
+
+// 移动最后一个元素到合适的位置,移动到大于他的元素的前面[实现按照时间排序,加入顺序排序]
+// e.g.: 1,2,2,3,4,4,3 => 1,2,2,3,3,4,4 [将最后一个元素移动到4的前面]
+func moveLastElementToProperPosition(l *list.List) {
+	lastElement := l.Back() // 获取最后一个元素
+	target := lastElement.Value.(*Millisecond)
+	var element *list.Element
+	for element = lastElement.Prev(); element != nil; element = element.Prev() {
+		current := element.Value.(*Millisecond)
+		if current.expire <= target.expire {
+			l.MoveAfter(lastElement, element)
+			return
+		}
+	}
+	if element == nil {
+		// 如果没有找到比目标小或等于的元素，将目标元素移动到列表的前面
+		l.MoveToFront(lastElement)
 	}
 }
 
@@ -114,9 +133,6 @@ func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
 
 	if p.opts.scanSecondDuration != nil {
 		p.secondChan = make(chan interface{}, 100)
-		for idx := range p.secondSlice {
-			p.secondSlice[idx].init()
-		}
 		p.waitGroup.Add(1)
 
 		go p.funcSecond(ctxWithCancel)
@@ -148,8 +164,8 @@ func (p *Mgr) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *millisecond {
-	t := &millisecond{
+func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *Millisecond {
+	t := &Millisecond{
 		Arg:      arg,
 		Function: cb,
 		expire:   expireMillisecond,
@@ -166,7 +182,7 @@ func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64)
 func (p *Mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
-		timerMillisecond := e.Value.(*millisecond)
+		timerMillisecond := e.Value.(*Millisecond)
 		if !timerMillisecond.isValid() {
 			next = e.Next()
 			p.millisecondList.Remove(e)
@@ -178,7 +194,7 @@ func (p *Mgr) scanMillisecond(ms int64) {
 			p.millisecondList.Remove(e)
 			continue
 		}
-		next = e.Next()
+		break
 	}
 }
 
@@ -192,7 +208,7 @@ func (p *Mgr) scanMillisecond(ms int64) {
 //		秒定时器
 func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
 	t := &Second{
-		millisecond{
+		Millisecond{
 			Arg:      arg,
 			Function: cb,
 			expire:   expire,
@@ -205,13 +221,33 @@ func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
 
 // 将秒级定时器,添加到轮转IDX的末尾.
 //
-//	参数:
-//		timerSecond: 秒定时器
-//		cycleIdx: 轮序号
-func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int) {
-	p.secondSlice[cycleIdx].data.PushBack(timerSecond)
-	if timerSecond.expire < p.secondSlice[cycleIdx].minExpire {
-		p.secondSlice[cycleIdx].minExpire = timerSecond.expire
+//		参数:
+//			timerSecond: 秒定时器
+//			cycleIdx: 轮序号
+//	     needMove: 是否需要移动到合适的位置
+func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int, needMove bool) {
+	p.secondSlice[cycleIdx].PushBack(timerSecond)
+	if needMove {
+		moveLastElementToProperPositionSecond(&p.secondSlice[cycleIdx])
+	}
+}
+
+// 移动最后一个元素到合适的位置,移动到大于他的元素的前面[实现按照时间排序,加入顺序排序]
+// e.g.: 1,2,2,3,4,4,3 => 1,2,2,3,3,4,4 [将最后一个元素移动到4的前面]
+func moveLastElementToProperPositionSecond(l *list.List) {
+	lastElement := l.Back() // 获取最后一个元素
+	target := lastElement.Value.(*Second)
+	var element *list.Element
+	for element = lastElement.Prev(); element != nil; element = element.Prev() {
+		current := element.Value.(*Second)
+		if current.expire <= target.expire {
+			l.MoveAfter(lastElement, element)
+			return
+		}
+	}
+	if element == nil {
+		// 如果没有找到比目标小或等于的元素，将目标元素移动到列表的前面
+		l.MoveToFront(lastElement)
 	}
 }
 
@@ -221,60 +257,47 @@ func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int) {
 func (p *Mgr) scanSecond(timestamp int64) {
 	var next *list.Element
 	cycle0 := &p.secondSlice[0]
-	if cycle0.minExpire <= timestamp {
-		// 更新最小过期时间戳
-		cycle0.minExpire = math.MaxInt64
-		for e := cycle0.data.Front(); nil != e; e = next {
+	for e := cycle0.Front(); nil != e; e = next {
+		t := e.Value.(*Second)
+		if !t.isValid() {
+			next = e.Next()
+			cycle0.Remove(e)
+			continue
+		}
+		if t.expire <= timestamp {
+			p.opts.outgoingTimeoutChan <- t
+			next = e.Next()
+			cycle0.Remove(e)
+			continue
+		}
+		break
+	}
+	// 更新时间轮,从序号为1的数组开始
+	for idx := 1; idx < cycleSize; idx++ {
+		if 0 != p.secondSlice[idx-1].Len() { // 如果(idx-1)的cycle中还有元素,则不需要(idx-1)之后的cycle向前移动
+			break
+		}
+		c := &p.secondSlice[idx]
+		for e := c.Front(); e != nil; e = next {
 			t := e.Value.(*Second)
 			if !t.isValid() {
 				next = e.Next()
-				cycle0.data.Remove(e)
+				c.Remove(e)
 				continue
 			}
 			if t.expire <= timestamp {
 				p.opts.outgoingTimeoutChan <- t
 				next = e.Next()
-				cycle0.data.Remove(e)
+				c.Remove(e)
 				continue
 			}
-			if t.expire < cycle0.minExpire {
-				cycle0.minExpire = t.expire
-			}
-			next = e.Next()
-		}
-	}
-	// 更新时间轮,从序号为1的数组开始
-	for idx := 1; idx < cycleSize; idx++ {
-		if 0 != p.secondSlice[idx-1].data.Len() { // 如果(idx-1)的cycle中还有元素,则不需要(idx-1)之后的cycle向前移动
-			break
-		}
-		c := &p.secondSlice[idx]
-		if (c.minExpire - timestamp) <= gCycleDuration[idx-1] {
-			c.minExpire = math.MaxInt64
-			for e := c.data.Front(); e != nil; e = next {
-				t := e.Value.(*Second)
-				if !t.isValid() {
-					next = e.Next()
-					c.data.Remove(e)
-					continue
-				}
-				if t.expire <= timestamp {
-					p.opts.outgoingTimeoutChan <- t
-					next = e.Next()
-					c.data.Remove(e)
-					continue
-				}
-				if newIdx := findPrevCycleIdx(t.expire-timestamp, idx); idx != newIdx {
-					next = e.Next()
-					c.data.Remove(e)
-					p.pushBackCycle(t, newIdx)
-					continue
-				}
-				if t.expire < c.minExpire {
-					c.minExpire = t.expire
-				}
+			if newIdx := findPrevCycleIdx(t.expire-timestamp, idx); idx != newIdx {
 				next = e.Next()
+				c.Remove(e)
+				p.pushBackCycle(t, newIdx, false)
+				continue
 			}
+			break
 		}
 	}
 }

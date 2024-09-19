@@ -12,7 +12,7 @@ echo -e "\e[93m======检查代码... \e[0m"
 cd  "${projectPath}" || exit
   echo "gofmt..."
   gofmt -w .
-  echo "清楚缓存 golangci cache clean..."
+  echo "清除缓存 golangci cache clean..."
   golangci cache clean
   echo "golangci-lint run --fix..."
   golangci-lint run --fix
