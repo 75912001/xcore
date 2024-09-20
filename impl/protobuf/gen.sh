@@ -81,17 +81,24 @@ genCMD(){
 #error.code
 srcDirFile="./proto/error.code.proto"
 protoc --${genMod}=. ${srcDirFile}
+genProtoError ${srcDirFile}
 
 ########################################################################################################################
 #gateway.proto
-fileName="./proto/gateway.proto"
+fileName="./proto/service/gateway.proto"
 protoc --${genMod}=. ${fileName}
 genCMD "gateway"
 #modifyPBFile world
 
 ########################################################################################################################
-#生成 error 文件
-genProtoError "./proto/error.code.proto"
+#event.proto
+fileName="./proto/event.proto"
+protoc --${genMod}=. ${fileName}
+
+########################################################################################################################
+#struct.proto
+fileName="./proto/struct.proto"
+protoc --${genMod}=. ${fileName}
 
 echo "生成 protobuf 完成"
 #read input
