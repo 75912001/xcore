@@ -1,0 +1,30 @@
+syntax="proto3";
+
+option go_package = "../protobuf/struct";
+
+//用户数据
+message User
+{
+	 uint64 id = 1;//用户ID
+	 string name = 2;//名字
+}
+
+//事件
+message Event
+{
+	 uint32 type = 1;//类型
+	 uint64 id = 2;//ID
+	 uint64 data = 3;//数据
+	 int64 timestamps = 4;//时间戳
+	 string strData = 5;//字符串数据
+}
+
+////////////////////////////////////////////////////
+//道具
+////////////////////////////////////////////////////
+message Item
+{
+	 uint32 id = 1;//ID
+	 uint32 number = 2;//数量
+}
+
