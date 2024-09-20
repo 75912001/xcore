@@ -28,8 +28,8 @@ func IsNetErrorTimeout(err error) bool {
 	return ok && netErr.Timeout()
 }
 
-// IsErrNetClosing checks if a network error is due to a closed connection.
-func IsErrNetClosing(err error) bool {
+// IsNetErrClosing checks if a network error is due to a closed connection.
+func IsNetErrClosing(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "use of closed network connection")
 }
 
