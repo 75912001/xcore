@@ -5,5 +5,5 @@ option go_package = "../protobuf/gateway";
 //[消息码 0x20000,0x2ffff]
 message UserOnlineMsg//0x20000#client->gateway.用户上线
 {
-    string Token = 1;//验证时使用的token
+    string token = 1;//验证时使用的token
 }
