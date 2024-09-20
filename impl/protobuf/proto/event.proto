@@ -2,7 +2,7 @@ syntax="proto3";
 
 option go_package = "../protobuf/event";
 
-// 事件-用户-永久
+// 事件类型-用户-永久
 enum EventUserForever
 {
 	EU_ForeverDefault = 0;
@@ -10,7 +10,7 @@ enum EventUserForever
 	EU_ForeverEnd = 0x0fffffff;
 }
 
-// 事件-用户-过期
+// 事件类型-用户-过期
 enum EventUserExpire
 {
 	EU_ExpireDefault = 0;
@@ -18,7 +18,7 @@ enum EventUserExpire
 	EU_ExpireEnd = 0x3fffffff;
 }
 
-// 事件-用户-每日
+// 事件类型-用户-每日
 enum EventUserDaily
 {
 	EU_DailyDefault = 0;
@@ -26,7 +26,7 @@ enum EventUserDaily
 	EU_DailyEnd = 0x5fffffff;
 }
 
-// 事件-用户-每周
+// 事件类型-用户-每周
 enum EventUserWeekly
 {
 	EU_WeeklyDefault = 0;
@@ -34,7 +34,7 @@ enum EventUserWeekly
 	EU_WeeklyEnd = 0x6fffffff;
 }
 
-// 事件-用户-每月
+// 事件类型-用户-每月
 enum EventUserMonthly
 {
 	EU_MonthlyDefault = 0;
