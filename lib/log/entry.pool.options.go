@@ -14,14 +14,13 @@ type entryPoolOptions struct {
 
 // newEntryPoolOptions 新的entryPoolOptions
 func newEntryPoolOptions() *entryPoolOptions {
-	s := xutil.NewDefaultSwitch(true)
 	pool := &sync.Pool{
 		New: func() interface{} {
 			return newEntry()
 		},
 	}
 	opt := &entryPoolOptions{
-		poolSwitch: s,
+		poolSwitch: xutil.NewDefaultSwitch(true),
 		pool:       pool,
 		newEntryFunc: func() *entry {
 			return pool.Get().(*entry)
