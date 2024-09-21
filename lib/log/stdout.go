@@ -36,7 +36,7 @@ func PrintfInfo(format string, v ...interface{}) {
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(stdOut, LevelInfo, line, funcName, v...)
+		formatAndPrint(stdOut, LevelInfo, line, funcName, fmt.Sprintf(format, v...))
 	}
 }
 

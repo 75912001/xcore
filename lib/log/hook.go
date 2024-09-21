@@ -13,17 +13,17 @@ type IHook interface {
 	Fire(outString string) error // 执行的方法 (outString: 输出的字符串)
 }
 
-type LevelHookMap map[uint32][]IHook // key: 日志等级, value: 钩子
+type levelHookMap map[uint32][]IHook // key: 日志等级, value: 钩子
 
 // add 添加钩子
-func (p LevelHookMap) add(hook IHook) {
+func (p levelHookMap) add(hook IHook) {
 	for _, level := range hook.Levels() {
 		p[level] = append(p[level], hook)
 	}
 }
 
 // fire 处理钩子
-func (p LevelHookMap) fire(entry *entry) error {
+func (p levelHookMap) fire(entry *entry) error {
 	for _, hook := range p[entry.level] {
 		if err := hook.Fire(entry.outString); err != nil {
 			return errors.WithMessage(err, xruntime.Location())

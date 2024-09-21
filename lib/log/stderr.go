@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -33,6 +34,6 @@ func PrintfErr(format string, v ...interface{}) {
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(stdErr, LevelError, line, funcName, v...)
+		formatAndPrint(stdErr, LevelError, line, funcName, fmt.Sprintf(format, v...))
 	}
 }

@@ -84,7 +84,7 @@ func (p *mgr) start() error {
 		p.loggerSlice[i] = log.New(os.Stdout, "", 0)
 	}
 	p.logChan = make(chan *entry, logChannelEntryCapacity)
-	p.timeMgr = &xtime.Mgr{}
+	p.timeMgr = xtime.NewMgr()
 	// 初始化各级别的日志输出
 	if err := newWriters(p); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -199,19 +199,19 @@ func newWriters(p *mgr) error {
 }
 
 // Stop 停止
-func Stop() error {
-	if mgrInstance.logChan != nil {
+func (p *mgr) Stop() error {
+	if p.logChan != nil {
 		// close chan, for range 读完chan会退出.
-		close(mgrInstance.logChan)
+		close(p.logChan)
 		// 等待logChan 的for range 退出.
-		mgrInstance.waitGroupOutPut.Wait()
+		p.waitGroupOutPut.Wait()
 	}
 	// 检查是否要关闭文件
-	if len(mgrInstance.openFiles) > 0 {
-		for i := range mgrInstance.openFiles {
-			_ = mgrInstance.openFiles[i].Close()
+	if len(p.openFiles) > 0 {
+		for i := range p.openFiles {
+			_ = p.openFiles[i].Close()
 		}
-		mgrInstance.openFiles = mgrInstance.openFiles[0:0]
+		p.openFiles = p.openFiles[0:0]
 	}
 	return nil
 }
@@ -236,7 +236,7 @@ func (p *mgr) newEntry() *entry {
 func (p *mgr) log(entry *entry, level uint32, v ...interface{}) {
 	withLevel(entry, level)
 	withTime(entry, p.timeMgr.NowTime())
-	withMessage(entry, fmt.Sprintln(v...))
+	withMessage(entry, fmt.Sprint(v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
 		funcName := xconstants.Unknown
