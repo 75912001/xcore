@@ -14,28 +14,18 @@ type Mgr struct {
 	timestampMillisecond  int64        // 上一次调用Update更新的时间戳-毫秒
 	time                  time.Time    // 上一次调用Update更新的时间
 	timestampSecondOffset int64        // 时间戳偏移量-秒
-	utcSwitch             util.ISwitch // UTC 时间开关
+	UTCSwitch             util.ISwitch // UTC 时间开关
 }
 
 func NewMgr() *Mgr {
 	return &Mgr{
-		utcSwitch: util.NewDefaultSwitch(false),
+		UTCSwitch: util.NewDefaultSwitch(false),
 	}
-}
-
-// AbleUTC 使用UTC时间
-func (p *Mgr) AbleUTC() {
-	p.utcSwitch.Enable()
-}
-
-// DisableUTC 不使用UTC时间
-func (p *Mgr) DisableUTC() {
-	p.utcSwitch.Disable()
 }
 
 // NowTime 获取当前时间
 func (p *Mgr) NowTime() time.Time {
-	if p.utcSwitch.IsEnabled() {
+	if p.UTCSwitch.IsEnabled() {
 		return time.Now().UTC()
 	}
 	return time.Now()
