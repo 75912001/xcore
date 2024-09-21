@@ -2,6 +2,7 @@ package util
 
 type ICallBackFunc interface {
 	CallBack() error
+	SetArg(arg interface{})
 	GetArg() interface{}
 }
 
@@ -23,6 +24,10 @@ func NewDefaultCallBackFunc(fun CallBackFunc, arg interface{}) ICallBackFunc {
 func (p *defaultCallBackFunc) CallBack() error {
 	p.Function(p.GetArg())
 	return nil
+}
+
+func (p *defaultCallBackFunc) SetArg(arg interface{}) {
+	p.Arg = arg
 }
 
 func (p *defaultCallBackFunc) GetArg() interface{} {
