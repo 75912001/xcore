@@ -11,7 +11,7 @@ type Millisecond struct {
 
 func (p *Millisecond) reset() {
 	p.ICallBackFunc = nil
-	p.ISwitch.Enable()
+	p.ISwitch.Disable()
 	p.expire = 0
 }
 
@@ -21,5 +21,5 @@ func (p *Millisecond) reset() {
 //	参数:
 //		毫秒定时器
 func DelMillisecond(t *Millisecond) {
-	t.Disable()
+	t.reset()
 }
