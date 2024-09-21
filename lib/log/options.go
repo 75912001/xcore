@@ -16,7 +16,7 @@ type options struct {
 	namePrefix       *string           // 日志名 前缀 [default]: 当前执行的程序名称
 	isWriteFile      *bool             // 是否写文件 [default]: true
 	entryPoolOptions *entryPoolOptions // entry的内存池选项 [default]: newEntryPoolOptions()
-	hookMap          levelHookMap      // 各日志级别对应的钩子 [default]: make(levelHookMap)
+	hook             IHook             // 钩子 [default]: nil
 }
 
 // NewOptions 新的Options
@@ -54,12 +54,8 @@ func (p *options) WithEntryPoolOptions(entryPoolOptions *entryPoolOptions) *opti
 	return p
 }
 
-// AddHook 添加钩子
-func (p *options) AddHook(hook IHook) *options {
-	if p.hookMap == nil {
-		p.hookMap = make(levelHookMap)
-	}
-	p.hookMap.add(hook)
+func (p *options) WithHook(hook IHook) *options {
+	p.hook = hook
 	return p
 }
 
@@ -89,8 +85,8 @@ func (p *options) merge(opts ...*options) *options {
 		if opt.entryPoolOptions != nil {
 			p.entryPoolOptions = p.entryPoolOptions.merge(opt.entryPoolOptions)
 		}
-		if opt.hookMap != nil {
-			p.hookMap = opt.hookMap
+		if opt.hook != nil {
+			p.hook = opt.hook
 		}
 	}
 	return p
@@ -132,8 +128,5 @@ func (p *options) configure() error {
 		p.entryPoolOptions = newEntryPoolOptions()
 	}
 	p.entryPoolOptions.configure()
-	if p.hookMap == nil {
-		p.hookMap = make(levelHookMap)
-	}
 	return nil
 }

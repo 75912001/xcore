@@ -110,10 +110,6 @@ func (p *mgr) GetLevel() uint32 {
 	return *p.options.level
 }
 
-func (p *mgr) AddHook(hook IHook) {
-	p.options.hookMap.add(hook)
-}
-
 // getLogDuration 取得日志刻度
 func (p *mgr) getLogDuration(sec int64) int {
 	var logFormat string
@@ -218,10 +214,10 @@ func (p *mgr) Stop() error {
 
 // fireHooks 处理钩子
 func (p *mgr) fireHooks(entry *entry) {
-	if 0 == len(p.options.hookMap) {
+	if p.options.hook == nil {
 		return
 	}
-	err := p.options.hookMap.fire(entry)
+	err := p.options.hook.Fire(entry.outString)
 	if err != nil {
 		PrintfErr("failed to fire hook. err:%v", err)
 	}
