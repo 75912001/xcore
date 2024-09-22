@@ -162,14 +162,23 @@ func (p *Mgr) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBackFunc, expireMillisecond int64) *Millisecond {
+func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int64) *Millisecond {
 	t := &Millisecond{
-		ICallBackFunc: callBackFunc,
-		ISwitch:       xutil.NewDefaultSwitch(true),
-		expire:        expireMillisecond,
+		ICallBack: callBackFunc,
+		ISwitch:   xutil.NewDefaultSwitch(true),
+		expire:    expireMillisecond,
 	}
 	p.milliSecondChan <- t
 	return t
+}
+
+// DelMillisecond 删除毫秒级定时器
+//
+//	[NOTE] 必须与该 outgoingTimeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
+//	参数:
+//		毫秒定时器
+func (p *Mgr) DelMillisecond(t *Millisecond) {
+	t.reset()
 }
 
 // 扫描毫秒级定时器
@@ -202,16 +211,22 @@ func (p *Mgr) scanMillisecond(ms int64) {
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *Mgr) AddSecond(callBackFunc xutil.ICallBackFunc, expire int64) *Second {
+func (p *Mgr) AddSecond(callBackFunc xutil.ICallBack, expire int64) *Second {
 	t := &Second{
 		Millisecond{
-			ICallBackFunc: callBackFunc,
-			ISwitch:       xutil.NewDefaultSwitch(true),
-			expire:        expire,
+			ICallBack: callBackFunc,
+			ISwitch:   xutil.NewDefaultSwitch(true),
+			expire:    expire,
 		},
 	}
 	p.secondChan <- t
 	return t
+}
+
+// DelSecond 删除秒级定时器
+// 同 DelMillisecond
+func (p *Mgr) DelSecond(t *Second) {
+	t.reset()
 }
 
 // 将秒级定时器,添加到轮转IDX的末尾.之后,移动到合适的位置
