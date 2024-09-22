@@ -1,5 +1,7 @@
 syntax="proto3";
 
+option go_package = "../protobuf/error";
+
 // [0x20000,0x2ffff]
 //enum ErrorCode
 //{
