@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	xconstants "xcore/lib/constants"
 	xtimer "xcore/lib/timer"
 	xutil "xcore/lib/util"
 )
@@ -11,13 +12,23 @@ import (
 func cbSecond(arg interface{}) {
 	fmt.Println("cbSecond:", arg.(uint64))
 }
+
+func cbMillisecond(arg interface{}) {
+	fmt.Println("cbMillisecond:", arg.(uint64))
+}
+
+type addSecondSignal struct {
+}
+type addMillisecondSignal struct {
+}
+
 func exampleTimer() {
 	if false {
 		return
 	}
 	var timer xtimer.ITimer
 	timer = xtimer.NewMgr()
-	busChannel := make(chan interface{}, 100)
+	busChannel := make(chan interface{}, xconstants.BusChannelCapacityDefault)
 	err := timer.Start(context.Background(),
 		xtimer.NewOptions().
 			WithOutgoingTimerOutChan(busChannel),
@@ -25,28 +36,39 @@ func exampleTimer() {
 	if err != nil {
 		panic(err)
 	}
-	time.Sleep(time.Second * 3)
-	for i := 0; i < 10; i++ {
-		defaultCallBack := xutil.NewDefaultCallBack(cbSecond, uint64(i))
-		second := timer.AddSecond(defaultCallBack, int64(i))
-		_ = second
-		//switch i {
-		//case 30, 70, 90:
-		//	timer.DelSecond(second)
-		//default:
-		//}
-	}
+
+	busChannel <- addSecondSignal{}
+	busChannel <- addMillisecondSignal{}
 	for {
 		select {
 		case v := <-busChannel:
 			switch t := v.(type) {
-			case xtimer.Second:
+			case addSecondSignal:
+				for i := 0; i < 10; i++ {
+					defaultCallBack := xutil.NewDefaultCallBack(cbSecond, uint64(i))
+					second := timer.AddSecond(defaultCallBack, time.Now().Unix()+int64(i))
+					switch i {
+					case 3, 7, 9:
+						timer.DelSecond(second)
+					default:
+					}
+				}
+			case addMillisecondSignal:
+				for i := 0; i < 10000; i += 1000 {
+					defaultCallBack := xutil.NewDefaultCallBack(cbMillisecond, uint64(i))
+					millisecond := timer.AddMillisecond(defaultCallBack, time.Now().UnixMilli()+int64(i))
+					switch i {
+					case 3000, 7000, 9000:
+						timer.DelMillisecond(millisecond)
+					default:
+					}
+				}
+			case xtimer.EventTimerSecond:
+				_ = t.CallBackFunc()
+			case xtimer.EventTimerMillisecond:
 				_ = t.CallBackFunc()
 			}
 		}
-	}
-	for {
-		time.Sleep(time.Second * 1)
 	}
 	return
 }

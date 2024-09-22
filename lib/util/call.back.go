@@ -7,7 +7,7 @@ type ICallBack interface {
 }
 
 // CallBackFunc 回调函数
-type CallBackFunc func(arg interface{})
+type CallBackFunc func(arg interface{}) error
 
 type defaultCallBack struct {
 	Arg      interface{}  // 参数
@@ -22,8 +22,7 @@ func NewDefaultCallBack(callBackFunc CallBackFunc, arg interface{}) ICallBack {
 }
 
 func (p *defaultCallBack) CallBackFunc() error {
-	p.Function(p.GetArg())
-	return nil
+	return p.Function(p.GetArg())
 }
 
 func (p *defaultCallBack) SetArg(arg interface{}) {
