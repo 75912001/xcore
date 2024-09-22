@@ -11,10 +11,13 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"xcore/impl/common"
+	gatewayhandler "xcore/impl/service/gateway/handler"
 	xbench "xcore/lib/bench"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
 	xruntime "xcore/lib/runtime"
 	xtime "xcore/lib/time"
@@ -115,8 +118,7 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 	xlog.PrintfInfo("go max process new:%v, previous setting:%v",
 		*p.BenchMgr.Json.Base.GoMaxProcess, previous)
 	// 日志
-	var log xlog.ILog
-	log, err = xlog.NewMgr(xlog.NewOptions().
+	common.GLog, err = xlog.NewMgr(xlog.NewOptions().
 		WithLevel(*p.BenchMgr.Json.Base.LogLevel).
 		WithAbsPath(*p.BenchMgr.Json.Base.LogAbsPath).
 		WithNamePrefix(fmt.Sprintf("%v.%v.%v", p.GroupID, p.Name, p.ID)).
@@ -138,7 +140,7 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 		defer func() {
 			p.BusChannelWaitGroup.Done()
 			// 主事件 channel 报错 不 recover
-			log.Infof(xconstants.GoroutineDone)
+			common.GLog.Infof(xconstants.GoroutineDone)
 		}()
 		p.BusChannelWaitGroup.Add(1)
 		p.HandlerBus()
@@ -157,6 +159,24 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 		)
 		if err != nil {
 			return errors.Errorf("timer Start err:%v %v", err, xruntime.Location())
+		}
+	}
+
+	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 { // 网络服务
+		switch *p.BenchMgr.Json.ServiceNet.Type {
+		case "tcp": // 启动 TCP 服务
+			if err := xnettcp.GetServer().Start(ctx, xnettcp.NewServerOptions().
+				SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
+				SetEventChan(p.BusChannel).
+				SetSendChanCapacity(*p.BenchMgr.Json.Base.SendChanCapacity).
+				SetPacket(xnettcp.NewDefaultPacket()).
+				SetHandler(gatewayhandler.NewServer())); err != nil {
+				return errors.WithMessage(err, xruntime.Location())
+			}
+		case "udp":
+			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+		default:
+			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 		}
 	}
 
