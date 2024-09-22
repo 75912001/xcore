@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"os"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -52,17 +51,8 @@ type benchJson struct {
 	ServiceNet ServiceNet `json:"serviceNet"`
 }
 
-func (p *benchJson) Parse(pathFile string) error {
-	file, err := os.Open(pathFile)
-	if err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(p)
+func (p *benchJson) Parse(jsonString string) error {
+	err := json.Unmarshal([]byte(jsonString), p)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
