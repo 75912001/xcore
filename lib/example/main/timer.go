@@ -9,12 +9,14 @@ import (
 	xutil "xcore/lib/util"
 )
 
-func cbSecond(arg interface{}) {
+func cbSecond(arg interface{}) error {
 	fmt.Println("cbSecond:", arg.(uint64))
+	return nil
 }
 
-func cbMillisecond(arg interface{}) {
+func cbMillisecond(arg interface{}) error {
 	fmt.Println("cbMillisecond:", arg.(uint64))
+	return nil
 }
 
 type addSecondSignal struct {

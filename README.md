@@ -69,28 +69,40 @@
 ### 下载地址: https://github.com/etcd-io/etcd/releases
 
 ## 目录结构
-### lib
-- pubsub: 发布订阅 [todo menglc]
-- util: 工具类
-- timer: 定时器
-- time: 时间管理器
-- runtime: 运行时
-- pprof: 性能分析
-- pool: 对象池
-- net: 网络
-- log: 日志
-- file: 文件操作
-- error: 错误码
-- etcd: etcd客户端 [todo menglc]
-- constants 常量
-- bench 服务基础配置
-- example 示例
 
 ### impl
-#### service
-##### main 服务入口 
-##### gateway 网关服务
 
-### impl/build/1.gateway.1
+##### impl/build/1.gateway.1
 - bench.json [ todo menglc 由脚本生成 impl/build/bench/gateway.bench.json -> impl/build/1.gateway.1/bench.json]
 - 1.gateway.1.exe [由编译生成]
+- 
+#### service
+##### main 服务入口
+##### gateway 网关服务
+
+
+### lib
+- bench 服务基础配置
+- constants 常量
+- error: 错误码
+- event 事件
+- example 示例 [todo menglc]
+- exec: 执行器 [todo menglc]
+- file: 文件操作
+- log: 日志 [todo menglc 优化]
+- net: 网络 [todo menglc 优化]
+- pool: 对象池
+- pprof: 性能分析
+- protobuf [todo menglc]
+- pubsub: 发布订阅 [todo menglc]
+- runtime: 运行时
+- time: 时间管理器
+- timer: 定时器
+- util: 工具类
+
+### main
+
+### scripts
+
+
+
