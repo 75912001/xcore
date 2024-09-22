@@ -309,12 +309,12 @@ func (p *mgr) Debug(v ...interface{}) {
 // DebugLazy 调试日志-惰性
 //
 //	等级满足之后才会计算
-func DebugLazy(vFunc func() []interface{}) {
-	if mgrInstance.GetLevel() < LevelDebug {
+func (p *mgr) DebugLazy(vFunc func() []interface{}) {
+	if p.GetLevel() < LevelDebug {
 		return
 	}
 	v := vFunc()
-	mgrInstance.log(mgrInstance.newEntry(), LevelDebug, v...)
+	p.log(p.newEntry(), LevelDebug, v...)
 }
 
 // Debugf 调试日志
@@ -322,6 +322,17 @@ func (p *mgr) Debugf(format string, v ...interface{}) {
 	if p.GetLevel() < LevelDebug {
 		return
 	}
+	p.logf(p.newEntry(), LevelDebug, format, v...)
+}
+
+// DebugfLazy 调试日志-惰性
+//
+//	等级满足之后才会计算
+func (p *mgr) DebugfLazy(formatFunc func() (string, []interface{})) {
+	if p.GetLevel() < LevelDebug {
+		return
+	}
+	format, v := formatFunc()
 	p.logf(p.newEntry(), LevelDebug, format, v...)
 }
 
