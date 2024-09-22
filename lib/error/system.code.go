@@ -1,6 +1,6 @@
 package error
 
-// [系统错误码] lib/system 级别的错误码 [0-0xffff]
+// [系统错误码] lib/system 级别的错误码
 var (
 	// Success 成功
 	Success = NewError(0x0000).WithName("Success").WithDesc("success")
@@ -14,8 +14,8 @@ var (
 	//Packet = NewError(0xf004, "Packet", "packet error")
 	//// Timeout 超时
 	//Timeout = NewError(0xf005, "Timeout", "time out")
-	//// ChannelFull 通道 满
-	//ChannelFull = NewError(0xf006, "ChannelFull", "channel full")
+	// ChannelFull 通道 满
+	ChannelFull = NewError(0xf006).WithName("ChannelFull").WithDesc("channel full")
 	// ChannelEmpty 通道 空
 	ChannelEmpty = NewError(0xf007).WithName("ChannelEmpty").WithDesc("channel empty")
 	//// OutOfRange 超出范围
@@ -102,7 +102,7 @@ var (
 	//ChannelClosed = NewError(0xf030, "ChannelClosed", "channel closed")
 	//// Unregistered 未注册
 	//Unregistered = NewError(0xf031, "Unregistered", "unregistered")
-	// ChannelNil 通道 为空
+	// ChannelNil 通道 未初始化
 	ChannelNil = NewError(0xf032).WithName("ChannelNil").WithDesc("channel is nil")
 	// Unknown 未知
 	Unknown = NewError(0xffff).WithName("Unknown").WithDesc("unknown error")
