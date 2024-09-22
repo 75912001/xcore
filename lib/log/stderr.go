@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"time"
 	xconstants "xcore/lib/constants"
 )
 
@@ -20,7 +21,13 @@ func PrintErr(v ...interface{}) {
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(stdErr, LevelError, line, funcName, v...)
+		element := newEntry().
+			withLevel(LevelError).
+			withTime(time.Now()).
+			withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName)).
+			withMessage(fmt.Sprint(v...))
+		formatLogData(element)
+		_ = stdErr.Output(calldepth2, element.outString)
 	}
 }
 
@@ -34,6 +41,12 @@ func PrintfErr(format string, v ...interface{}) {
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(stdErr, LevelError, line, funcName, fmt.Sprintf(format, v...))
+		element := newEntry().
+			withLevel(LevelError).
+			withTime(time.Now()).
+			withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName)).
+			withMessage(fmt.Sprint(v...))
+		formatLogData(element)
+		_ = stdErr.Output(calldepth2, element.outString)
 	}
 }

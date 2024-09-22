@@ -1,7 +1,6 @@
 package log
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -22,7 +21,13 @@ func PrintInfo(v ...interface{}) {
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(stdOut, LevelInfo, line, funcName, v...)
+		element := newEntry().
+			withLevel(LevelInfo).
+			withTime(time.Now()).
+			withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName)).
+			withMessage(fmt.Sprint(v...))
+		formatLogData(element)
+		_ = stdOut.Output(calldepth2, element.outString)
 	}
 }
 
@@ -36,20 +41,12 @@ func PrintfInfo(format string, v ...interface{}) {
 		if ok {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		formatAndPrint(stdOut, LevelInfo, line, funcName, fmt.Sprintf(format, v...))
+		element := newEntry().
+			withLevel(LevelInfo).
+			withTime(time.Now()).
+			withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName)).
+			withMessage(fmt.Sprint(v...))
+		formatLogData(element)
+		_ = stdOut.Output(calldepth2, element.outString)
 	}
-}
-
-func formatAndPrint(logger *log.Logger, level uint32, line int, funcName string, v ...interface{}) {
-	var buf bytes.Buffer
-	buf.Grow(bufferCapacity)
-	// 格式为  [时间][日志级别][TID:xxx][UID:xxx][堆栈信息][{extendFields-key:extendFields:val}...{}][自定义内容]
-	buf.WriteString(fmt.Sprint("[", time.Now().Format(logTimeFormat), "]"))
-	buf.WriteString(fmt.Sprint("[", levelDesc[level], "]"))
-	buf.WriteString(traceIDKeyString0)
-	buf.WriteString(userIDKeyString0)
-	buf.WriteString(fmt.Sprint("[", fmt.Sprintf(callerInfoFormat, line, funcName), "]"))
-	buf.WriteString("[]")
-	buf.WriteString(fmt.Sprintf("%s%s%s", "[", fmt.Sprint(v...), "]"))
-	_ = logger.Output(calldepth3, buf.String())
 }
