@@ -66,3 +66,16 @@
 ## ETCD
 ### etcd-v3.5.15-windows-amd64.zip
 ### 下载地址: https://github.com/etcd-io/etcd/releases
+
+## 目录结构
+### lib
+- pubsub: 发布订阅 [todo menglc]
+- util: 工具类
+- timer: 定时器
+- time: 时间管理器
+- runtime: 运行时
+- pprof: 性能分析
+- pool: 对象池
+- net: 网络 [todo menglc]
+- log: 日志
+- file: 文件操作
