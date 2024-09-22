@@ -51,7 +51,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 			log.PrintInfo(constants.GoroutineDone)
 			return
 		case v := <-p.secondChan:
-			s := v.(*Second)
+			s := v.(*second)
 			p.pushBackCycle(s, searchCycleIdxIteration(s.expire), true)
 		case <-idleDelay.C:
 			idleDelay.Reset(*p.opts.scanSecondDuration)
@@ -60,7 +60,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 	}
 }
 
-// 每 Millisecond 个毫秒更新
+// 每 millisecond 个毫秒更新
 func (p *Mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if runtime.IsRelease() {
@@ -103,10 +103,10 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 // todo menglc 可以优化为,二分查找,然后插入
 func moveLastElementToProperPosition(l *list.List) {
 	lastElement := l.Back() // 获取最后一个元素
-	target := lastElement.Value.(*Millisecond)
+	target := lastElement.Value.(*millisecond)
 	var element *list.Element
 	for element = lastElement.Prev(); element != nil; element = element.Prev() {
-		current := element.Value.(*Millisecond)
+		current := element.Value.(*millisecond)
 		if current.expire <= target.expire {
 			l.MoveAfter(lastElement, element)
 			return
@@ -149,7 +149,7 @@ func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
 func (p *Mgr) Stop() {
 	if p.cancelFunc != nil {
 		p.cancelFunc()
-		// 等待 Second, milliSecond goroutine退出.
+		// 等待 second, milliSecond goroutine退出.
 		p.waitGroup.Wait()
 		p.cancelFunc = nil
 	}
@@ -162,8 +162,8 @@ func (p *Mgr) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int64) *Millisecond {
-	t := &Millisecond{
+func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int64) *millisecond {
+	t := &millisecond{
 		ICallBack: callBackFunc,
 		ISwitch:   xutil.NewDefaultSwitch(true),
 		expire:    expireMillisecond,
@@ -177,7 +177,7 @@ func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int
 //	[NOTE] 必须与该 outgoingTimeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
 //	参数:
 //		毫秒定时器
-func (p *Mgr) DelMillisecond(t *Millisecond) {
+func (p *Mgr) DelMillisecond(t *millisecond) {
 	t.reset()
 }
 
@@ -188,14 +188,16 @@ func (p *Mgr) DelMillisecond(t *Millisecond) {
 func (p *Mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
-		timerMillisecond := e.Value.(*Millisecond)
-		if timerMillisecond.IsDisabled() {
+		t := e.Value.(*millisecond)
+		if t.IsDisabled() {
 			next = e.Next()
 			p.millisecondList.Remove(e)
 			continue
 		}
-		if timerMillisecond.expire <= ms {
-			p.opts.outgoingTimeoutChan <- timerMillisecond
+		if t.expire <= ms {
+			p.opts.outgoingTimeoutChan <- EventTimerMillisecond{
+				ICallBack: t.ICallBack,
+			}
 			next = e.Next()
 			p.millisecondList.Remove(e)
 			continue
@@ -211,9 +213,9 @@ func (p *Mgr) scanMillisecond(ms int64) {
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *Mgr) AddSecond(callBackFunc xutil.ICallBack, expire int64) *Second {
-	t := &Second{
-		Millisecond{
+func (p *Mgr) AddSecond(callBackFunc xutil.ICallBack, expire int64) *second {
+	t := &second{
+		millisecond{
 			ICallBack: callBackFunc,
 			ISwitch:   xutil.NewDefaultSwitch(true),
 			expire:    expire,
@@ -225,7 +227,7 @@ func (p *Mgr) AddSecond(callBackFunc xutil.ICallBack, expire int64) *Second {
 
 // DelSecond 删除秒级定时器
 // 同 DelMillisecond
-func (p *Mgr) DelSecond(t *Second) {
+func (p *Mgr) DelSecond(t *second) {
 	t.reset()
 }
 
@@ -235,7 +237,7 @@ func (p *Mgr) DelSecond(t *Second) {
 //			timerSecond: 秒定时器
 //			cycleIdx: 轮序号
 //	     needMove: 是否需要移动到合适的位置
-func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int, needMove bool) {
+func (p *Mgr) pushBackCycle(timerSecond *second, cycleIdx int, needMove bool) {
 	p.secondSlice[cycleIdx].PushBack(timerSecond)
 	if needMove {
 		moveLastElementToProperPositionSecond(&p.secondSlice[cycleIdx])
@@ -246,10 +248,10 @@ func (p *Mgr) pushBackCycle(timerSecond *Second, cycleIdx int, needMove bool) {
 // e.g.: 1,2,2,3,4,4,3 => 1,2,2,3,3,4,4 [将最后一个元素移动到4的前面]
 func moveLastElementToProperPositionSecond(l *list.List) {
 	lastElement := l.Back() // 获取最后一个元素
-	target := lastElement.Value.(*Second)
+	target := lastElement.Value.(*second)
 	var element *list.Element
 	for element = lastElement.Prev(); element != nil; element = element.Prev() {
-		current := element.Value.(*Second)
+		current := element.Value.(*second)
 		if current.expire <= target.expire {
 			l.MoveAfter(lastElement, element)
 			return
@@ -268,14 +270,16 @@ func (p *Mgr) scanSecond(timestamp int64) {
 	var next *list.Element
 	cycle0 := &p.secondSlice[0]
 	for e := cycle0.Front(); nil != e; e = next {
-		t := e.Value.(*Second)
+		t := e.Value.(*second)
 		if t.IsDisabled() {
 			next = e.Next()
 			cycle0.Remove(e)
 			continue
 		}
 		if t.expire <= timestamp {
-			p.opts.outgoingTimeoutChan <- t
+			p.opts.outgoingTimeoutChan <- EventTimerSecond{
+				ICallBack: t.ICallBack,
+			}
 			next = e.Next()
 			cycle0.Remove(e)
 			continue
@@ -289,14 +293,16 @@ func (p *Mgr) scanSecond(timestamp int64) {
 	for idx := 1; idx < cycleSize; idx++ {
 		c := &p.secondSlice[idx]
 		for e := c.Front(); e != nil; e = next {
-			t := e.Value.(*Second)
+			t := e.Value.(*second)
 			if t.IsDisabled() {
 				next = e.Next()
 				c.Remove(e)
 				continue
 			}
 			if t.expire <= timestamp {
-				p.opts.outgoingTimeoutChan <- t
+				p.opts.outgoingTimeoutChan <- EventTimerSecond{
+					ICallBack: t.ICallBack,
+				}
 				next = e.Next()
 				c.Remove(e)
 				continue

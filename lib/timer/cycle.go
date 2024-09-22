@@ -11,13 +11,13 @@ const cycleSize int = 9
 //
 //	key:序号[0,...]
 //	value:到期时间
-var gCycleDuration [cycleSize]int64 //nolint:all // 包内 全局变量
+var cycleDuration [cycleSize]int64 //nolint:all // 包内 全局变量
 
 func init() { //nolint:all // 初始化
-	for i := 0; i < len(gCycleDuration); i++ {
-		gCycleDuration[i] = genDuration(i)
+	for i := 0; i < len(cycleDuration); i++ {
+		cycleDuration[i] = genDuration(i)
 	}
-	gCycleDuration[cycleSize-1] = math.MaxInt64
+	cycleDuration[cycleSize-1] = math.MaxInt64
 }
 
 // 生成一个轮的时长
@@ -39,34 +39,34 @@ func genDuration(idx int) int64 {
 ////	返回值:
 ////		轮序号
 //func findCycleIdx(duration int64) (idx int) {
-//	for k, v := range gCycleDuration {
+//	for k, v := range cycleDuration {
 //		if duration <= v {
 //			return k
 //		} else {
 //			idx++
 //		}
 //	}
-//	return len(gCycleDuration) - 1
+//	return len(cycleDuration) - 1
 //}
 
 // 根据 时长 找到时间轮的序号 二分查找 (迭代)
 func searchCycleIdxIteration(duration int64) int {
-	low, high := 0, len(gCycleDuration)-1
+	low, high := 0, len(cycleDuration)-1
 	for low <= high {
 		mid := low + (high-low)/2 //nolint:all // 二分法,2:从中间取
 		if low == high {
-			if gCycleDuration[mid] < duration {
+			if cycleDuration[mid] < duration {
 				return mid + 1
 			} else {
 				return mid
 			}
 		}
 		switch {
-		case gCycleDuration[mid] == duration:
+		case cycleDuration[mid] == duration:
 			return mid
-		case duration < gCycleDuration[mid]:
+		case duration < cycleDuration[mid]:
 			high = mid - 1
-		case duration > gCycleDuration[mid]:
+		case duration > cycleDuration[mid]:
 			low = mid + 1
 		}
 	}
@@ -80,7 +80,7 @@ func searchCycleIdxIteration(duration int64) int {
 //		idx: 轮序号 0 < idx
 func findPrevCycleIdx(duration int64, idx int) int {
 	for {
-		if idx != 0 && duration <= gCycleDuration[idx-1] {
+		if idx != 0 && duration <= cycleDuration[idx-1] {
 			idx--
 		} else {
 			break
