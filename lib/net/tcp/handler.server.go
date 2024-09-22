@@ -7,6 +7,10 @@ import (
 type DefaultHandlerServer struct {
 }
 
+func NewDefaultHandlerServer() *DefaultHandlerServer {
+	return &DefaultHandlerServer{}
+}
+
 func (p *DefaultHandlerServer) OnConnect(remote *DefaultRemote) error {
 	return xerror.NotImplemented
 }
@@ -22,11 +26,11 @@ func (p *DefaultHandlerServer) OnUnmarshalPacket(remote *DefaultRemote, data []b
 func (p *DefaultHandlerServer) OnPacket(packet *DefaultPacket) error {
 	return xerror.NotImplemented
 }
+
+// OnDisconnect [NOTE] 需要外部实现调用
 func (p *DefaultHandlerServer) OnDisconnect(remote *DefaultRemote) error {
-	return xerror.NotImplemented
-	// 下面是断开连接后需要做的事情
-	//if remote.IsConnect() {
-	//	remote.stop()
-	//}
-	//return nil
+	if remote.IsConnect() {
+		remote.Stop()
+	}
+	return nil
 }
