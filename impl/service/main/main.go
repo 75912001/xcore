@@ -11,6 +11,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"time"
 	"xcore/impl/common"
 	xservice "xcore/impl/common/service"
 	"xcore/impl/service/gateway"
@@ -59,6 +60,9 @@ func main() {
 	err := gIService.Start()
 	if err != nil {
 		xlog.PrintErr(err, xruntime.Location())
+	}
+	for { // todo menglc 优雅退出
+		time.Sleep(time.Second)
 	}
 	err = gIService.Stop()
 	if err != nil {
