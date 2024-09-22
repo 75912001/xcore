@@ -16,7 +16,7 @@ type options struct {
 	namePrefix       *string           // 日志名 前缀 [default]: 当前执行的程序名称
 	isWriteFile      *bool             // 是否写文件 [default]: true
 	entryPoolOptions *entryPoolOptions // entry的内存池选项 [default]: newEntryPoolOptions()
-	levelCallBack    *levelCallBack    // 日志结果的回调. 该执行过程在 log 的写过程中, 位于写 log 的 goroutine 中 [default]: nil
+	levelSubscribe   *levelSubscribe   // 日志结果的回调. 该执行过程在 log 的写过程中, 位于写 log 的 goroutine 中 [default]: nil
 }
 
 // NewOptions 新的Options
@@ -54,8 +54,14 @@ func (p *options) WithEntryPoolOptions(entryPoolOptions *entryPoolOptions) *opti
 	return p
 }
 
-func (p *options) WithLevelCallBack(levelCallBack *levelCallBack) *options {
-	p.levelCallBack = levelCallBack
+func (p *options) WithLevelCallBack(callbackFunc CallBackFunc, subLevel ...uint32) *options {
+	p.levelSubscribe.callBackFunc = callbackFunc
+	if p.levelSubscribe.subMap == nil {
+		p.levelSubscribe.subMap = make(map[uint32]struct{})
+	}
+	for _, level := range subLevel {
+		p.levelSubscribe.subMap[level] = struct{}{}
+	}
 	return p
 }
 
@@ -85,8 +91,16 @@ func (p *options) merge(opts ...*options) *options {
 		if opt.entryPoolOptions != nil {
 			p.entryPoolOptions = p.entryPoolOptions.merge(opt.entryPoolOptions)
 		}
-		if opt.levelCallBack != nil {
-			p.levelCallBack = opt.levelCallBack
+		if opt.levelSubscribe != nil {
+			p.levelSubscribe = opt.levelSubscribe
+		}
+		if opt.levelSubscribe.subMap != nil {
+			if p.levelSubscribe.subMap == nil {
+				p.levelSubscribe.subMap = make(map[uint32]struct{})
+			}
+			for level := range opt.levelSubscribe.subMap {
+				p.levelSubscribe.subMap[level] = struct{}{}
+			}
 		}
 	}
 	return p
@@ -127,6 +141,8 @@ func (p *options) configure() error {
 	if p.entryPoolOptions == nil {
 		p.entryPoolOptions = newEntryPoolOptions()
 	}
-	p.entryPoolOptions.configure()
+	if err := p.entryPoolOptions.configure(); err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
 	return nil
 }

@@ -129,8 +129,8 @@ func (p *mgr) getLogDuration(sec int64) int {
 // doLog 处理日志
 func doLog(p *mgr) {
 	for v := range p.logChan {
-		v.outString = formatLogData(v)
-		p.fireHooks(v)
+		formatLogData(v)
+		p.callBack(v)
 		// 检查自动切换日志
 		if p.logDuration != p.getLogDuration(v.time.Unix()) {
 			if err := newWriters(p); err != nil {
@@ -212,15 +212,15 @@ func (p *mgr) Stop() error {
 	return nil
 }
 
-// fireHooks 处理钩子
-func (p *mgr) fireHooks(entry *entry) {
-	if p.options.hook == nil {
+// callBack 处理回调
+func (p *mgr) callBack(entry *entry) {
+	if p.options.levelSubscribe == nil {
 		return
 	}
-	err := p.options.hook.Fire(entry.outString)
-	if err != nil {
-		PrintfErr("failed to fire hook. err:%v", err)
+	if !p.options.levelSubscribe.isSubscribe(entry.level) {
+		return
 	}
+	p.options.levelSubscribe.callBackFunc(entry.level, entry.outString)
 }
 
 func (p *mgr) newEntry() *entry {
@@ -230,9 +230,9 @@ func (p *mgr) newEntry() *entry {
 
 // log 记录日志
 func (p *mgr) log(entry *entry, level uint32, v ...interface{}) {
-	withLevel(entry, level)
-	withTime(entry, p.timeMgr.NowTime())
-	withMessage(entry, fmt.Sprint(v...))
+	entry.withLevel(level).
+		withTime(p.timeMgr.NowTime()).
+		withMessage(fmt.Sprint(v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
 		funcName := xconstants.Unknown
@@ -241,16 +241,16 @@ func (p *mgr) log(entry *entry, level uint32, v ...interface{}) {
 		} else {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		withCallerInfo(entry, fmt.Sprintf(callerInfoFormat, line, funcName))
+		entry.withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName))
 	}
 	p.logChan <- entry
 }
 
 // logf 记录日志
 func (p *mgr) logf(entry *entry, level uint32, format string, v ...interface{}) {
-	withLevel(entry, level)
-	withTime(entry, p.timeMgr.NowTime())
-	withMessage(entry, fmt.Sprintf(format, v...))
+	entry.withLevel(level).
+		withTime(p.timeMgr.NowTime()).
+		withMessage(fmt.Sprintf(format, v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
 		funcName := xconstants.Unknown
@@ -259,17 +259,17 @@ func (p *mgr) logf(entry *entry, level uint32, format string, v ...interface{}) 
 		} else {
 			funcName = runtime.FuncForPC(pc).Name()
 		}
-		withCallerInfo(entry, fmt.Sprintf(callerInfoFormat, line, funcName))
+		entry.withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName))
 	}
 	p.logChan <- entry
 }
 
 // Trace 踪迹日志
-func Trace(v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelTrace {
+func (p *mgr) Trace(v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
 		return
 	}
-	mgrInstance.log(mgrInstance.newEntry(), LevelTrace, v...)
+	p.log(p.newEntry(), LevelTrace, v...)
 }
 
 func TraceWithEntry(entry *entry, v ...interface{}) {
@@ -280,11 +280,11 @@ func TraceWithEntry(entry *entry, v ...interface{}) {
 }
 
 // Tracef 踪迹日志
-func Tracef(format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelTrace {
+func (p *mgr) Tracef(format string, v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
 		return
 	}
-	mgrInstance.logf(mgrInstance.newEntry(), LevelTrace, format, v...)
+	p.logf(p.newEntry(), LevelTrace, format, v...)
 }
 
 func TracefWithEntry(entry *entry, format string, v ...interface{}) {
@@ -295,11 +295,11 @@ func TracefWithEntry(entry *entry, format string, v ...interface{}) {
 }
 
 // Debug 调试日志
-func Debug(v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelDebug {
+func (p *mgr) Debug(v ...interface{}) {
+	if p.GetLevel() < LevelDebug {
 		return
 	}
-	mgrInstance.log(mgrInstance.newEntry(), LevelDebug, v...)
+	p.log(p.newEntry(), LevelDebug, v...)
 }
 
 // DebugLazy 调试日志-惰性
@@ -314,73 +314,73 @@ func DebugLazy(vFunc func() []interface{}) {
 }
 
 // Debugf 调试日志
-func Debugf(format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelDebug {
+func (p *mgr) Debugf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelDebug {
 		return
 	}
-	mgrInstance.logf(mgrInstance.newEntry(), LevelDebug, format, v...)
+	p.logf(p.newEntry(), LevelDebug, format, v...)
 }
 
 // Info 信息日志
-func Info(v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelInfo {
+func (p *mgr) Info(v ...interface{}) {
+	if p.GetLevel() < LevelInfo {
 		return
 	}
-	mgrInstance.log(mgrInstance.newEntry(), LevelInfo, v...)
+	p.log(p.newEntry(), LevelInfo, v...)
 }
 
 // Infof 信息日志
-func Infof(format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelInfo {
+func (p *mgr) Infof(format string, v ...interface{}) {
+	if p.GetLevel() < LevelInfo {
 		return
 	}
-	mgrInstance.logf(mgrInstance.newEntry(), LevelInfo, format, v...)
+	p.logf(p.newEntry(), LevelInfo, format, v...)
 }
 
 // Warn 警告日志
-func Warn(v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelWarn {
+func (p *mgr) Warn(v ...interface{}) {
+	if p.GetLevel() < LevelWarn {
 		return
 	}
-	mgrInstance.log(mgrInstance.newEntry(), LevelWarn, v...)
+	p.log(p.newEntry(), LevelWarn, v...)
 }
 
 // Warnf 警告日志
-func Warnf(format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelWarn {
+func (p *mgr) Warnf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelWarn {
 		return
 	}
-	mgrInstance.logf(mgrInstance.newEntry(), LevelWarn, format, v...)
+	p.logf(p.newEntry(), LevelWarn, format, v...)
 }
 
 // Error 错误日志
-func Error(v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelError {
+func (p *mgr) Error(v ...interface{}) {
+	if p.GetLevel() < LevelError {
 		return
 	}
-	mgrInstance.log(mgrInstance.newEntry(), LevelError, v...)
+	p.log(p.newEntry(), LevelError, v...)
 }
 
 // Errorf 错误日志
-func Errorf(format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelError {
+func (p *mgr) Errorf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelError {
 		return
 	}
-	mgrInstance.logf(mgrInstance.newEntry(), LevelError, format, v...)
+	p.logf(p.newEntry(), LevelError, format, v...)
 }
 
 // Fatal 致命日志
-func Fatal(v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelFatal {
+func (p *mgr) Fatal(v ...interface{}) {
+	if p.GetLevel() < LevelFatal {
 		return
 	}
-	mgrInstance.log(mgrInstance.newEntry(), LevelFatal, v...)
+	p.log(p.newEntry(), LevelFatal, v...)
 }
 
 // Fatalf 致命日志
-func Fatalf(format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelFatal {
+func (p *mgr) Fatalf(format string, v ...interface{}) {
+	if p.GetLevel() < LevelFatal {
 		return
 	}
-	mgrInstance.logf(mgrInstance.newEntry(), LevelFatal, format, v...)
+	p.logf(p.newEntry(), LevelFatal, format, v...)
 }
