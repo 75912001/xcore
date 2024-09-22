@@ -18,7 +18,7 @@ type Message struct {
 	handler           Handler              // [required] 消息处理函数
 	newProtoMessage   func() proto.Message // [required] 创建新的 proto.Message
 	name              string               // [optional] [default]: "Unknown" 名称, 在设置 handler 时, 会自动设置
-	stateSwitch       xutil.ISwitch        // [optional] 状态开关-该消息是否启用 [default]:false
+	stateSwitch       xutil.ISwitch        // [optional] 状态开关-该消息是否启用 [default]:true
 	passThroughSwitch xutil.ISwitch        // [optional] 透传开关-该消息是否透传 [default]:false
 }
 
@@ -108,7 +108,7 @@ func configure(opts *Message) error {
 		opts.name = xconstants.Unknown
 	}
 	if opts.stateSwitch == nil {
-		opts.stateSwitch = xutil.NewDefaultSwitch(false)
+		opts.stateSwitch = xutil.NewDefaultSwitch(true)
 	}
 	if opts.passThroughSwitch == nil {
 		opts.passThroughSwitch = xutil.NewDefaultSwitch(false)
