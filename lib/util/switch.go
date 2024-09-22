@@ -17,11 +17,9 @@ type defaultSwitch struct {
 
 // NewDefaultSwitch creates a new defaultSwitch
 func NewDefaultSwitch(enable bool) *defaultSwitch {
-	s := new(defaultSwitch)
-	if enable {
-		s.Enable()
+	return &defaultSwitch{
+		enabled: enable,
 	}
-	return s
 }
 
 // Enable the switch

@@ -7,7 +7,7 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-// Command 调用 linux 命令
+// Command 调用 linux 命令 todo menglc 是否需要
 //
 //	参数:
 //		args:"chmod +x /xx/xx/x.sh"

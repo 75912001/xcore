@@ -12,6 +12,7 @@ import (
 	"xcore/lib/constants"
 	"xcore/lib/log"
 	"xcore/lib/runtime"
+	xutil "xcore/lib/util"
 )
 
 // Mgr 定时器管理器
@@ -28,9 +29,6 @@ type Mgr struct {
 func NewMgr() *Mgr {
 	return &Mgr{}
 }
-
-// OnFun 回调定时器函数(使用协程回调)
-type OnFun func(arg interface{})
 
 // 每秒更新
 func (p *Mgr) funcSecond(ctx context.Context) {
@@ -102,6 +100,7 @@ func (p *Mgr) funcMillisecond(ctx context.Context) {
 
 // 移动最后一个元素到合适的位置,移动到大于他的元素的前面[实现按照时间排序,加入顺序排序]
 // e.g.: 1,2,2,3,4,4,3 => 1,2,2,3,3,4,4 [将最后一个元素移动到4的前面]
+// todo menglc 可以优化为,二分查找,然后插入
 func moveLastElementToProperPosition(l *list.List) {
 	lastElement := l.Back() // 获取最后一个元素
 	target := lastElement.Value.(*Millisecond)
@@ -120,7 +119,7 @@ func moveLastElementToProperPosition(l *list.List) {
 }
 
 // Start
-// [NOTE] 处理定时器相关数据,必须与该 timeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
+// [NOTE] 处理定时器相关数据,必须与该 outgoingTimeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
 func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
 	p.opts = &options{}
 	p.opts = p.opts.merge(opts...)
@@ -159,17 +158,15 @@ func (p *Mgr) Stop() {
 // AddMillisecond 添加毫秒级定时器
 //
 //	参数:
-//		cb: 回调函数
-//		Arg: 回调参数
+//		callBackFunc: 回调接口
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(cb OnFun, arg interface{}, expireMillisecond int64) *Millisecond {
+func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBackFunc, expireMillisecond int64) *Millisecond {
 	t := &Millisecond{
-		Arg:      arg,
-		Function: cb,
-		expire:   expireMillisecond,
-		valid:    true,
+		ICallBackFunc: callBackFunc,
+		ISwitch:       xutil.NewDefaultSwitch(true),
+		expire:        expireMillisecond,
 	}
 	p.milliSecondChan <- t
 	return t
@@ -183,7 +180,7 @@ func (p *Mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
 		timerMillisecond := e.Value.(*Millisecond)
-		if !timerMillisecond.isValid() {
+		if timerMillisecond.IsDisabled() {
 			next = e.Next()
 			p.millisecondList.Remove(e)
 			continue
@@ -201,25 +198,23 @@ func (p *Mgr) scanMillisecond(ms int64) {
 // AddSecond 添加秒级定时器
 //
 //	参数:
-//		cb: 回调函数
-//		Arg: 回调参数
+//		callBackFunc: 回调接口
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *Mgr) AddSecond(cb OnFun, arg interface{}, expire int64) *Second {
+func (p *Mgr) AddSecond(callBackFunc xutil.ICallBackFunc, expire int64) *Second {
 	t := &Second{
 		Millisecond{
-			Arg:      arg,
-			Function: cb,
-			expire:   expire,
-			valid:    true,
+			ICallBackFunc: callBackFunc,
+			ISwitch:       xutil.NewDefaultSwitch(true),
+			expire:        expire,
 		},
 	}
 	p.secondChan <- t
 	return t
 }
 
-// 将秒级定时器,添加到轮转IDX的末尾.
+// 将秒级定时器,添加到轮转IDX的末尾.之后,移动到合适的位置
 //
 //		参数:
 //			timerSecond: 秒定时器
@@ -259,7 +254,7 @@ func (p *Mgr) scanSecond(timestamp int64) {
 	cycle0 := &p.secondSlice[0]
 	for e := cycle0.Front(); nil != e; e = next {
 		t := e.Value.(*Second)
-		if !t.isValid() {
+		if t.IsDisabled() {
 			next = e.Next()
 			cycle0.Remove(e)
 			continue
@@ -272,15 +267,15 @@ func (p *Mgr) scanSecond(timestamp int64) {
 		}
 		break
 	}
+	if 0 != cycle0.Len() { // 如果当前的 cycle 中还有元素,则不需要之后的cycle向前移动
+		return
+	}
 	// 更新时间轮,从序号为1的数组开始
 	for idx := 1; idx < cycleSize; idx++ {
-		if 0 != p.secondSlice[idx-1].Len() { // 如果(idx-1)的cycle中还有元素,则不需要(idx-1)之后的cycle向前移动
-			break
-		}
 		c := &p.secondSlice[idx]
 		for e := c.Front(); e != nil; e = next {
 			t := e.Value.(*Second)
-			if !t.isValid() {
+			if t.IsDisabled() {
 				next = e.Next()
 				c.Remove(e)
 				continue
@@ -297,6 +292,9 @@ func (p *Mgr) scanSecond(timestamp int64) {
 				p.pushBackCycle(t, newIdx, false)
 				continue
 			}
+			break
+		}
+		if 0 != c.Len() { // 如果当前的 cycle 中还有元素,则不需要之后的cycle向前移动
 			break
 		}
 	}

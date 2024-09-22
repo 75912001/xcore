@@ -1,0 +1,9 @@
+syntax="proto3";
+
+option go_package = "../protobuf/gateway";
+
+//[消息码 0x20000,0x2ffff]
+message UserOnlineMsg//0x20000#user->gateway.用户上线
+{
+    string token = 1;//验证时使用的token
+}

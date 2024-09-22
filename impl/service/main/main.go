@@ -8,8 +8,10 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strconv"
+	"time"
 	"xcore/impl/common"
 	xservice "xcore/impl/common/service"
 	"xcore/impl/service/gateway"
@@ -23,7 +25,7 @@ func main() {
 	argNum := len(args)
 	const neededArgsNumber = 4
 	if argNum != neededArgsNumber {
-		xlog.PrintErr("the number of parameters is incorrect, needed %x, but %x.", neededArgsNumber, argNum)
+		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return
 	}
 	defaultService := xservice.NewDefaultService()
@@ -44,11 +46,13 @@ func main() {
 		xlog.PrintInfo("groupID:", defaultService.GroupID, "name:",
 			defaultService.Name, "serviceID:", defaultService.ID)
 	}
+	if err := defaultService.PreStart(context.Background(), xservice.NewOptions()); err != nil {
+		xlog.PrintErr(err, xruntime.Location())
+		return
+	}
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
-		gIService = &gateway.Service{
-			DefaultService: defaultService,
-		}
+		gIService = gateway.NewService(defaultService)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
@@ -56,6 +60,9 @@ func main() {
 	err := gIService.Start()
 	if err != nil {
 		xlog.PrintErr(err, xruntime.Location())
+	}
+	for { // todo menglc 优雅退出
+		time.Sleep(time.Second)
 	}
 	err = gIService.Stop()
 	if err != nil {

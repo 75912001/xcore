@@ -8,5 +8,5 @@ type Second struct {
 // DelSecond 删除秒级定时器
 // 同 DelMillisecond
 func DelSecond(t *Second) {
-	t.Millisecond.inValid()
+	t.reset()
 }

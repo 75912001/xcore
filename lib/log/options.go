@@ -16,7 +16,7 @@ type options struct {
 	namePrefix       *string           // 日志名 前缀 [default]: 当前执行的程序名称
 	isWriteFile      *bool             // 是否写文件 [default]: true
 	entryPoolOptions *entryPoolOptions // entry的内存池选项 [default]: newEntryPoolOptions()
-	hookMap          LevelHookMap      // 各日志级别对应的钩子 [default]: make(LevelHookMap)
+	levelSubscribe   *levelSubscribe   // 日志结果的回调. 该执行过程在 log 的写过程中, 位于写 log 的 goroutine 中 [default]: nil
 }
 
 // NewOptions 新的Options
@@ -54,9 +54,12 @@ func (p *options) WithEntryPoolOptions(entryPoolOptions *entryPoolOptions) *opti
 	return p
 }
 
-// AddHook 添加钩子
-func (p *options) AddHook(hook IHook) *options {
-	p.hookMap.add(hook)
+func (p *options) WithLevelCallBack(callbackFunc CallBackFunc, subLevel ...uint32) *options {
+	p.levelSubscribe = newLevelSubscribe()
+	p.levelSubscribe.callBackFunc = callbackFunc
+	for _, level := range subLevel {
+		p.levelSubscribe.subMap[level] = struct{}{}
+	}
 	return p
 }
 
@@ -86,8 +89,8 @@ func (p *options) merge(opts ...*options) *options {
 		if opt.entryPoolOptions != nil {
 			p.entryPoolOptions = p.entryPoolOptions.merge(opt.entryPoolOptions)
 		}
-		if opt.hookMap != nil {
-			p.hookMap = opt.hookMap
+		if opt.levelSubscribe != nil {
+			p.levelSubscribe = opt.levelSubscribe
 		}
 	}
 	return p
@@ -128,9 +131,8 @@ func (p *options) configure() error {
 	if p.entryPoolOptions == nil {
 		p.entryPoolOptions = newEntryPoolOptions()
 	}
-	p.entryPoolOptions.configure()
-	if p.hookMap == nil {
-		p.hookMap = make(LevelHookMap)
+	if err := p.entryPoolOptions.configure(); err != nil {
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
 }

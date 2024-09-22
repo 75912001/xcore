@@ -45,6 +45,7 @@
 
 ## 服务资源
 ### 服务类型
+- sys 系统保留lib.error [错误码 0x0,0xffff] 
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
 - gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff] [tcp:3${gateway.type:02}${gateway.id:01}]
 - logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
@@ -66,3 +67,30 @@
 ## ETCD
 ### etcd-v3.5.15-windows-amd64.zip
 ### 下载地址: https://github.com/etcd-io/etcd/releases
+
+## 目录结构
+### lib
+- pubsub: 发布订阅 [todo menglc]
+- util: 工具类
+- timer: 定时器
+- time: 时间管理器
+- runtime: 运行时
+- pprof: 性能分析
+- pool: 对象池
+- net: 网络
+- log: 日志
+- file: 文件操作
+- error: 错误码
+- etcd: etcd客户端 [todo menglc]
+- constants 常量
+- bench 服务基础配置
+- example 示例
+
+### impl
+#### service
+##### main 服务入口 
+##### gateway 网关服务
+
+### impl/build/1.gateway.1
+- bench.json [ todo menglc 由脚本生成 impl/build/bench/gateway.bench.json -> impl/build/1.gateway.1/bench.json]
+- 1.gateway.1.exe [由编译生成]

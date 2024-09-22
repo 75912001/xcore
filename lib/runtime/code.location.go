@@ -55,7 +55,8 @@ func GetExecutableName() (string, error) {
 	return filepath.Base(path), nil
 }
 
-func GetCurrentPath() (currentPath string, err error) {
+// GetRealExecutablePath 获取当前执行的程序,符号链接的实际路径-绝对路径,指向启动当前进程的可执行文件,符号链接的实际路径-目录路径.
+func GetRealExecutablePath() (currentPath string, err error) {
 	exePath, err := os.Executable()
 	if err != nil {
 		return "", err

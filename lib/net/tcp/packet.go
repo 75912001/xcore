@@ -3,13 +3,13 @@ package tcp
 import (
 	"context"
 	"google.golang.org/protobuf/proto"
+	xerror "xcore/lib/error"
 	xnetmessage "xcore/lib/net/message"
 	"xcore/lib/net/packet"
 )
 
-// Packet 数据包
-type Packet struct {
-	Remote          *DefaultRemote
+// DefaultPacket 数据包
+type DefaultPacket struct {
 	Header          packet.IHeader // 包头
 	Message         proto.Message  // 解析出的数据
 	PassThroughData []byte         // 包体数据(不带包头)
@@ -17,36 +17,24 @@ type Packet struct {
 	CTX             context.Context
 }
 
-// OnCheckPacketLength 检查长度是否合法(包头中)
-type OnCheckPacketLength func(length uint32) error
-
-// OnCheckPacketLimit 限流
-//
-//	返回:
-//		nil:不限流
-type OnCheckPacketLimit func(remote *DefaultRemote) error
-
-// OnUnmarshalPacket [multithreading] 反序列化数据包
-// data:数据 [NOTE] 如果保存该参数 则 需要copy
-// 返回值: 包头, 消息, 包体数据(不带包头)
-// [NOTE] 多协程调用
-type OnUnmarshalPacket func(remote *DefaultRemote, data []byte) (*Packet, error)
-
-// OnPacket 处理数据包
-type OnPacket func(parsePacket *Packet) error
-
-// EventDisconnect 事件-断开链接
-type EventDisconnect struct {
-	Remote *DefaultRemote
+// NewDefaultPacket 新建数据包
+func NewDefaultPacket() *DefaultPacket {
+	return &DefaultPacket{}
 }
 
-// OnDisconnect 处理断开链接
-type OnDisconnect func(remote *DefaultRemote) error
-
-// EventConnect 事件-链接成功
-type EventConnect struct {
-	Remote *DefaultRemote
+func (p *DefaultPacket) Marshal() (data []byte, err error) {
+	// todo menglc 序列化
+	return nil, xerror.NotImplemented
 }
 
-// OnConnect 处理-链接成功
-type OnConnect func(remote *DefaultRemote) error
+func (p *DefaultPacket) Unmarshal(data []byte) (header packet.IHeader, message proto.Message, err error) {
+	// todo menglc 反序列化
+	return nil, nil, xerror.NotImplemented
+}
+
+// IsPassThrough 是否透传
+// 是: DefaultPacket.PassThroughBody 可用
+// 否: DefaultPacket.Message 可用
+//func (p *DefaultPacket) IsPassThrough() bool {
+//	return p.PassThroughData != nil
+//}

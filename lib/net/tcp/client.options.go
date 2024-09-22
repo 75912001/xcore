@@ -15,10 +15,7 @@ type ClientOptions struct {
 	sendChanCapacity *uint32            // 发送管道容量
 	packet           xnetpacket.IPacket
 	connOptions      ConnOptions
-
-	OnUnmarshalPacket OnUnmarshalPacket
-	OnPacket          OnPacket
-	OnDisconnect      OnDisconnect
+	handler          IHandler
 }
 
 // NewClientOptions 新的ClientOptions
@@ -56,18 +53,8 @@ func (p *ClientOptions) SetPacket(packet xnetpacket.IPacket) *ClientOptions {
 	return p
 }
 
-func (p *ClientOptions) SetOnUnmarshalPacket(onUnmarshalPacket OnUnmarshalPacket) *ClientOptions {
-	p.OnUnmarshalPacket = onUnmarshalPacket
-	return p
-}
-
-func (p *ClientOptions) SetOnPacket(onPacket OnPacket) *ClientOptions {
-	p.OnPacket = onPacket
-	return p
-}
-
-func (p *ClientOptions) SetOnDisconnect(onDisconnect OnDisconnect) *ClientOptions {
-	p.OnDisconnect = onDisconnect
+func (p *ClientOptions) SetHandler(handler IHandler) *ClientOptions {
+	p.handler = handler
 	return p
 }
 
@@ -92,20 +79,14 @@ func mergeClientOptions(opts ...*ClientOptions) *ClientOptions {
 		if opt.packet != nil {
 			newOptions.SetPacket(opt.packet)
 		}
-		if opt.OnUnmarshalPacket != nil {
-			newOptions.SetOnUnmarshalPacket(opt.OnUnmarshalPacket)
-		}
-		if opt.OnPacket != nil {
-			newOptions.SetOnPacket(opt.OnPacket)
-		}
-		if opt.OnDisconnect != nil {
-			newOptions.SetOnDisconnect(opt.OnDisconnect)
-		}
 		if opt.connOptions.readBuffer != nil {
 			newOptions.SetReadBuffer(*opt.connOptions.readBuffer)
 		}
 		if opt.connOptions.writeBuffer != nil {
 			newOptions.SetWriteBuffer(*opt.connOptions.writeBuffer)
+		}
+		if opt.handler != nil {
+			newOptions.SetHandler(opt.handler)
 		}
 	}
 	return newOptions
@@ -125,13 +106,7 @@ func clientConfigure(opts *ClientOptions) error {
 	if opts.packet == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
-	if opts.OnUnmarshalPacket == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.OnPacket == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.OnDisconnect == nil {
+	if opts.handler == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	return nil
