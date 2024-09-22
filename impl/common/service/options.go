@@ -10,7 +10,7 @@ import (
 // options contains options to configure a server instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type options struct {
-	BenchPath *string // 配置文件路径
+	BenchPath *string // 配置文件路径 [default]: 可执行程序所在目录的 bench.json
 }
 
 // NewOptions 新的Options
