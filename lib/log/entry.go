@@ -7,8 +7,8 @@ import (
 
 //日志条目
 
-// 日志数据字段,扩展字段
-type extendFields []interface{}
+// ExtendFields 扩展字段,日志数据字段
+type ExtendFields []interface{} // key,val 数组
 
 // entry 日志数据信息
 type entry struct {
@@ -17,7 +17,7 @@ type entry struct {
 	callerInfo   string    // 调用堆栈信息
 	message      string    // 日志信息
 	ctx          context.Context
-	extendFields extendFields // [string,interface{}] key,value;key,value...
+	extendFields ExtendFields // [string,interface{}] key,value;key,value...
 	outString    string       // 输出的字符串
 }
 
@@ -54,23 +54,23 @@ func (p *entry) withMessage(message string) *entry {
 	return p
 }
 
-func (p *entry) withContext(ctx context.Context) *entry {
+func (p *entry) WithContext(ctx context.Context) *entry {
 	p.ctx = ctx
 	return p
 }
 
-func (p *entry) withExtendField(key string, value interface{}) *entry {
-	if p.extendFields == nil {
-		p.extendFields = make(extendFields, 0, 4)
-	}
-	p.extendFields = append(p.extendFields, key, value)
-	return p
-}
+//func (p *entry) WithExtendField(key string, value interface{}) *entry {
+//	if p.ExtendFields == nil {
+//		p.ExtendFields = make(ExtendFields, 0, 4)
+//	}
+//	p.ExtendFields = append(p.ExtendFields, key, value)
+//	return p
+//}
 
-func (p *entry) withExtendFields(fields extendFields) *entry {
+func (p *entry) WithExtendFields(fields ExtendFields) *entry {
 	if p.extendFields == nil {
 		fieldsSize := len(fields)
-		p.extendFields = make(extendFields, 0, fieldsSize)
+		p.extendFields = make(ExtendFields, 0, fieldsSize)
 	}
 	p.extendFields = append(p.extendFields, fields...)
 	return p

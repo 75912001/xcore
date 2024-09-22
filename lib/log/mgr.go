@@ -7,6 +7,7 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"github.com/pkg/errors"
 	"io"
@@ -224,8 +225,7 @@ func (p *mgr) callBack(entry *entry) {
 }
 
 func (p *mgr) newEntry() *entry {
-	entry := p.options.entryPoolOptions.newEntryFunc()
-	return entry
+	return p.options.entryPoolOptions.newEntryFunc()
 }
 
 // log 记录日志
@@ -272,11 +272,13 @@ func (p *mgr) Trace(v ...interface{}) {
 	p.log(p.newEntry(), LevelTrace, v...)
 }
 
-func TraceWithEntry(entry *entry, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelTrace {
+func (p *mgr) TraceExtend(ctx context.Context, extendFields ExtendFields, v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
 		return
 	}
-	mgrInstance.log(entry, LevelTrace, v...)
+	element := p.newEntry()
+	element.WithContext(ctx).WithExtendFields(extendFields)
+	p.log(element, LevelTrace, v...)
 }
 
 // Tracef 踪迹日志
@@ -287,11 +289,13 @@ func (p *mgr) Tracef(format string, v ...interface{}) {
 	p.logf(p.newEntry(), LevelTrace, format, v...)
 }
 
-func TracefWithEntry(entry *entry, format string, v ...interface{}) {
-	if mgrInstance.GetLevel() < LevelTrace {
+func (p *mgr) TracefExtend(ctx context.Context, extendFields ExtendFields, format string, v ...interface{}) {
+	if p.GetLevel() < LevelTrace {
 		return
 	}
-	mgrInstance.logf(entry, LevelTrace, format, v...)
+	element := p.newEntry()
+	element.WithContext(ctx).WithExtendFields(extendFields)
+	p.logf(element, LevelTrace, format, v...)
 }
 
 // Debug 调试日志

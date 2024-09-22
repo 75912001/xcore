@@ -55,10 +55,8 @@ func (p *options) WithEntryPoolOptions(entryPoolOptions *entryPoolOptions) *opti
 }
 
 func (p *options) WithLevelCallBack(callbackFunc CallBackFunc, subLevel ...uint32) *options {
+	p.levelSubscribe = newLevelSubscribe()
 	p.levelSubscribe.callBackFunc = callbackFunc
-	if p.levelSubscribe.subMap == nil {
-		p.levelSubscribe.subMap = make(map[uint32]struct{})
-	}
 	for _, level := range subLevel {
 		p.levelSubscribe.subMap[level] = struct{}{}
 	}
@@ -93,14 +91,6 @@ func (p *options) merge(opts ...*options) *options {
 		}
 		if opt.levelSubscribe != nil {
 			p.levelSubscribe = opt.levelSubscribe
-		}
-		if opt.levelSubscribe.subMap != nil {
-			if p.levelSubscribe.subMap == nil {
-				p.levelSubscribe.subMap = make(map[uint32]struct{})
-			}
-			for level := range opt.levelSubscribe.subMap {
-				p.levelSubscribe.subMap[level] = struct{}{}
-			}
 		}
 	}
 	return p
