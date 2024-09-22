@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"xcore/impl/common"
@@ -44,11 +45,13 @@ func main() {
 		xlog.PrintInfo("groupID:", defaultService.GroupID, "name:",
 			defaultService.Name, "serviceID:", defaultService.ID)
 	}
+	if err := defaultService.PreStart(context.Background(), xservice.NewOptions()); err != nil {
+		xlog.PrintErr(err, xruntime.Location())
+		return
+	}
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
-		gIService = &gateway.Service{
-			DefaultService: defaultService,
-		}
+		gIService = gateway.NewService(defaultService)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
