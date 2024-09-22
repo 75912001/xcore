@@ -77,7 +77,7 @@
 - runtime: 运行时
 - pprof: 性能分析
 - pool: 对象池
-- net: 网络 [todo menglc]
+- net: 网络
 - log: 日志
 - file: 文件操作
 - error: 错误码
@@ -85,3 +85,12 @@
 - constants 常量
 - bench 服务基础配置
 - example 示例
+
+### impl
+#### service
+##### main 服务入口 
+##### gateway 网关服务
+
+### impl/build/1.gateway.1
+- bench.json [ todo menglc 由脚本生成 impl/build/bench/gateway.bench.json -> impl/build/1.gateway.1/bench.json]
+- 1.gateway.1.exe [由编译生成]
