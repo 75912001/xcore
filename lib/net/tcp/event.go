@@ -50,7 +50,7 @@ func (p *DefaultEvent) Packet(packet *DefaultPacket) error {
 		Packet: packet,
 	}:
 	default:
-		xlog.PrintfErr("push DefaultPacket failed with eventChan full. remote:%v", packet.Remote)
+		xlog.PrintfErr("push DefaultPacket failed with eventChan full. packet:%v", packet)
 		return errors.WithMessage(xerror.ChannelFull, xruntime.Location())
 	}
 	return nil
