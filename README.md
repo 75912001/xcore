@@ -75,7 +75,12 @@
 ##### impl/build/1.gateway.1
 - bench.json [ todo menglc 由脚本生成 impl/build/bench/gateway.bench.json -> impl/build/1.gateway.1/bench.json]
 - 1.gateway.1.exe [由编译生成]
-- 
+
+
+#### common
+
+#### protobuf
+
 #### service
 ##### main 服务入口
 ##### gateway 网关服务
