@@ -9,7 +9,7 @@ import (
 type entryPoolOptions struct {
 	poolSwitch   xutil.ISwitch // 内存池开关 [default]: true
 	pool         *sync.Pool    // 内存池 [default]: &sync.Pool{New: func() interface{} { return newEntry() }}
-	newEntryFunc func() *entry // 创建 entry 的方法 [default]: func() *entry { return p.pool.Get().(*entry) }
+	newEntryFunc func() *Entry // 创建 Entry 的方法 [default]: func() *Entry { return p.pool.Get().(*Entry) }
 }
 
 // newEntryPoolOptions 新的entryPoolOptions
@@ -22,8 +22,8 @@ func newEntryPoolOptions() *entryPoolOptions {
 	opt := &entryPoolOptions{
 		poolSwitch: xutil.NewDefaultSwitch(true),
 		pool:       pool,
-		newEntryFunc: func() *entry {
-			return pool.Get().(*entry)
+		newEntryFunc: func() *Entry {
+			return pool.Get().(*Entry)
 		},
 	}
 	return opt
@@ -57,11 +57,11 @@ func (p *entryPoolOptions) configure() error {
 				return newEntry()
 			},
 		}
-		p.newEntryFunc = func() *entry {
-			return p.pool.Get().(*entry)
+		p.newEntryFunc = func() *Entry {
+			return p.pool.Get().(*Entry)
 		}
 	} else {
-		p.newEntryFunc = func() *entry {
+		p.newEntryFunc = func() *Entry {
 			return newEntry()
 		}
 	}
@@ -69,7 +69,7 @@ func (p *entryPoolOptions) configure() error {
 }
 
 // 将内存放回池中
-func (p *entryPoolOptions) put(value *entry) {
+func (p *entryPoolOptions) put(value *Entry) {
 	if p.poolSwitch.IsEnabled() {
 		value.reset()
 		p.pool.Put(value)
