@@ -20,18 +20,18 @@ import (
 
 type IRemote interface {
 	IsConnect() bool
+	Stop()
 	GetIP() string
 	Send(packet xnetpacket.IPacket) error
 }
 
-// DefaultRemote 远端信息
+// DefaultRemote 远端
 type DefaultRemote struct {
 	Conn                *net.TCPConn     // 连接
 	sendChan            chan interface{} // 发送管道
 	cancelFunc          context.CancelFunc
 	ActiveDisconnection bool        // 主动断开连接
 	Object              interface{} // 保存 应用层数据
-	Packet              xnetpacket.IPacket
 }
 
 // GetIP 获取IP地址
@@ -78,7 +78,7 @@ func (p *DefaultRemote) IsConnect() bool {
 
 // Send 发送数据
 //
-//	[NOTE]必须在处理EventChan事件中调用
+//	[NOTE]必须在处理 EventChan 事件中调用
 //	参数:
 //		packet: 未序列化的包. [NOTE]该数据会被引用,使用层不可写
 func (p *DefaultRemote) Send(packet xnetpacket.IPacket) error {
@@ -89,7 +89,7 @@ func (p *DefaultRemote) Send(packet xnetpacket.IPacket) error {
 	return nil
 }
 
-func (p *DefaultRemote) stop() {
+func (p *DefaultRemote) Stop() {
 	if p.IsConnect() {
 		err := p.Conn.Close()
 		if err != nil {
@@ -230,11 +230,10 @@ func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
 		xlog.PrintInfo(xconstants.GoroutineDone, p)
 	}()
 	// 消息总长度
-	//msgLengthBuf := []byte("1234")
 	msgLengthBuf := make([]byte, MsgLengthFieldSize)
 	for {
 		if _, err := io.ReadFull(p.Conn, msgLengthBuf); err != nil {
-			if !xutil.IsErrNetClosing(err) {
+			if !xutil.IsNetErrClosing(err) {
 				xlog.PrintfInfo("remote:%p err:%v", p, err)
 			}
 			return
