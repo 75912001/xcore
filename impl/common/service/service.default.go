@@ -161,8 +161,8 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 			return errors.Errorf("timer Start err:%v %v", err, xruntime.Location())
 		}
 	}
-
-	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 { // 网络服务
+	// 网络服务
+	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
 		case "tcp": // 启动 TCP 服务
 			if err := xnettcp.GetServer().Start(ctx, xnettcp.NewServerOptions().
