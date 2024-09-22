@@ -24,8 +24,7 @@ func GetServer() *server {
 
 // 己方作为服务端
 type server struct {
-	Handler  IHandler // 需要的话, 可以设置
-	Event    IEvent
+	event    IEvent
 	listener *net.TCPListener //监听
 	options  *ServerOptions
 }
@@ -54,7 +53,7 @@ func (p *server) Start(_ context.Context, opts ...*ServerOptions) error {
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.Event = &DefaultEvent{
+	p.event = &DefaultEvent{
 		eventChan: p.options.eventChan,
 	}
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
@@ -111,7 +110,7 @@ func (p *server) ActiveDisconnect(remote *DefaultRemote) error {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
 	remote.ActiveDisconnection = true
-	if err := p.Handler.OnDisconnect(remote); err != nil {
+	if err := p.options.handler.OnDisconnect(remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
@@ -121,11 +120,10 @@ func (p *server) handleConn(conn *net.TCPConn) {
 	remote := &DefaultRemote{
 		Conn:     conn,
 		sendChan: make(chan interface{}, *p.options.sendChanCapacity),
-		Packet:   p.options.packet,
 	}
-	if err := p.Event.Connect(remote); err != nil {
-		xlog.PrintfErr("Event.Connect err:%v", err)
+	if err := p.event.Connect(remote); err != nil {
+		xlog.PrintfErr("event.Connect err:%v", err)
 		return
 	}
-	remote.start(&p.options.connOptions, p.Event, p.Handler)
+	remote.start(&p.options.connOptions, p.event, p.options.handler)
 }
