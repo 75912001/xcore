@@ -13,21 +13,21 @@ type Client struct {
 	Handler IHandler
 	Event   IEvent
 	Remote  DefaultRemote
-	options *ClientOptions
 }
 
 // Connect 连接
 //
 //	每个连接有 一个 发送协程, 一个 接收协程
 func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
-	p.options = mergeClientOptions(opts...)
-	if err := clientConfigure(p.options); err != nil {
+	newOpts := mergeClientOptions(opts...)
+	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
+	p.Handler = newOpts.handler
 	p.Event = &DefaultEvent{
-		eventChan: p.options.eventChan,
+		eventChan: newOpts.eventChan,
 	}
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", *p.options.serverAddress)
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
 	}
@@ -36,9 +36,9 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.Remote.Conn = conn
-	p.Remote.sendChan = make(chan interface{}, *p.options.sendChanCapacity)
-	p.Remote.Packet = p.options.packet
-	p.Remote.start(&p.options.connOptions, p.Event, p.Handler)
+	p.Remote.sendChan = make(chan interface{}, *newOpts.sendChanCapacity)
+	p.Remote.Packet = newOpts.packet
+	p.Remote.start(&newOpts.connOptions, p.Event, p.Handler)
 	return nil
 }
 
