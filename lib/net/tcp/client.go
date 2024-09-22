@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	xerror "xcore/lib/error"
+	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -13,6 +14,7 @@ type Client struct {
 	Handler IHandler
 	Event   IEvent
 	Remote  DefaultRemote
+	Packet  xnetpacket.IPacket
 }
 
 // Connect 连接
@@ -37,7 +39,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*ClientOptions) error {
 	}
 	p.Remote.Conn = conn
 	p.Remote.sendChan = make(chan interface{}, *newOpts.sendChanCapacity)
-	p.Remote.Packet = newOpts.packet
+	p.Packet = newOpts.packet
 	p.Remote.start(&newOpts.connOptions, p.Event, p.Handler)
 	return nil
 }
