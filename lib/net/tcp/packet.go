@@ -17,6 +17,11 @@ type DefaultPacket struct {
 	CTX             context.Context
 }
 
+// NewDefaultPacket 新建数据包
+func NewDefaultPacket() *DefaultPacket {
+	return &DefaultPacket{}
+}
+
 func (p *DefaultPacket) Marshal() (data []byte, err error) {
 	// todo menglc 序列化
 	return nil, xerror.NotImplemented
