@@ -24,7 +24,7 @@ func main() {
 	argNum := len(args)
 	const neededArgsNumber = 4
 	if argNum != neededArgsNumber {
-		xlog.PrintErr("the number of parameters is incorrect, needed %x, but %x.", neededArgsNumber, argNum)
+		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return
 	}
 	defaultService := xservice.NewDefaultService()
