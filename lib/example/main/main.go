@@ -4,6 +4,7 @@ package main
 
 func main() {
 	exampleLog()
+	exampleTimer()
 	exampleUtil()
 	return
 }
