@@ -43,7 +43,7 @@ func (p *DefaultEvent) Disconnect(remote *DefaultRemote) error {
 	return nil
 }
 
-// DefaultPacket 数据包
+// Packet 数据包
 func (p *DefaultEvent) Packet(packet *DefaultPacket) error {
 	select {
 	case p.eventChan <- &EventPacket{
