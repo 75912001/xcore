@@ -33,7 +33,7 @@ type DefaultService struct {
 	Name    string // 名称
 	ID      uint32 // ID
 
-	TimeMgr  xtime.Mgr
+	TimeMgr  *xtime.Mgr
 	TimerMgr xtimer.Mgr
 	Opts     *options
 
@@ -44,7 +44,9 @@ type DefaultService struct {
 }
 
 func NewDefaultService() *DefaultService {
-	return &DefaultService{}
+	return &DefaultService{
+		TimeMgr: xtime.NewMgr(),
+	}
 }
 
 func (p *DefaultService) WithBenchSub(benchSub xbench.IBenchSub) *DefaultService {
