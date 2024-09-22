@@ -37,7 +37,7 @@ type DefaultService struct {
 	TimerMgr xtimer.Mgr
 	Opts     *options
 
-	EtcdMgr etcdMgr
+	//EtcdMgr etcdMgr
 
 	BusChannel          chan interface{}
 	BusChannelWaitGroup sync.WaitGroup
