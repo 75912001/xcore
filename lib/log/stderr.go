@@ -45,7 +45,7 @@ func PrintfErr(format string, v ...interface{}) {
 			withLevel(LevelError).
 			withTime(time.Now()).
 			withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName)).
-			withMessage(fmt.Sprint(v...))
+			withMessage(fmt.Sprintf(format, v...))
 		formatLogData(element)
 		_ = stdErr.Output(calldepth2, element.outString)
 	}

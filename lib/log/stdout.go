@@ -45,7 +45,7 @@ func PrintfInfo(format string, v ...interface{}) {
 			withLevel(LevelInfo).
 			withTime(time.Now()).
 			withCallerInfo(fmt.Sprintf(callerInfoFormat, line, funcName)).
-			withMessage(fmt.Sprint(v...))
+			withMessage(fmt.Sprintf(format, v...))
 		formatLogData(element)
 		_ = stdOut.Output(calldepth2, element.outString)
 	}
