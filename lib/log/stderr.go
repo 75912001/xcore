@@ -12,9 +12,9 @@ import (
 var stdErr = log.New(os.Stderr, "", 0)
 
 // PrintErr 输出到os.Stderr
-func PrintErr(v ...interface{}) {
-	if isEnable() { // 日志已启用,使用日志打印
-		mgrInstance.log(mgrInstance.newEntry(), LevelError, v...)
+func PrintErr(l ILog, v ...interface{}) {
+	if l != nil { // 日志已启用,使用日志打印
+		l.Error(v...)
 	} else {
 		funcName := xconstants.Unknown
 		pc, _, line, ok := runtime.Caller(calldepth1)
@@ -32,9 +32,9 @@ func PrintErr(v ...interface{}) {
 }
 
 // PrintfErr 输出到os.Stderr
-func PrintfErr(format string, v ...interface{}) {
-	if isEnable() { // 日志已启用,使用日志打印
-		mgrInstance.logf(mgrInstance.newEntry(), LevelError, format, v...)
+func PrintfErr(l ILog, format string, v ...interface{}) {
+	if l != nil { // 日志已启用,使用日志打印
+		l.Errorf(format, v...)
 	} else {
 		funcName := xconstants.Unknown
 		pc, _, line, ok := runtime.Caller(calldepth1)

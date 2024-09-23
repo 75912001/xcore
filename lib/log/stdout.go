@@ -12,9 +12,9 @@ import (
 var stdOut = log.New(os.Stdout, "", 0)
 
 // PrintInfo 输出到os.Stdout
-func PrintInfo(v ...interface{}) {
-	if isEnable() { // 日志已启用,使用日志打印
-		mgrInstance.log(mgrInstance.newEntry(), LevelInfo, v...)
+func PrintInfo(l ILog, v ...interface{}) {
+	if l != nil { // 日志已启用,使用日志打印
+		l.Info(v...)
 	} else {
 		funcName := xconstants.Unknown
 		pc, _, line, ok := runtime.Caller(calldepth1)
@@ -32,9 +32,9 @@ func PrintInfo(v ...interface{}) {
 }
 
 // PrintfInfo 输出到os.Stdout
-func PrintfInfo(format string, v ...interface{}) {
-	if isEnable() { // 日志已启用,需要放入日志 channel 中
-		mgrInstance.logf(mgrInstance.newEntry(), LevelInfo, format, v...)
+func PrintfInfo(l ILog, format string, v ...interface{}) {
+	if l != nil { // 日志已启用,使用日志打印
+		l.Infof(format, v...)
 	} else {
 		funcName := xconstants.Unknown
 		pc, _, line, ok := runtime.Caller(calldepth1)

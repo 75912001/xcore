@@ -24,26 +24,8 @@ import (
 	xtime "xcore/lib/time"
 )
 
-var (
-	mgrInstance *mgr
-)
-
-// 是否 启用
-func isEnable() bool {
-	if mgrInstance == nil {
-		return false
-	}
-	if mgrInstance.logChan == nil {
-		return false
-	}
-	return true
-}
-
 // NewMgr 创建日志管理器
-func NewMgr(opts ...*options) (*mgr, error) {
-	if isEnable() {
-		return mgrInstance, nil
-	}
+func NewMgr(opts ...*options) (ILog, error) {
 	m := &mgr{}
 	err := m.handleOptions(opts...)
 	if err != nil {
@@ -51,10 +33,7 @@ func NewMgr(opts ...*options) (*mgr, error) {
 	}
 	err = m.start()
 	if err != nil {
-		mgrInstance = nil
 		return nil, err
-	} else {
-		mgrInstance = m
 	}
 	return m, nil
 }
@@ -95,11 +74,11 @@ func (p *mgr) start() error {
 		defer func() {
 			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					PrintErr(xconstants.GoroutinePanic, err, string(debug.Stack()))
+					PrintErr(p, xconstants.GoroutinePanic, err, string(debug.Stack()))
 				}
 			}
 			p.waitGroupOutPut.Done()
-			PrintInfo(xconstants.GoroutineDone)
+			PrintInfo(p, xconstants.GoroutineDone)
 		}()
 		doLog(p)
 	}()
@@ -122,7 +101,7 @@ func (p *mgr) getLogDuration(sec int64) int {
 	durationStr := time.Unix(sec, 0).Format(logFormat)
 	duration, err := strconv.Atoi(durationStr)
 	if err != nil {
-		PrintfErr("strconv.Atoi sec:%v durationStr:%v err:%v", sec, durationStr, err)
+		PrintfErr(p, "strconv.Atoi sec:%v durationStr:%v err:%v", sec, durationStr, err)
 	}
 	return duration
 }
@@ -135,7 +114,7 @@ func doLog(p *mgr) {
 		// 检查自动切换日志
 		if p.logDuration != p.getLogDuration(v.time.Unix()) {
 			if err := newWriters(p); err != nil {
-				PrintfErr("log duration changed, init writers failed, err:%v", err)
+				PrintfErr(p, "log duration changed, init writers failed, err:%v", err)
 				p.options.entryPoolOptions.put(v)
 				continue
 			}
