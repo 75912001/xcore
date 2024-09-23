@@ -9,11 +9,16 @@ type Service struct {
 	*xservice.DefaultService
 }
 
+var service *Service
+
 func NewService(defaultService *xservice.DefaultService) *Service {
-	return &Service{
+	service = &Service{
 		DefaultService: defaultService,
 	}
+	return service
 }
+
+var defaultService = xservice.NewDefaultService()
 
 func (p *Service) Start() (err error) {
 	// 数据统计
