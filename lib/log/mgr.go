@@ -78,7 +78,7 @@ func (p *mgr) start() error {
 				}
 			}
 			p.waitGroupOutPut.Done()
-			PrintInfo(p, xconstants.GoroutineDone)
+			PrintInfo(xconstants.GoroutineDone)
 		}()
 		doLog(p)
 	}()
@@ -101,7 +101,7 @@ func (p *mgr) getLogDuration(sec int64) int {
 	durationStr := time.Unix(sec, 0).Format(logFormat)
 	duration, err := strconv.Atoi(durationStr)
 	if err != nil {
-		PrintfErr(p, "strconv.Atoi sec:%v durationStr:%v err:%v", sec, durationStr, err)
+		PrintfErr("strconv.Atoi sec:%v durationStr:%v err:%v", sec, durationStr, err)
 	}
 	return duration
 }
@@ -114,7 +114,7 @@ func doLog(p *mgr) {
 		// 检查自动切换日志
 		if p.logDuration != p.getLogDuration(v.time.Unix()) {
 			if err := newWriters(p); err != nil {
-				PrintfErr(p, "log duration changed, init writers failed, err:%v", err)
+				PrintfErr("log duration changed, init writers failed, err:%v", err)
 				p.options.entryPoolOptions.put(v)
 				continue
 			}

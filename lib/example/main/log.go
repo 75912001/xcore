@@ -9,13 +9,13 @@ import (
 
 func logCallBackFunc(level uint32, outString string) {
 	if xruntime.IsDebug() {
-		fmt.Println(level, outString)
+		fmt.Println("logCallBackFunc: ", level, outString)
 	}
 	return
 }
 
 func exampleLog() {
-	if true {
+	if false {
 		return
 	}
 	xruntime.SetRunMode(xruntime.RunModeDebug)
@@ -25,53 +25,58 @@ func exampleLog() {
 	xlog.PrintErr("print err")
 	xlog.PrintfErr("print err %s", "format")
 	fmt.Println("============================================================")
-	var log xlog.ILog
-	log, err := xlog.NewMgr(xlog.NewOptions().
+	var l xlog.ILog
+	l, err := xlog.NewMgr(xlog.NewOptions().
 		WithLevelCallBack(logCallBackFunc, xlog.LevelFatal, xlog.LevelError, xlog.LevelWarn),
 	)
 	if err != nil {
 		panic(err)
 	}
-	log.Fatal("fatal")
-	log.Fatalf("fatal %s", "format")
-	log.Error("error")
-	log.Errorf("error %s", "format")
-	log.Warn("warn")
-	log.Warnf("warn %s", "format")
-	log.Info("info")
-	log.Infof("info %s", "format")
-	log.Debug("debug")
+	xlog.PrintInfo("print info")
+	xlog.PrintfInfo("print info %s", "format")
+	xlog.PrintErr("print err")
+	xlog.PrintfErr("print err %s", "format")
+
+	l.Fatal("fatal")
+	l.Fatalf("fatal %s", "format")
+	l.Error("error")
+	l.Errorf("error %s", "format")
+	l.Warn("warn")
+	l.Warnf("warn %s", "format")
+	l.Info("info")
+	l.Infof("info %s", "format")
+	l.Debug("debug")
 	{
-		log.DebugLazy(func() []interface{} {
+		l.DebugLazy(func() []interface{} {
 			return []interface{}{fmt.Sprintf("%v %v", "This is a complex log message", "msg")}
 		})
 	}
-	log.Debugf("debug %s", "format")
+	l.Debugf("debug %s", "format")
 	{
-		log.DebugfLazy(func() (string, []interface{}) {
+		l.DebugfLazy(func() (string, []interface{}) {
 			return "format %v %v", []interface{}{"This is a complex log message", 111}
 		})
 	}
-	log.Trace("trace")
+	l.Trace("trace")
 	{
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, xlog.TraceIDKey, "TraceIDKey.value1")
 		ctx = context.WithValue(ctx, xlog.UserIDKey, uint64(668))
-		log.TraceExtend(ctx, xlog.ExtendFields{"key1", "value1", 1001, 1}, "trace")
+		l.TraceExtend(ctx, xlog.ExtendFields{"key1", "value1", 1001, 1}, "trace")
 	}
 	{
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, xlog.TraceIDKey, "TraceIDKey.value1")
-		log.TraceExtend(ctx, xlog.ExtendFields{"key1", "value1", 1001, 1, xlog.UserIDKey, uint64(7200)}, "trace")
+		l.TraceExtend(ctx, xlog.ExtendFields{"key1", "value1", 1001, 1, xlog.UserIDKey, uint64(7200)}, "trace")
 	}
-	log.Tracef("trace %s", "format")
+	l.Tracef("trace %s", "format")
 	{
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, xlog.TraceIDKey, "TraceIDKey.value1")
 		ctx = context.WithValue(ctx, xlog.UserIDKey, uint64(668))
-		log.TracefExtend(ctx, xlog.ExtendFields{"key1", "value1", 1001, 1}, "trace %s", "format")
+		l.TracefExtend(ctx, xlog.ExtendFields{"key1", "value1", 1001, 1}, "trace %s", "format")
 	}
-	err = log.Stop()
+	err = l.Stop()
 	if err != nil {
 		panic(err)
 	}

@@ -25,7 +25,7 @@ type addMillisecondSignal struct {
 }
 
 func exampleTimer() {
-	if false {
+	if true {
 		return
 	}
 	var timer xtimer.ITimer
