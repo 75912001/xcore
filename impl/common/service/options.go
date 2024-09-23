@@ -4,6 +4,9 @@ import (
 	"github.com/pkg/errors"
 	"path"
 	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
+	xlog "xcore/lib/log"
+	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -11,6 +14,7 @@ import (
 // documentation for each setter function for an explanation of the option.
 type options struct {
 	BenchPath *string // 配置文件路径 [default]: 可执行程序所在目录的 bench.json
+	xnettcp.IHandler
 }
 
 // NewOptions 新的Options
@@ -21,6 +25,11 @@ func NewOptions() *options {
 
 func (p *options) WithBenchPath(benchPath string) *options {
 	p.BenchPath = &benchPath
+	return p
+}
+
+func (p *options) WithHandler(handler xnettcp.IHandler) *options {
+	p.IHandler = handler
 	return p
 }
 
@@ -36,6 +45,9 @@ func mergeOptions(opts ...*options) *options {
 		if opt.BenchPath != nil {
 			so.BenchPath = opt.BenchPath
 		}
+		if opt.IHandler != nil {
+			so.IHandler = opt.IHandler
+		}
 	}
 	return so
 }
@@ -49,6 +61,9 @@ func configure(opts *options) error {
 		}
 		benchPath = path.Join(benchPath, xconstants.ServiceConfigFile)
 		opts.BenchPath = &benchPath
+	}
+	if opts.IHandler == nil {
+		xlog.PrintErr(errors.WithMessage(xerror.Param, xruntime.Location()))
 	}
 	return nil
 }

@@ -18,6 +18,7 @@ import (
 	"xcore/impl/service/gateway"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -47,16 +48,18 @@ func main() {
 		xlog.PrintInfo("groupID:", defaultService.GroupID, "name:",
 			defaultService.Name, "serviceID:", defaultService.ID)
 	}
-	if err := defaultService.PreStart(context.Background(), commonservice.NewOptions()); err != nil {
-		xlog.PrintErr(err, xruntime.Location())
-		return
-	}
 	var service commonservice.IService
+	var handler xnettcp.IHandler
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
 		service = gateway.NewService(defaultService)
+		handler = gateway.NewServer()
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
+		return
+	}
+	if err := defaultService.PreStart(context.Background(), commonservice.NewOptions().WithHandler(handler)); err != nil {
+		xlog.PrintErr(err, xruntime.Location())
 		return
 	}
 	err := service.Start()
