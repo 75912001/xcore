@@ -94,7 +94,7 @@
 - example 示例 [todo menglc]
 - exec: 执行器 [todo menglc]
 - file: 文件操作
-- log: 日志 [todo menglc 优化]
+- log: 日志
 - net: 网络 [todo menglc 优化]
 - pool: 对象池
 - pprof: 性能分析
