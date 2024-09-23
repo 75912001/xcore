@@ -10,8 +10,9 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 	"strconv"
-	"time"
+	"syscall"
 	"xcore/impl/common"
 	xservice "xcore/impl/common/service"
 	"xcore/impl/service/gateway"
@@ -60,13 +61,24 @@ func main() {
 	err := gIService.Start()
 	if err != nil {
 		xlog.PrintErr(err, xruntime.Location())
+		return
 	}
-	for { // todo menglc 优雅退出
-		time.Sleep(time.Second)
-	}
-	err = gIService.Stop()
-	if err != nil {
-		xlog.PrintErr(err, xruntime.Location())
+
+	// 退出服务
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+EXIT:
+	for {
+		select {
+		case <-defaultService.QuitChan:
+			defaultService.Log.Warn("service will shutdown in a few seconds")
+			gIService.PreShutdown()
+			_ = gIService.Stop()
+			break EXIT // 退出循环
+		case s := <-sigChan:
+			defaultService.Log.Warnf("service got signal: %s, shutting down...", s)
+			close(defaultService.QuitChan)
+		}
 	}
 	return
 }
