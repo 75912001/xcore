@@ -11,8 +11,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
-	"xcore/impl/common"
-	gatewayhandler "xcore/impl/service/gateway/handler"
+	gatewayhandler "xcore/impl/service/gateway"
 	xbench "xcore/lib/bench"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
@@ -33,19 +32,23 @@ type DefaultService struct {
 	Name    string // 名称
 	ID      uint32 // ID
 
+	Log      xlog.ILog
 	TimeMgr  *xtime.Mgr
 	TimerMgr xtimer.Mgr
 	Opts     *options
 
 	//EtcdMgr etcdMgr
 
-	BusChannel          chan interface{}
+	BusChannel          chan interface{} // 总线
 	BusChannelWaitGroup sync.WaitGroup
+
+	QuitChan chan struct{} // 退出信号, 用于关闭服务
 }
 
 func NewDefaultService() *DefaultService {
 	return &DefaultService{
-		TimeMgr: xtime.NewMgr(),
+		TimeMgr:  xtime.NewMgr(),
+		QuitChan: make(chan struct{}),
 	}
 }
 
@@ -60,6 +63,10 @@ func (p *DefaultService) Start() (err error) {
 
 func (p *DefaultService) Stop() (err error) {
 	return xerror.NotImplemented
+}
+
+func (p *DefaultService) PreShutdown() {
+	// todo menglc 关闭服务-之前的操作
 }
 
 func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
@@ -120,7 +127,7 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 	xlog.PrintfInfo("go max process new:%v, previous setting:%v",
 		*p.BenchMgr.Json.Base.GoMaxProcess, previous)
 	// 日志
-	common.GLog, err = xlog.NewMgr(xlog.NewOptions().
+	p.Log, err = xlog.NewMgr(xlog.NewOptions().
 		WithLevel(*p.BenchMgr.Json.Base.LogLevel).
 		WithAbsPath(*p.BenchMgr.Json.Base.LogAbsPath).
 		WithNamePrefix(fmt.Sprintf("%v.%v.%v", p.GroupID, p.Name, p.ID)).
@@ -142,7 +149,7 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 		defer func() {
 			p.BusChannelWaitGroup.Done()
 			// 主事件 channel 报错 不 recover
-			common.GLog.Infof(xconstants.GoroutineDone)
+			p.Log.Infof(xconstants.GoroutineDone)
 		}()
 		p.BusChannelWaitGroup.Add(1)
 		p.HandlerBus()

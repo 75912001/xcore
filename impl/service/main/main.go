@@ -10,10 +10,11 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 	"strconv"
-	"time"
+	"syscall"
 	"xcore/impl/common"
-	xservice "xcore/impl/common/service"
+	commonservice "xcore/impl/common/service"
 	"xcore/impl/service/gateway"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
@@ -28,7 +29,7 @@ func main() {
 		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return
 	}
-	defaultService := xservice.NewDefaultService()
+	defaultService := commonservice.NewDefaultService()
 	{ // 解析启动参数
 		groupID, err := strconv.ParseUint(args[1], 10, 32)
 		if err != nil {
@@ -46,27 +47,39 @@ func main() {
 		xlog.PrintInfo("groupID:", defaultService.GroupID, "name:",
 			defaultService.Name, "serviceID:", defaultService.ID)
 	}
-	if err := defaultService.PreStart(context.Background(), xservice.NewOptions()); err != nil {
+	if err := defaultService.PreStart(context.Background(), commonservice.NewOptions()); err != nil {
 		xlog.PrintErr(err, xruntime.Location())
 		return
 	}
+	var service commonservice.IService
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
-		gIService = gateway.NewService(defaultService)
+		service = gateway.NewService(defaultService)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
 	}
-	err := gIService.Start()
+	err := service.Start()
 	if err != nil {
 		xlog.PrintErr(err, xruntime.Location())
+		return
 	}
-	for { // todo menglc 优雅退出
-		time.Sleep(time.Second)
-	}
-	err = gIService.Stop()
-	if err != nil {
-		xlog.PrintErr(err, xruntime.Location())
+
+	// 退出服务
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+EXIT:
+	for {
+		select {
+		case <-defaultService.QuitChan:
+			defaultService.Log.Warn("service will shutdown in a few seconds")
+			service.PreShutdown()
+			_ = service.Stop()
+			break EXIT // 退出循环
+		case s := <-sigChan:
+			defaultService.Log.Warnf("service got signal: %s, shutting down...", s)
+			close(defaultService.QuitChan)
+		}
 	}
 	return
 }
