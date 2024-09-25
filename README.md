@@ -81,7 +81,7 @@
   - **common**: 公共模块 [todo menglc]
     - **db_async**: 异步数据库 [todo menglc]
     - **etcd**: etcd客户端 [todo menglc]
-    - **service**: 服务 [todo menglc]
+    - **service**: 服务
     - `common.go` 公共模块 [todo menglc]
   - **protobuf**: protobuf
     - **proto**: proto 文件

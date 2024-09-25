@@ -4,35 +4,36 @@ import (
 	xnettcp "xcore/lib/net/tcp"
 )
 
-type Server struct {
-	*xnettcp.DefaultHandlerServer
-}
+//type Server struct {
+//	*xnettcp.DefaultHandlerServer
+//}
+//
+//func NewServer() *Server {
+//	def := &Server{
+//		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
+//	}
+//	return def
+//}
 
-func NewServer() *Server {
-	return &Server{
-		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
-	}
-}
-
-func (p *Server) OnConnect(remote *xnettcp.DefaultRemote) error {
+func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 	return nil
 }
-func (p *Server) OnCheckPacketLength(length uint32) error {
+func (p *Service) OnCheckPacketLength(length uint32) error {
 	return nil
 }
-func (p *Server) OnCheckPacketLimit(remote *xnettcp.DefaultRemote) error {
+func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	return nil
 }
-func (p *Server) OnUnmarshalPacket(remote *xnettcp.DefaultRemote, data []byte) (*xnettcp.DefaultPacket, error) {
+func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (*xnettcp.DefaultPacket, error) {
 	return nil, nil
 }
-func (p *Server) OnPacket(packet *xnettcp.DefaultPacket) error {
+func (p *Service) OnPacket(packet *xnettcp.DefaultPacket) error {
 	return nil
 }
-func (p *Server) OnDisconnect(remote *xnettcp.DefaultRemote) error {
+func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
 	// todo menglc
 
-	if err := p.DefaultHandlerServer.OnDisconnect(remote); err != nil {
+	if err := p.DefaultService.OnDisconnect(remote); err != nil {
 		return err
 	}
 	return nil

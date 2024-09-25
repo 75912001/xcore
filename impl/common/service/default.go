@@ -33,13 +33,12 @@ type DefaultService struct {
 	ID             uint32 // ID
 	ExecutablePath string // 执行程序路径
 
-	xnettcp.IHandler
+	*xnettcp.DefaultHandlerServer
 
 	Log     xlog.ILog
 	TimeMgr *xtime.Mgr
 	Timer   xtimer.ITimer
 
-	OnHandlerBus
 	BusChannel          chan interface{} // 总线
 	BusChannelWaitGroup sync.WaitGroup   // 总线等待
 
@@ -48,8 +47,9 @@ type DefaultService struct {
 
 func NewDefaultService() *DefaultService {
 	return &DefaultService{
-		TimeMgr:  xtime.NewMgr(),
-		QuitChan: make(chan struct{}),
+		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
+		TimeMgr:              xtime.NewMgr(),
+		QuitChan:             make(chan struct{}),
 	}
 }
 
@@ -66,7 +66,6 @@ func (p *DefaultService) Stop() (err error) {
 }
 
 func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler, onHandlerBus OnHandlerBus, logCallbackFunc xlog.CallBackFunc) (err error) {
-	p.OnHandlerBus = onHandlerBus
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -146,7 +145,7 @@ func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler,
 			p.Log.Infof(xconstants.GoroutineDone)
 		}()
 		p.BusChannelWaitGroup.Add(1)
-		_ = p.OnHandlerBus()
+		_ = onHandlerBus()
 	}()
 	// 是否开启http采集分析
 	if p.BenchMgr.Json.Base.PprofHttpPort != nil {
@@ -154,6 +153,7 @@ func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler,
 	}
 	// 全局定时器
 	if p.BenchMgr.Json.Timer.ScanSecondDuration != nil || p.BenchMgr.Json.Timer.ScanMillisecondDuration != nil {
+		p.Timer = xtimer.NewMgr()
 		err = p.Timer.Start(ctx,
 			xtimer.NewOptions().
 				WithScanSecondDuration(*p.BenchMgr.Json.Timer.ScanSecondDuration).

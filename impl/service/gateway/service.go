@@ -13,13 +13,15 @@ type Service struct {
 }
 
 func NewService(defaultService *commonservice.DefaultService) *Service {
-	return &Service{
+	r := &Service{
 		DefaultService: defaultService,
 	}
+	//defaultService.DefaultHandlerServer = r
+	return r
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	if err = p.DefaultService.PreStart(ctx, p.IHandler, OnHandlerBus, logCallBackFunc); err != nil {
+	if err = p.DefaultService.PreStart(ctx, p, OnHandlerBus, logCallBackFunc); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 	_ = p.DefaultService.Start(ctx)

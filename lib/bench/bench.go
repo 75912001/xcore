@@ -64,10 +64,6 @@ func (p *benchJson) Parse(jsonString string) error {
 		defaultValue := "0.0.1.beta.2024.09.03.2034"
 		p.Base.Version = &defaultValue
 	}
-	if p.Base.PprofHttpPort == nil {
-		defaultValue := uint16(0)
-		p.Base.PprofHttpPort = &defaultValue
-	}
 	if p.Base.LogLevel == nil {
 		defaultValue := xlog.LevelOn
 		p.Base.LogLevel = &defaultValue
