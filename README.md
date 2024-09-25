@@ -3,6 +3,7 @@
 - 采用csp方式构建程序
 ## 项目初始化
 - go mod init xcore
+- go mod tidy
 ## 安装包
 - go get github.com/pkg/errors@v0.9.1
 - go get go.etcd.io/etcd/client/v3@v3.5.15
