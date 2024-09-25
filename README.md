@@ -70,46 +70,50 @@
 ### 下载地址: https://github.com/etcd-io/etcd/releases
 
 ## 目录结构
-
-### impl
-
-##### impl/build/1.gateway.1
-- bench.json [ todo menglc 由脚本生成 impl/build/bench/gateway.bench.json -> impl/build/1.gateway.1/bench.json]
-- 1.gateway.1.exe [由编译生成]
-
-
-#### common
-
-#### protobuf
-
-#### service
-##### main 服务入口
-##### gateway 网关服务
-
-
-### lib
-- bench 服务基础配置
-- callback 回调
-- constants 常量
-- error: 错误码
-- etcd: etcd客户端 [todo menglc]
-- event 事件
-- example 示例
-- exec: 执行器 [todo menglc]
-- file: 文件操作
-- log: 日志
-- net: 网络
-- pool: 对象池
-- pprof: 性能分析
-- pubsub: 发布订阅 [todo menglc]
-- runtime: 运行时
-- time: 时间管理器
-- timer: 定时器
-- util: 工具类
-
-### scripts [todo menglc]
-
-### tools [todo menglc]
-
-
-
+- **impl**
+  - **bin** 执行目录
+    - e.g.: 1.gateway.1.bench.json gateway 服务基础配置(group:1,name:gateway,id:1) 
+    - **log** 日志目录
+  - **build**: 构建 [todo menglc]
+    - **bench**: 服务基础配置
+      - `gateway.bench.json` gateway 服务基础配置
+      - `logic.bench.json` logic 服务基础配置
+  - **common**: 公共模块 [todo menglc]
+    - **db_async**: 异步数据库 [todo menglc]
+    - **etcd**: etcd客户端 [todo menglc]
+    - **service**: 服务 [todo menglc]
+    - `common.go` 公共模块 [todo menglc]
+  - **protobuf**: protobuf
+    - **proto**: proto 文件
+      - **service**: 服务
+        - `gateway.proto`
+      - `error.code.proto` 
+      - `event.proto`
+      - `struct.proto`
+    - `gen.sh` 生成protobuf文件
+  - **service**: 服务
+    - **gateway**: 网关服务 [todo menglc]
+    - **logic**: 逻辑服务 [todo menglc]
+    - **main**: 服务入口 [todo menglc]
+  - **lib**: 公共库
+    - **bench**: 服务基础配置
+    - **callback**: 回调
+    - **constants**: 常量
+    - **error**: 错误码
+    - **etcd**: etcd客户端 [todo menglc]
+    - **event**: 事件
+    - **example**: 示例
+    - **exec**: 执行器 [todo menglc]
+    - **file**: 文件操作
+    - **log**: 日志
+    - **net**: 网络
+    - **pool**: 对象池
+    - **pprof**: 性能分析
+    - **pubsub**: 发布订阅 [todo menglc]
+    - **runtime**: 运行时
+    - **time**: 时间管理器
+    - **timer**: 定时器
+    - **util**: 工具类
+  - **scripts**: 脚本
+  - **tools**: 工具
+    - **client.simulator**: 客户端模拟器 [todo menglc]
