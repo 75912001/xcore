@@ -2,7 +2,7 @@ package timer
 
 import (
 	"context"
-	xutil "xcore/lib/util"
+	xutil "xcore/lib/callback"
 )
 
 type ITimer interface {
