@@ -44,9 +44,7 @@ func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.event = &defaultEvent{
-		eventChan: p.options.eventChan,
-	}
+	p.event = newDefaultEvent(p.options.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -109,6 +107,7 @@ func (p *server) ActiveDisconnect(remote IRemote) error {
 
 func (p *server) handleConn(conn *net.TCPConn) {
 	remote := &DefaultRemote{
+		IHandler: p.options.handler,
 		Conn:     conn,
 		sendChan: make(chan interface{}, *p.options.sendChanCapacity),
 	}
@@ -116,5 +115,5 @@ func (p *server) handleConn(conn *net.TCPConn) {
 		xlog.PrintfErr("event.Connect err:%v", err)
 		return
 	}
-	remote.start(&p.options.connOptions, p.event, p.options.handler)
+	remote.start(&p.options.connOptions, p.event)
 }

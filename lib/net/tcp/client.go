@@ -11,10 +11,9 @@ import (
 
 // Client 客户端
 type Client struct {
-	Handler IHandler
-	Event   IEvent
-	Remote  IRemote
-	Packet  xnetpacket.IPacket
+	Event  IEvent
+	Remote IRemote
+	Packet xnetpacket.IPacket
 }
 
 // Connect 连接
@@ -25,10 +24,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.Handler = newOpts.handler
-	p.Event = &defaultEvent{
-		eventChan: newOpts.eventChan,
-	}
+	p.Event = newDefaultEvent(newOpts.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -37,8 +33,8 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	defaultRemote := NewDefaultRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
-	defaultRemote.start(&newOpts.connOptions, p.Event, p.Handler)
+	defaultRemote := NewDefaultRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity), newOpts.handler)
+	defaultRemote.start(&newOpts.connOptions, p.Event)
 	p.Remote = defaultRemote
 	p.Packet = newOpts.packet
 	return nil
@@ -50,7 +46,7 @@ func (p *Client) ActiveDisconnect() error {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
 	p.Remote.SetActiveDisconnection(true)
-	if err := p.Handler.OnDisconnect(p.Remote); err != nil {
+	if err := p.Remote.OnDisconnect(p.Remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil

@@ -8,13 +8,19 @@ import (
 )
 
 type IEvent interface {
-	Connect(remote IRemote) error       // 链接 放入 事件中
-	Disconnect(remote IRemote) error    // 断开链接 放入 事件中
-	Packet(packet *DefaultPacket) error // 数据包 放入 事件中
+	Connect(remote IRemote) error                       // 链接 放入 事件中
+	Disconnect(remote IRemote) error                    // 断开链接 放入 事件中
+	Packet(remote IRemote, packet *DefaultPacket) error // 数据包 放入 事件中
 }
 
 type defaultEvent struct {
 	eventChan chan<- interface{} // 待处理的事件
+}
+
+func newDefaultEvent(eventChan chan<- interface{}) IEvent {
+	return &defaultEvent{
+		eventChan: eventChan,
+	}
 }
 
 // Connect 连接
@@ -44,13 +50,14 @@ func (p *defaultEvent) Disconnect(remote IRemote) error {
 }
 
 // Packet 数据包
-func (p *defaultEvent) Packet(packet *DefaultPacket) error {
+func (p *defaultEvent) Packet(remote IRemote, packet *DefaultPacket) error {
 	select {
 	case p.eventChan <- &EventPacket{
+		Remote: remote,
 		Packet: packet,
 	}:
 	default:
-		xlog.PrintfErr("push DefaultPacket failed with eventChan full. packet:%v", packet)
+		xlog.PrintfErr("push EventPacket failed with eventChan full. remote:%v packet:%v", remote, packet)
 		return errors.WithMessage(xerror.ChannelFull, xruntime.Location())
 	}
 	return nil
@@ -68,5 +75,6 @@ type EventConnect struct {
 
 // EventPacket 事件-数据包
 type EventPacket struct {
+	Remote IRemote
 	Packet *DefaultPacket
 }

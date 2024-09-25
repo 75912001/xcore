@@ -25,17 +25,17 @@ func OnHandlerBus() error {
 			switch t := v.(type) {
 			//tcp
 			case *tcp.EventConnect:
-				err = t.Remote.Owner.OnConnect(t.Remote)
-			case *tcp.Packet:
+				err = t.Remote.OnConnect(t.Remote)
+			case *tcp.EventPacket:
 				if !t.Remote.IsConn() {
 					continue
 				}
-				err = t.Remote.Owner.OnPacket(t)
+				err = t.Remote.OnPacket(t.Packet)
 			case *tcp.EventDisconnect:
 				if !t.Remote.IsConn() {
 					continue
 				}
-				err = t.Remote.Owner.OnDisconnect(t.Remote)
+				err = t.Remote.OnDisconnect(t.Remote)
 				//timer
 			case *timer.Second:
 				if t.IsValid() {

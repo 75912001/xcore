@@ -25,10 +25,12 @@ type IRemote interface {
 	Send(packet xnetpacket.IPacket) error
 	SetActiveDisconnection(active bool) // 主动断开连接
 	GetActiveDisconnection() bool       // 获取 是否主动断开连接
+	IHandler
 }
 
 // DefaultRemote 远端
 type DefaultRemote struct {
+	IHandler
 	Conn                *net.TCPConn     // 连接
 	sendChan            chan interface{} // 发送管道
 	cancelFunc          context.CancelFunc
@@ -36,8 +38,9 @@ type DefaultRemote struct {
 	Object              interface{} // 保存 应用层数据
 }
 
-func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) *DefaultRemote {
+func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}, handler IHandler) *DefaultRemote {
 	defaultRemote := &DefaultRemote{
+		IHandler: handler,
 		Conn:     Conn,
 		sendChan: sendChan,
 	}
@@ -61,7 +64,7 @@ func (p *DefaultRemote) GetIP() string {
 	return slice[0]
 }
 
-func (p *DefaultRemote) start(tcpOptions *connOptions, event IEvent, handler IHandler) {
+func (p *DefaultRemote) start(tcpOptions *connOptions, event IEvent) {
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	log.Printf("SetKeepAlive war:%v", err)
 	//}
@@ -86,7 +89,7 @@ func (p *DefaultRemote) start(tcpOptions *connOptions, event IEvent, handler IHa
 	p.cancelFunc = cancelFunc
 
 	go p.onSend(ctxWithCancel)
-	go p.onRecv(event, handler)
+	go p.onRecv(event)
 }
 
 // IsConnect 是否连接
@@ -235,7 +238,7 @@ func (p *DefaultRemote) onSend(ctx context.Context) {
 const MsgLengthFieldSize uint32 = 4 // 消息总长度字段 的 大小
 
 // 处理接收
-func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
+func (p *DefaultRemote) onRecv(event IEvent) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
@@ -257,7 +260,7 @@ func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
 			return
 		}
 		packetLength := binary.LittleEndian.Uint32(msgLengthBuf)
-		if err := handler.OnCheckPacketLength(packetLength); err != nil {
+		if err := p.IHandler.OnCheckPacketLength(packetLength); err != nil {
 			xlog.PrintfErr("remote:%p OnCheckPacketLength err:%v", p, err)
 			return
 		}
@@ -268,12 +271,12 @@ func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
 			_ = xpool.ReleaseByteSlice(buf)
 			return
 		}
-		if err := handler.OnCheckPacketLimit(p); err != nil {
+		if err := p.IHandler.OnCheckPacketLimit(p); err != nil {
 			xlog.PrintfErr("remote:%p buf:%v err:%v", p, buf, err)
 			_ = xpool.ReleaseByteSlice(buf)
 			continue
 		}
-		packet, err := handler.OnUnmarshalPacket(p, buf)
+		packet, err := p.IHandler.OnUnmarshalPacket(p, buf)
 		_ = xpool.ReleaseByteSlice(buf)
 		if err != nil {
 			xlog.PrintfErr("remote:%p buf:%v err:%v", p, buf, err)
