@@ -23,6 +23,8 @@ type IRemote interface {
 	Stop()
 	GetIP() string
 	Send(packet xnetpacket.IPacket) error
+	SetActiveDisconnection(active bool) // 主动断开连接
+	GetActiveDisconnection() bool       // 获取 是否主动断开连接
 }
 
 // DefaultRemote 远端
@@ -34,6 +36,22 @@ type DefaultRemote struct {
 	Object              interface{} // 保存 应用层数据
 }
 
+func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) *DefaultRemote {
+	defaultRemote := &DefaultRemote{
+		Conn:     Conn,
+		sendChan: sendChan,
+	}
+	return defaultRemote
+}
+
+func (p *DefaultRemote) SetActiveDisconnection(active bool) {
+	p.ActiveDisconnection = active
+}
+
+func (p *DefaultRemote) GetActiveDisconnection() bool {
+	return p.ActiveDisconnection
+}
+
 // GetIP 获取IP地址
 func (p *DefaultRemote) GetIP() string {
 	slice := strings.Split(p.Conn.RemoteAddr().String(), ":")
@@ -43,7 +61,7 @@ func (p *DefaultRemote) GetIP() string {
 	return slice[0]
 }
 
-func (p *DefaultRemote) start(tcpOptions *ConnOptions, event IEvent, handler IHandler) {
+func (p *DefaultRemote) start(tcpOptions *connOptions, event IEvent, handler IHandler) {
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	log.Printf("SetKeepAlive war:%v", err)
 	//}

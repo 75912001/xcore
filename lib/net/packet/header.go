@@ -1,6 +1,6 @@
 package packet
 
 type IHeader interface {
-	GetLength() uint32
-	GetCmd() uint32
+	GetLength() uint32 // 总长度
+	GetCmd() uint32    // 消息ID
 }

@@ -9,14 +9,15 @@ import (
 	"runtime/debug"
 	"sync"
 	"time"
+	"xcore/lib/callback"
 	"xcore/lib/constants"
 	"xcore/lib/log"
 	"xcore/lib/runtime"
 	xutil "xcore/lib/util"
 )
 
-// Mgr 定时器管理器
-type Mgr struct {
+// mgr 定时器管理器
+type mgr struct {
 	opts            *options
 	secondSlice     [cycleSize]list.List // 时间轮-数组. 秒,数据
 	millisecondList list.List            // 毫秒,数据
@@ -26,12 +27,12 @@ type Mgr struct {
 	secondChan      chan interface{} // 秒, channel
 }
 
-func NewMgr() *Mgr {
-	return &Mgr{}
+func NewMgr() *mgr {
+	return &mgr{}
 }
 
 // 每秒更新
-func (p *Mgr) funcSecond(ctx context.Context) {
+func (p *mgr) funcSecond(ctx context.Context) {
 	defer func() {
 		if runtime.IsRelease() {
 			if err := recover(); err != nil {
@@ -61,7 +62,7 @@ func (p *Mgr) funcSecond(ctx context.Context) {
 }
 
 // 每 millisecond 个毫秒更新
-func (p *Mgr) funcMillisecond(ctx context.Context) {
+func (p *mgr) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if runtime.IsRelease() {
 			if err := recover(); err != nil {
@@ -120,7 +121,7 @@ func moveLastElementToProperPosition(l *list.List) {
 
 // Start
 // [NOTE] 处理定时器相关数据,必须与该 outgoingTimeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
-func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
+func (p *mgr) Start(ctx context.Context, opts ...*options) error {
 	p.opts = &options{}
 	p.opts = p.opts.merge(opts...)
 	if err := p.opts.configure(); err != nil {
@@ -146,7 +147,7 @@ func (p *Mgr) Start(ctx context.Context, opts ...*options) error {
 }
 
 // Stop 停止服务
-func (p *Mgr) Stop() {
+func (p *mgr) Stop() {
 	if p.cancelFunc != nil {
 		p.cancelFunc()
 		// 等待 second, milliSecond goroutine退出.
@@ -162,7 +163,7 @@ func (p *Mgr) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int64) *millisecond {
+func (p *mgr) AddMillisecond(callBackFunc callback.ICallBack, expireMillisecond int64) *millisecond {
 	t := &millisecond{
 		ICallBack: callBackFunc,
 		ISwitch:   xutil.NewDefaultSwitch(true),
@@ -177,7 +178,7 @@ func (p *Mgr) AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int
 //	[NOTE] 必须与该 outgoingTimeoutChan 线性处理.如:在同一个 goroutine select 中处理数据
 //	参数:
 //		毫秒定时器
-func (p *Mgr) DelMillisecond(t *millisecond) {
+func (p *mgr) DelMillisecond(t *millisecond) {
 	t.reset()
 }
 
@@ -185,7 +186,7 @@ func (p *Mgr) DelMillisecond(t *millisecond) {
 //
 //	参数:
 //		ms: 到期毫秒数
-func (p *Mgr) scanMillisecond(ms int64) {
+func (p *mgr) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
 		t := e.Value.(*millisecond)
@@ -213,7 +214,7 @@ func (p *Mgr) scanMillisecond(ms int64) {
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *Mgr) AddSecond(callBackFunc xutil.ICallBack, expire int64) *second {
+func (p *mgr) AddSecond(callBackFunc callback.ICallBack, expire int64) *second {
 	t := &second{
 		millisecond{
 			ICallBack: callBackFunc,
@@ -227,7 +228,7 @@ func (p *Mgr) AddSecond(callBackFunc xutil.ICallBack, expire int64) *second {
 
 // DelSecond 删除秒级定时器
 // 同 DelMillisecond
-func (p *Mgr) DelSecond(t *second) {
+func (p *mgr) DelSecond(t *second) {
 	t.reset()
 }
 
@@ -237,7 +238,7 @@ func (p *Mgr) DelSecond(t *second) {
 //			timerSecond: 秒定时器
 //			cycleIdx: 轮序号
 //	     needMove: 是否需要移动到合适的位置
-func (p *Mgr) pushBackCycle(timerSecond *second, cycleIdx int, needMove bool) {
+func (p *mgr) pushBackCycle(timerSecond *second, cycleIdx int, needMove bool) {
 	p.secondSlice[cycleIdx].PushBack(timerSecond)
 	if needMove {
 		moveLastElementToProperPositionSecond(&p.secondSlice[cycleIdx])
@@ -266,7 +267,7 @@ func moveLastElementToProperPositionSecond(l *list.List) {
 // 扫描秒级定时器
 //
 //	timestamp: 到期时间戳
-func (p *Mgr) scanSecond(timestamp int64) {
+func (p *mgr) scanSecond(timestamp int64) {
 	var next *list.Element
 	cycle0 := &p.secondSlice[0]
 	for e := cycle0.Front(); nil != e; e = next {

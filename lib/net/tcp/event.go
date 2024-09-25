@@ -8,17 +8,17 @@ import (
 )
 
 type IEvent interface {
-	Connect(remote *DefaultRemote) error    // 链接 放入 事件中
-	Disconnect(remote *DefaultRemote) error // 断开链接 放入 事件中
-	Packet(packet *DefaultPacket) error     // 数据包 放入 事件中
+	Connect(remote IRemote) error       // 链接 放入 事件中
+	Disconnect(remote IRemote) error    // 断开链接 放入 事件中
+	Packet(packet *DefaultPacket) error // 数据包 放入 事件中
 }
 
-type DefaultEvent struct {
+type defaultEvent struct {
 	eventChan chan<- interface{} // 待处理的事件
 }
 
 // Connect 连接
-func (p *DefaultEvent) Connect(remote *DefaultRemote) error {
+func (p *defaultEvent) Connect(remote IRemote) error {
 	select {
 	case p.eventChan <- &EventConnect{
 		Remote: remote,
@@ -31,7 +31,7 @@ func (p *DefaultEvent) Connect(remote *DefaultRemote) error {
 }
 
 // Disconnect 断开链接
-func (p *DefaultEvent) Disconnect(remote *DefaultRemote) error {
+func (p *defaultEvent) Disconnect(remote IRemote) error {
 	select {
 	case p.eventChan <- &EventDisconnect{
 		Remote: remote,
@@ -44,7 +44,7 @@ func (p *DefaultEvent) Disconnect(remote *DefaultRemote) error {
 }
 
 // Packet 数据包
-func (p *DefaultEvent) Packet(packet *DefaultPacket) error {
+func (p *defaultEvent) Packet(packet *DefaultPacket) error {
 	select {
 	case p.eventChan <- &EventPacket{
 		Packet: packet,
@@ -58,12 +58,12 @@ func (p *DefaultEvent) Packet(packet *DefaultPacket) error {
 
 // EventDisconnect 事件-断开链接
 type EventDisconnect struct {
-	Remote *DefaultRemote
+	Remote IRemote
 }
 
 // EventConnect 事件-链接成功
 type EventConnect struct {
-	Remote *DefaultRemote
+	Remote IRemote
 }
 
 // EventPacket 事件-数据包

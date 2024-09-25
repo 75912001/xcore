@@ -13,24 +13,15 @@ import (
 	xutil "xcore/lib/util"
 )
 
-var gServer *server
-
-func GetServer() *server {
-	if gServer == nil {
-		gServer = newServer()
-	}
-	return gServer
-}
-
 // 己方作为服务端
 type server struct {
 	event    IEvent
 	listener *net.TCPListener //监听
-	options  *ServerOptions
+	options  *serverOptions
 }
 
-// newServer 新建服务
-func newServer() *server {
+// NewServer 新建服务
+func NewServer() *server {
 	return &server{}
 }
 
@@ -48,12 +39,12 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *server) Start(_ context.Context, opts ...*ServerOptions) error {
+func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
 	p.options = mergeServerOptions(opts...)
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.event = &DefaultEvent{
+	p.event = &defaultEvent{
 		eventChan: p.options.eventChan,
 	}
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
@@ -105,11 +96,11 @@ func (p *server) Stop() {
 }
 
 // ActiveDisconnect 逻辑层 主动 断开连接
-func (p *server) ActiveDisconnect(remote *DefaultRemote) error {
+func (p *server) ActiveDisconnect(remote IRemote) error {
 	if remote == nil || !remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
-	remote.ActiveDisconnection = true
+	remote.SetActiveDisconnection(true)
 	if err := p.options.handler.OnDisconnect(remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}

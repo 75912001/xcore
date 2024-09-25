@@ -2,23 +2,18 @@ package gateway
 
 import (
 	"runtime"
-	xservice "xcore/impl/common/service"
+	commonservice "xcore/impl/common/service"
 )
 
 type Service struct {
-	*xservice.DefaultService
+	*commonservice.DefaultService
 }
 
-var service *Service
-
-func NewService(defaultService *xservice.DefaultService) *Service {
-	service = &Service{
+func NewService(defaultService *commonservice.DefaultService) *Service {
+	return &Service{
 		DefaultService: defaultService,
 	}
-	return service
 }
-
-var defaultService = xservice.NewDefaultService()
 
 func (p *Service) Start() (err error) {
 	// 数据统计

@@ -9,13 +9,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
+	"path"
 	"strconv"
 	"syscall"
 	"xcore/impl/common"
 	commonservice "xcore/impl/common/service"
 	"xcore/impl/service/gateway"
+	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xnettcp "xcore/lib/net/tcp"
@@ -23,6 +26,14 @@ import (
 )
 
 func main() {
+	var err error
+	defaultService := commonservice.NewDefaultService()
+	// 程序所在路径(如为link,则为link所在的路径)
+	defaultService.ExecutablePath, err = xruntime.GetExecutablePath()
+	if err != nil {
+		xlog.PrintErr(err, xruntime.Location())
+		return
+	}
 	args := os.Args
 	argNum := len(args)
 	const neededArgsNumber = 4
@@ -30,7 +41,7 @@ func main() {
 		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return
 	}
-	defaultService := commonservice.NewDefaultService()
+
 	{ // 解析启动参数
 		groupID, err := strconv.ParseUint(args[1], 10, 32)
 		if err != nil {
@@ -45,25 +56,24 @@ func main() {
 			return
 		}
 		defaultService.ID = uint32(serviceID)
-		xlog.PrintInfo("groupID:", defaultService.GroupID, "name:",
-			defaultService.Name, "serviceID:", defaultService.ID)
+		xlog.PrintfInfo("groupID:%v name:%v, serviceID:%v",
+			defaultService.GroupID, defaultService.Name, defaultService.ID)
 	}
 	var service commonservice.IService
-	var handler xnettcp.IHandler
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
 		service = gateway.NewService(defaultService)
-		handler = gateway.NewServer()
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
 	}
-	if err := defaultService.PreStart(context.Background(), commonservice.NewOptions().WithHandler(handler)); err != nil {
+	benchPath := path.Join(defaultService.ExecutablePath, fmt.Sprintf("%v.%v.%v.%v",
+		defaultService.GroupID, defaultService.Name, defaultService.ID, xconstants.ServiceConfigFile))
+	if err = defaultService.PreStart(context.Background(), commonservice.NewOptions().WithBenchPath(benchPath)); err != nil {
 		xlog.PrintErr(err, xruntime.Location())
 		return
 	}
-	err := service.Start()
-	if err != nil {
+	if err = service.Start(); err != nil {
 		xlog.PrintErr(err, xruntime.Location())
 		return
 	}

@@ -7,61 +7,61 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-// ClientOptions contains options to configure a server instance. Each option can be set through setter functions. See
+// clientOptions contains options to configure a server instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
-type ClientOptions struct {
+type clientOptions struct {
 	serverAddress    *string            // 服务端的地址 e.g.:127.0.0.1:8787
 	eventChan        chan<- interface{} // 外部传递的事件处理管道.连接的事件会放入该管道,以供外部处理
 	sendChanCapacity *uint32            // 发送管道容量
 	packet           xnetpacket.IPacket
-	connOptions      ConnOptions
+	connOptions      connOptions
 	handler          IHandler
 }
 
 // NewClientOptions 新的ClientOptions
-func NewClientOptions() *ClientOptions {
-	return new(ClientOptions)
+func NewClientOptions() *clientOptions {
+	return new(clientOptions)
 }
 
-func (p *ClientOptions) SetReadBuffer(readBuffer int) *ClientOptions {
+func (p *clientOptions) SetReadBuffer(readBuffer int) *clientOptions {
 	p.connOptions.readBuffer = &readBuffer
 	return p
 }
 
-func (p *ClientOptions) SetWriteBuffer(writeBuffer int) *ClientOptions {
+func (p *clientOptions) SetWriteBuffer(writeBuffer int) *clientOptions {
 	p.connOptions.writeBuffer = &writeBuffer
 	return p
 }
 
-func (p *ClientOptions) SetAddress(address string) *ClientOptions {
+func (p *clientOptions) SetAddress(address string) *clientOptions {
 	p.serverAddress = &address
 	return p
 }
 
-func (p *ClientOptions) SetEventChan(eventChan chan<- interface{}) *ClientOptions {
+func (p *clientOptions) SetEventChan(eventChan chan<- interface{}) *clientOptions {
 	p.eventChan = eventChan
 	return p
 }
 
-func (p *ClientOptions) SetSendChanCapacity(sendChanCapacity uint32) *ClientOptions {
+func (p *clientOptions) SetSendChanCapacity(sendChanCapacity uint32) *clientOptions {
 	p.sendChanCapacity = &sendChanCapacity
 	return p
 }
 
-func (p *ClientOptions) SetPacket(packet xnetpacket.IPacket) *ClientOptions {
+func (p *clientOptions) SetPacket(packet xnetpacket.IPacket) *clientOptions {
 	p.packet = packet
 	return p
 }
 
-func (p *ClientOptions) SetHandler(handler IHandler) *ClientOptions {
+func (p *clientOptions) SetHandler(handler IHandler) *clientOptions {
 	p.handler = handler
 	return p
 }
 
-// mergeClientOptions combines the given *ClientOptions into a single *ClientOptions in a last one wins fashion.
+// mergeClientOptions combines the given *clientOptions into a single *clientOptions in a last one wins fashion.
 // The specified options are merged with the existing options on the server, with the specified options taking
 // precedence.
-func mergeClientOptions(opts ...*ClientOptions) *ClientOptions {
+func mergeClientOptions(opts ...*clientOptions) *clientOptions {
 	newOptions := NewClientOptions()
 	for _, opt := range opts {
 		if opt == nil {
@@ -93,7 +93,7 @@ func mergeClientOptions(opts ...*ClientOptions) *ClientOptions {
 }
 
 // 配置
-func clientConfigure(opts *ClientOptions) error {
+func clientConfigure(opts *clientOptions) error {
 	if opts.serverAddress == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}

@@ -9,6 +9,23 @@
     },
     "serviceNet": {
         "addr": "127.0.0.1:30201"
-    }
+    },
+    "routes": [
+        {
+            "service": {
+                "name": "login",
+                "cmdMin": "0x10000",
+                "cmdMax": "0x1ffff"
+            }
+        },
+        {
+            "service": {
+                "name": "logic",
+                "cmdMin": "0x30000",
+                "cmdMax": "0x3ffff"
+            }
+        }
+    ]
+
 }
 

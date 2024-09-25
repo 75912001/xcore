@@ -7,16 +7,16 @@ import (
 type DefaultHandlerClient struct {
 }
 
-func (p *DefaultHandlerClient) OnConnect(_ *DefaultRemote) error {
+func (p *DefaultHandlerClient) OnConnect(_ IRemote) error {
 	return nil
 }
 func (p *DefaultHandlerClient) OnCheckPacketLength(_ uint32) error {
 	return nil
 }
-func (p *DefaultHandlerClient) OnCheckPacketLimit(_ *DefaultRemote) error {
+func (p *DefaultHandlerClient) OnCheckPacketLimit(_ IRemote) error {
 	return nil
 }
-func (p *DefaultHandlerClient) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*DefaultPacket, error) {
+func (p *DefaultHandlerClient) OnUnmarshalPacket(remote IRemote, data []byte) (*DefaultPacket, error) {
 	return nil, xerror.NotImplemented
 }
 func (p *DefaultHandlerClient) OnPacket(packet *DefaultPacket) error {
@@ -24,7 +24,7 @@ func (p *DefaultHandlerClient) OnPacket(packet *DefaultPacket) error {
 }
 
 // OnDisconnect [NOTE] 需要外部实现调用
-func (p *DefaultHandlerClient) OnDisconnect(remote *DefaultRemote) error {
+func (p *DefaultHandlerClient) OnDisconnect(remote IRemote) error {
 	if remote.IsConnect() {
 		remote.Stop()
 	}

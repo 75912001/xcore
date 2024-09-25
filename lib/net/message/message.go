@@ -12,8 +12,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Message contains options to configure a server instance. Each option can be set through setter functions. See
-// documentation for each setter function for an explanation of the option.
 type Message struct {
 	handler           Handler              // [required] 消息处理函数
 	newProtoMessage   func() proto.Message // [required] 创建新的 proto.Message
@@ -74,9 +72,6 @@ func (p *Message) Handler(ctx context.Context, header packet.IHeader, message pr
 	return p.handler(ctx, header, message, obj)
 }
 
-// merge combines the given *Options into a single *Options in a last one wins fashion.
-// The specified options are merged with the existing options on the server, with the specified options taking
-// precedence.
 func merge(opts ...*Message) *Message {
 	so := NewMessage()
 	for _, opt := range opts {

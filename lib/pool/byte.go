@@ -58,7 +58,7 @@ func (p *bytePool) releaseByteSlice(byteBuff []byte) {
 // MakeByteSlice 分配byte切片
 //
 //	返回 nil 表示分配失败
-//	[NOTE] 返回的数据,不可以append.否则会丢失原指针
+//	[NOTE] 返回的数据,不可以append.否则会丢失原指针,导致无法正确回收
 func MakeByteSlice(size int) []byte {
 	if size <= maxAreaValue {
 		for i := 0; i < len(bytePoolList); i++ {
