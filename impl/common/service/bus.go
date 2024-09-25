@@ -27,14 +27,8 @@ func OnHandlerBus() error {
 			case *tcp.EventConnect:
 				err = t.Remote.OnConnect(t.Remote)
 			case *tcp.EventPacket:
-				if !t.Remote.IsConn() {
-					continue
-				}
 				err = t.Remote.OnPacket(t.Packet)
 			case *tcp.EventDisconnect:
-				if !t.Remote.IsConn() {
-					continue
-				}
 				err = t.Remote.OnDisconnect(t.Remote)
 				//timer
 			case *timer.Second:
