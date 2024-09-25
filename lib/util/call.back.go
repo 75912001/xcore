@@ -1,28 +1,28 @@
 package util
 
 type ICallBack interface {
-	CallBackFunc() error
+	Function() error
 	SetArg(arg interface{})
 	GetArg() interface{}
 }
 
-// CallBackFunc 回调函数
-type CallBackFunc func(arg interface{}) error
+// CallbackFunction 回调函数
+type CallbackFunction func(arg interface{}) error
 
 type defaultCallBack struct {
-	Arg      interface{}  // 参数
-	Function CallBackFunc // 回调函数
+	Arg      interface{}      // 参数
+	Callback CallbackFunction // 回调函数
 }
 
-func NewDefaultCallBack(callBackFunc CallBackFunc, arg interface{}) ICallBack {
+func NewDefaultCallBack(callbackFunction CallbackFunction, arg interface{}) ICallBack {
 	return &defaultCallBack{
 		Arg:      arg,
-		Function: callBackFunc,
+		Callback: callbackFunction,
 	}
 }
 
-func (p *defaultCallBack) CallBackFunc() error {
-	return p.Function(p.GetArg())
+func (p *defaultCallBack) Function() error {
+	return p.Callback(p.GetArg())
 }
 
 func (p *defaultCallBack) SetArg(arg interface{}) {
