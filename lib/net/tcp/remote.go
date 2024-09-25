@@ -283,6 +283,6 @@ func (p *DefaultRemote) onRecv(event IEvent) {
 			continue
 		}
 		buf = nil
-		_ = event.Packet(packet)
+		_ = event.Packet(p, packet)
 	}
 }
