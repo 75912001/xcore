@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"sync"
 	"time"
-	gatewayhandler "xcore/impl/service/gateway"
 	xbench "xcore/lib/bench"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
