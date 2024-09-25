@@ -28,14 +28,15 @@ type DefaultService struct {
 	BenchMgr xbench.Mgr
 	BenchSub xbench.IBenchSub
 
-	GroupID uint32 // 组ID
-	Name    string // 名称
-	ID      uint32 // ID
+	GroupID        uint32 // 组ID
+	Name           string // 名称
+	ID             uint32 // ID
+	ExecutablePath string // 执行程序路径
 
-	Log      xlog.ILog
-	TimeMgr  *xtime.Mgr
-	TimerMgr xtimer.Mgr
-	Opts     *options
+	Log     xlog.ILog
+	TimeMgr *xtime.Mgr
+	Timer   xtimer.ITimer
+	Opts    *options
 
 	//EtcdMgr etcdMgr
 
@@ -160,7 +161,7 @@ func (p *DefaultService) PreStart(ctx context.Context, opts ...*options) error {
 	}
 	// 全局定时器
 	if p.BenchMgr.Json.Timer.ScanSecondDuration != nil || p.BenchMgr.Json.Timer.ScanMillisecondDuration != nil {
-		err = p.TimerMgr.Start(ctx,
+		err = p.Timer.Start(ctx,
 			xtimer.NewOptions().
 				WithScanSecondDuration(*p.BenchMgr.Json.Timer.ScanSecondDuration).
 				WithScanMillisecondDuration(*p.BenchMgr.Json.Timer.ScanMillisecondDuration).
