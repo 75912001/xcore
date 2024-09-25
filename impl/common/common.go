@@ -6,98 +6,25 @@ import (
 	"github.com/google/uuid"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+const ServiceNameGateway string = "gateway" // 网关服
+const ServiceNameLogin string = "login"     // 登录服
+const ServiceNameLogic string = "logic"     // 逻辑服
+const ServiceNameRoom string = "room"       // 房间服
+const ServiceNameGM string = "gm"           // GM服务
 
-//const LogAbsPath string = "/data/log" //日志绝对路径
+var TCPHeartBeatTimeOutSec int64 = 30 // 心跳时间-秒 // todo menglc 可配置...
+var KCPHeartBeatTimeOutSec int64 = 30 // 心跳时间-秒 // todo menglc 可配置...
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//etcd 相关
-
-// 各服务名称 注意此处名称需与bench.json里的ServiceName保持一致
-const ServiceNameGateway string = "gateway"              //网关服
-const ServiceNameLogin string = "login"                  //登录服
-const ServiceNameWorld string = "world"                  //世界服
-const ServiceNameMatchRoomList string = "match_roomlist" //匹配-房间列表方式
-const ServiceNameRoom string = "room"                    //房间服
-const ServiceNameBattleGateway string = "battle_gateway" //战斗网关
-const ServiceNameBattleVerify string = "battle_verify"   //战斗校验
-const ServiceNameBattleServer string = "battle_server"   //战斗计算
-const ServiceNameGM string = "gm"                        //GM服务
-const ServiceNameServerList string = "server_list"       //区服列表
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//room 相关
-
-// RoomUserMaxCnt 房间最大人数限制
-const RoomUserMaxCnt = 4
-
-// GetRoomListMaxCnt 获取房间列表,最大数量
-const GetRoomListMaxCnt = 100
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//心跳 相关
-
-// TCPHeartBeatTimeOutSec 心跳时间 秒 // todo 可配置...
-var TCPHeartBeatTimeOutSec int64 = 30 //原值30
-// KCPHeartBeatTimeOutSec 心跳时间 秒 //todo 可配置...
-var KCPHeartBeatTimeOutSec int64 = 30 //原值10
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//服务配置参数-限流-阈值
-
-// BenchJsonOverLoadRoomCountMaxDefault 房间数量 最大 默认值
-const BenchJsonOverLoadRoomCountMaxDefault = 1000
-
-// BenchJsonOverLoadUserNumberMaxDefault 用户数量 最大 默认值
-const BenchJsonOverLoadUserNumberMaxDefault = 100000000 //todo [@] 测试时开启 最大值, 默认10000
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//帧相关
-
-// FrameWindowsSize 帧 窗口大小
-const FrameWindowsSize uint32 = FrameOneSecondFrameCount * 5
-
-// FrameBattleAverageSecond 一场战斗平均秒数
-const FrameBattleAverageSecond = 600
-
-// FrameTimeOutMillisecond 帧,超时,毫秒
-const FrameTimeOutMillisecond = 50
-
-// FrameOneSecondFrameCount 一秒 帧 数量
-const FrameOneSecondFrameCount = 1000 / FrameTimeOutMillisecond
-
-// FrameBattleAverageFrameCount 一场战斗 平均 帧数
-const FrameBattleAverageFrameCount = FrameBattleAverageSecond * FrameOneSecondFrameCount
-
-// FrameVerifyHashFrameInterval 帧 验证 hash 逻辑帧间隔 , 1000 为 1000帧. 0:不需要hash.
-const FrameVerifyHashFrameInterval = 1000
-
-// FrameVerifyHashMapInitCapacity 验证 hash  初始化 entityMap 容量(单场战斗平均帧数/多少帧间隔发送一次hash值)
-const FrameVerifyHashMapInitCapacity = FrameBattleAverageFrameCount / FrameVerifyHashFrameInterval
-
-// SnapShootInitCapacity 快照 初始化 容量 todo [*]需要客户端提供预估大小...
-const SnapShootInitCapacity = 1024 * 1024
-
-const FillFrameNumber = 10 // 填充帧数量 todo [*]需要客户端提供预估大小...
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//杂
-
-// LoginTokenDuration 登录token持续时间
-var LoginTokenDuration = time.Second * 60
+var LoginTokenDuration = time.Second * 60 // LoginTokenDuration 登录 token 有效持续时间
 
 // ServiceInfoTimeOutSec 信息 超时时间 秒
 const ServiceInfoTimeOutSec = 10
 
-//限流
+const RateLimitIntervalSec = 60 // RateLimitIntervalSec 限流-间隔-秒 // todo 可配置...
 
-// RateLimitIntervalSec 限流 间隔 秒 // todo 可配置...
-const RateLimitIntervalSec = 60
+const RateLimitCount = 120 // RateLimitCount 限流-数量// todo 可配置...
 
-// RateLimitCount 限流 数量// todo 可配置...
-const RateLimitCount = 120
-
-// NameLengthMax 名字 长度 最大值
-const NameLengthMax = 24
+const NameLengthMax = 24 // NameLengthMax 名字 长度 最大值
 
 //MongoDB 异步合并写
 
