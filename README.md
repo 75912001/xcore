@@ -15,7 +15,7 @@
 ## 代码测试工具
 - $ go get github.com/agiledragon/gomonkey@v2.0.2
 ## 代码检测工具
-- go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
+- go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1 (未使用)
 - go get -u golang.org/x/lint/golint (未使用)
 - go install honnef.co/go/tools/cmd/staticcheck@v0.4.7 (未使用)
 - go get honnef.co/go/tools/cmd/staticcheck@latest (未使用)
@@ -89,6 +89,7 @@
 
 ### lib
 - bench 服务基础配置
+- callback 回调 [todo menglc]
 - constants 常量
 - error: 错误码
 - event 事件
@@ -106,9 +107,9 @@
 - timer: 定时器
 - util: 工具类
 
-### main
+### scripts [todo menglc]
 
-### scripts
+### tools [todo menglc]
 
 
 
