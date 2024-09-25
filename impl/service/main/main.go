@@ -21,7 +21,6 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -41,7 +40,6 @@ func main() {
 		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return
 	}
-
 	{ // 解析启动参数
 		groupID, err := strconv.ParseUint(args[1], 10, 32)
 		if err != nil {
@@ -69,7 +67,8 @@ func main() {
 	}
 	benchPath := path.Join(defaultService.ExecutablePath, fmt.Sprintf("%v.%v.%v.%v",
 		defaultService.GroupID, defaultService.Name, defaultService.ID, xconstants.ServiceConfigFile))
-	if err = defaultService.PreStart(context.Background(), commonservice.NewOptions().WithBenchPath(benchPath)); err != nil {
+	if err = defaultService.PreStart(context.Background(),
+		commonservice.NewOptions().WithBenchPath(benchPath)); err != nil {
 		xlog.PrintErr(err, xruntime.Location())
 		return
 	}
@@ -77,7 +76,6 @@ func main() {
 		xlog.PrintErr(err, xruntime.Location())
 		return
 	}
-
 	// 退出服务
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
