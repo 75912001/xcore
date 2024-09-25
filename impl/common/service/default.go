@@ -65,7 +65,7 @@ func (p *DefaultService) Stop() (err error) {
 	return xerror.NotImplemented
 }
 
-func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler, onHandlerBus OnHandlerBus, logCallbackFunc xlog.CallBackFunc) (err error) {
+func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler, onHandlerBusFunc OnHandlerBusFunc, logCallbackFunc xlog.CallBackFunc) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -145,7 +145,7 @@ func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler,
 			p.Log.Infof(xconstants.GoroutineDone)
 		}()
 		p.BusChannelWaitGroup.Add(1)
-		_ = onHandlerBus()
+		_ = onHandlerBusFunc()
 	}()
 	// 是否开启http采集分析
 	if p.BenchMgr.Json.Base.PprofHttpPort != nil {

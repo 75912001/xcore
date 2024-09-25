@@ -1,3 +1,3 @@
 package service
 
-type OnHandlerBus func() error
+type OnHandlerBusFunc func() error
