@@ -11,16 +11,16 @@ func NewDefaultHandlerServer() *DefaultHandlerServer {
 	return &DefaultHandlerServer{}
 }
 
-func (p *DefaultHandlerServer) OnConnect(remote *DefaultRemote) error {
+func (p *DefaultHandlerServer) OnConnect(remote IRemote) error {
 	return xerror.NotImplemented
 }
 func (p *DefaultHandlerServer) OnCheckPacketLength(length uint32) error {
 	return xerror.NotImplemented
 }
-func (p *DefaultHandlerServer) OnCheckPacketLimit(remote *DefaultRemote) error {
+func (p *DefaultHandlerServer) OnCheckPacketLimit(remote IRemote) error {
 	return xerror.NotImplemented
 }
-func (p *DefaultHandlerServer) OnUnmarshalPacket(remote *DefaultRemote, data []byte) (*DefaultPacket, error) {
+func (p *DefaultHandlerServer) OnUnmarshalPacket(remote IRemote, data []byte) (*DefaultPacket, error) {
 	return nil, xerror.NotImplemented
 }
 func (p *DefaultHandlerServer) OnPacket(packet *DefaultPacket) error {
@@ -28,7 +28,7 @@ func (p *DefaultHandlerServer) OnPacket(packet *DefaultPacket) error {
 }
 
 // OnDisconnect [NOTE] 需要外部实现调用
-func (p *DefaultHandlerServer) OnDisconnect(remote *DefaultRemote) error {
+func (p *DefaultHandlerServer) OnDisconnect(remote IRemote) error {
 	if remote.IsConnect() {
 		remote.Stop()
 	}
