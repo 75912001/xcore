@@ -9,16 +9,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
-	"path"
 	"strconv"
 	"syscall"
 	"xcore/impl/common"
 	commonservice "xcore/impl/common/service"
 	"xcore/impl/service/gateway"
-	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
@@ -65,14 +62,7 @@ func main() {
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
 	}
-	benchPath := path.Join(defaultService.ExecutablePath, fmt.Sprintf("%v.%v.%v.%v",
-		defaultService.GroupID, defaultService.Name, defaultService.ID, xconstants.ServiceConfigFile))
-	if err = defaultService.PreStart(context.Background(),
-		commonservice.NewOptions().WithBenchPath(benchPath)); err != nil {
-		xlog.PrintErr(err, xruntime.Location())
-		return
-	}
-	if err = service.Start(); err != nil {
+	if err = service.Start(context.Background()); err != nil {
 		xlog.PrintErr(err, xruntime.Location())
 		return
 	}
@@ -84,7 +74,7 @@ EXIT:
 		select {
 		case <-defaultService.QuitChan:
 			defaultService.Log.Warn("service will shutdown in a few seconds")
-			service.PreShutdown()
+			_ = service.PreStop()
 			_ = service.Stop()
 			break EXIT // 退出循环
 		case s := <-sigChan:

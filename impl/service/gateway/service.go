@@ -1,8 +1,11 @@
 package gateway
 
 import (
+	"context"
+	"github.com/pkg/errors"
 	"runtime"
 	commonservice "xcore/impl/common/service"
+	xruntime "xcore/lib/runtime"
 )
 
 type Service struct {
@@ -15,7 +18,143 @@ func NewService(defaultService *commonservice.DefaultService) *Service {
 	}
 }
 
-func (p *Service) Start() (err error) {
+func (p *Service) Start(ctx context.Context) (err error) {
+	if err = p.DefaultService.PreStart(ctx, OnHandlerBus, logCallBackFunc); err != nil {
+		return errors.WithMessagef(err, xruntime.Location())
+	}
+	_ = p.DefaultService.Start(ctx)
+
+	// todo menglc 开启 jaeger
+	// 链路追踪jaeger
+	//if len(p.BenchMgr.Json.Jaeger.Addr) != 0 {
+	//
+	//}
+	//if len(p.Bench.Json.Jaeger.Addr) != 0 {
+	//	err = xrjaeger.GetInstance().Start(context.TODO(),
+	//		xrjaeger.NewOptions().
+	//			SetEndpoint(p.Bench.Json.Jaeger.Addr).
+	//			SetServiceName(fmt.Sprintf("%v.%v.%v", p.ZoneID, p.ServiceName, p.ServiceID)).
+	//			SetServiceVersion(fmt.Sprintf("%v", p.Bench.Json.Base.Version)),
+	//	)
+	//	if err != nil {
+	//		return errors.Errorf("Jaeger connect %+v err:%v %v", p.Bench.Json.Jaeger.Addr, err, xrutil.GetCodeLocation(1).String())
+	//	}
+	//}
+	// todo menglc 开启 MongoDB
+	// 连接mongodb
+	//subZoneMongodb := sub_bench.GMgr.Json.ZoneMongoDB
+	//if err := xrmongodb.GetInstance().Connect(context.TODO(),
+	//	xrmongodb.NewOptions().
+	//		SetAddrs(subZoneMongodb.Addrs).
+	//		SetUserName(subZoneMongodb.User).
+	//		SetPW(subZoneMongodb.Pwd).
+	//		SetDBName(subZoneMongodb.DBName).
+	//		SetMaxPoolSize(subZoneMongodb.MaxPoolSize).
+	//		SetMinPoolSize(subZoneMongodb.MinPoolSize).
+	//		SetTimeoutDuration(subZoneMongodb.TimeoutDuration).
+	//		SetMaxConnIdleTime(subZoneMongodb.MaxConnIdleTime).
+	//		SetMaxConnecting(subZoneMongodb.MaxConnecting),
+	//); err != nil {
+	//	return errors.WithMessagef(err, "%v %v", sub_bench.GMgr.Json.ZoneMongoDB, xrutil.GetCodeLocation(1).String())
+	//} else {
+	//	xrmongodb.GetInstance().SwitchedDatabase(mdb.GenDatabaseName(server_del.GMgr.ZoneID))
+	//
+	//	mdb_sys.Collection = xrmongodb.GetInstance().SwitchedCollection(mdb_sys.CollectionName)
+	//	mdb_user.Collection = xrmongodb.GetInstance().SwitchedCollection(mdb_user.CollectionName)
+	//	mdb_inventory.Collection = xrmongodb.GetInstance().SwitchedCollection(mdb_inventory.CollectionName)
+	//
+	//	//加载系统 event 数据
+	//	var record common_proto.DBInventory
+	//	opts := options.FindOne().SetProjection(bson.M{"_id": 0, "uid": 0})
+	//	if _, err = mdb_inventory.FindOne(context.Background(), xrmongodb.GetInstance(), 0, &record, opts); err != nil {
+	//		return errors.WithMessagef(err, "%v mongodb col_event FindOne %v", dk.event, xrutil.GetCodeLocation(1).String())
+	//	} else {
+	//		xrlog.GetInstance().Tracef("%v %+v", dk.event, &record)
+	//		world.GEventMgr.LoadFromDB(0, record.Events)
+	//	}
+	//}
+	// todo menglc 开启 Redis
+	// 连接redis
+	//if err = xrredis.GetInstance().Connect(context.Background(),
+	//	xrredis.NewOptions().
+	//		SetAddrs(sub_bench.GMgr.Json.ZoneRedis.Addrs).
+	//		SetPW(sub_bench.GMgr.Json.ZoneRedis.Password),
+	//); err != nil {
+	//	return errors.WithMessagef(err, "redis connect addrs:%v %v",
+	//		sub_bench.GMgr.Json.ZoneRedis.Addrs, xrutil.GetCodeLocation(1).String())
+	//}
+	// redis订阅
+	//go func() {
+	//	defer func() {
+	//		if xrutil.IsRelease() {
+	//			if err := recover(); err != nil {
+	//				xrlog.GetInstance().Fatal(dk.GoroutinePanic, err, debug.Stack())
+	//			}
+	//		}
+	//		xrlog.GetInstance().Fatal(dk.GoroutineDone)
+	//	}()
+	//	sub := xrredis.GetInstance().Client.Subscribe(context.Background(),
+	//		redis_pub_sub.GenChannelNotice(server_del.GMgr.ZoneID))
+	//	// sub.Channel() 返回go channel，可以循环读取redis服务器发过来的消息
+	//	for message := range sub.Channel() {
+	//		xrlog.GetInstance().Debugf("redis Subscribe %v", dk.Notice)
+	//		server_del.GMgr.BusChannel <- message
+	//	}
+	//}()
+	// todo menglc 开启 NATS
+	//{
+	//	// 连接 global NATS
+	//	var urls string
+	//	for k := range sub_bench.GMgr.Json.GlobalNATS.Addrs {
+	//		urls += sub_bench.GMgr.Json.GlobalNATS.Addrs[k] + ","
+	//	}
+	//	urls = strings.TrimRight(urls, ",")
+	//
+	//	var option nats.Option
+	//	if sub_bench.GMgr.Json.GlobalNATS.User != nil && sub_bench.GMgr.Json.GlobalNATS.Password != nil {
+	//		option = nats.UserInfo(*sub_bench.GMgr.Json.GlobalNATS.User, *sub_bench.GMgr.Json.GlobalNATS.Password)
+	//	}
+	//
+	//	if err = server_del.GGlobalNats.Connect(urls, option); err != nil {
+	//		return errors.WithMessagef(err, "nats connect addrs:%v urls:%v %v",
+	//			sub_bench.GMgr.Json.GlobalNATS.Addrs, urls, xrutil.GetCodeLocation(1).String())
+	//	}
+	//	server_del.GGlobalNats.Sub = mq_nats.GenGlobalSub(server_del.GMgr.ZoneID, server_del.GMgr.ServiceName,
+	//		server_del.GMgr.ServiceID)
+	//	server_del.GGlobalNats.Subscription, err = server_del.GGlobalNats.Subscribe(server_del.GGlobalNats.Sub, &world.GMQPbFunMgr, server_del.GMgr.BusChannel)
+	//	if err != nil {
+	//		return errors.WithMessagef(err, "GGlobalNats Subscribe sub:%v %v",
+	//			server_del.GGlobalNats.Sub, xrutil.GetCodeLocation(1).String())
+	//	}
+	//}
+	{
+		//// 连接zone NATS
+		//var urls string
+		//for k := range sub_bench.GMgr.Json.ZoneNATS.Addrs {
+		//	urls += sub_bench.GMgr.Json.ZoneNATS.Addrs[k] + ","
+		//}
+		//urls = strings.TrimRight(urls, ",")
+		//
+		//var option nats.Option
+		//if sub_bench.GMgr.Json.ZoneNATS.User != nil && sub_bench.GMgr.Json.ZoneNATS.Password != nil {
+		//	option = nats.UserInfo(*sub_bench.GMgr.Json.ZoneNATS.User, *sub_bench.GMgr.Json.ZoneNATS.Password)
+		//}
+		//
+		//if err = server_del.GZoneNats.Connect(urls, option); err != nil {
+		//	return errors.WithMessagef(err, "nats connect addrs:%v urls:%v %v",
+		//		sub_bench.GMgr.Json.ZoneNATS.Addrs, urls, xrutil.GetCodeLocation(1).String())
+		//}
+		//server_del.GZoneNats.Sub = mq_nats.GenZoneSub(server_del.GMgr.ZoneID, server_del.GMgr.ServiceName,
+		//	server_del.GMgr.ServiceID)
+		//server_del.GZoneNats.Subscription, err = server_del.GZoneNats.Subscribe(server_del.GZoneNats.Sub, &world.GMQPbFunMgr, server_del.GMgr.BusChannel)
+		//if err != nil {
+		//	return errors.WithMessagef(err, "GZoneNats Subscribe sub:%v err:%v",
+		//		server_del.GZoneNats.Sub, xrutil.GetCodeLocation(1).String())
+		//}
+	}
+
+	runtime.GC()
+	return nil
 	// 数据统计
 	//if err = server_del.GST.Start(sub_bench.GMgr.Json.STKafka.Addrs, st_mgr.GameID,
 	//	sub_bench.GMgr.Json.StServerID, sub_bench.GMgr.Json.StServerType); err != nil {
@@ -102,7 +241,7 @@ func (p *Service) Start() (err error) {
 	//	xrlog.GetInstance().Warnf("GServer got signal: %s, shutting down...", s)
 	//}
 	//
-	//world.PreShutdown()
+	//world.PreStop()
 	//_ = server_del.GMgr.Stop()
 
 	return err
@@ -147,3 +286,12 @@ func (p *Service) Start() (err error) {
 //	_ = xrlog.GetInstance().Stop()
 //	return nil
 //}
+
+func (p *Service) PreStop() error {
+	_ = p.DefaultService.PreStop()
+	return nil
+}
+func (p *Service) Stop() (err error) {
+	_ = p.DefaultService.Stop()
+	return nil
+}
