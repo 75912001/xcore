@@ -14,7 +14,7 @@ type clientOptions struct {
 	eventChan        chan<- interface{} // 外部传递的事件处理管道.连接的事件会放入该管道,以供外部处理
 	sendChanCapacity *uint32            // 发送管道容量
 	packet           xnetpacket.IPacket
-	connOptions      ConnOptions
+	connOptions      connOptions
 	handler          IHandler
 }
 
