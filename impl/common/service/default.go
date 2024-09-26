@@ -153,7 +153,7 @@ func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler,
 	}
 	// 全局定时器
 	if p.BenchMgr.Json.Timer.ScanSecondDuration != nil || p.BenchMgr.Json.Timer.ScanMillisecondDuration != nil {
-		p.Timer = xtimer.NewMgr()
+		p.Timer = xtimer.NewTimer()
 		err = p.Timer.Start(ctx,
 			xtimer.NewOptions().
 				WithScanSecondDuration(*p.BenchMgr.Json.Timer.ScanSecondDuration).

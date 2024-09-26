@@ -29,7 +29,7 @@ func exampleTimer() {
 		return
 	}
 	var timer xtimer.ITimer
-	timer = xtimer.NewMgr()
+	timer = xtimer.NewTimer()
 	busChannel := make(chan interface{}, xconstants.BusChannelCapacityDefault)
 	err := timer.Start(context.Background(),
 		xtimer.NewOptions().
