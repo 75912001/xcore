@@ -9,13 +9,13 @@ import (
 	xtimer "xcore/lib/timer"
 )
 
-func cbSecond(arg interface{}) error {
-	fmt.Println("cbSecond:", arg.(uint64))
+func cbSecond(arg ...interface{}) error {
+	fmt.Println("cbSecond:", arg[0].(uint64))
 	return nil
 }
 
-func cbMillisecond(arg interface{}) error {
-	fmt.Println("cbMillisecond:", arg.(uint64))
+func cbMillisecond(arg ...interface{}) error {
+	fmt.Println("cbMillisecond:", arg[0].(uint64))
 	return nil
 }
 
@@ -66,9 +66,9 @@ func exampleTimer() {
 					}
 				}
 			case xtimer.EventTimerSecond:
-				_ = t.Function()
+				_ = t.Execute()
 			case xtimer.EventTimerMillisecond:
-				_ = t.Function()
+				_ = t.Execute()
 			}
 		}
 	}
