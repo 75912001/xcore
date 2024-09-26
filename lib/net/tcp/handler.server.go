@@ -7,7 +7,7 @@ import (
 type DefaultHandlerServer struct {
 }
 
-func NewDefaultHandlerServer() *DefaultHandlerServer {
+func NewDefaultHandlerServer() IHandler {
 	return &DefaultHandlerServer{}
 }
 

@@ -9,20 +9,25 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
 )
 
 // 己方作为服务端
 type server struct {
-	event    IEvent
+	IEvent
+	IHandler
+	xnetpacket.IPacket
 	listener *net.TCPListener //监听
 	options  *serverOptions
 }
 
 // NewServer 新建服务
 func NewServer() *server {
-	return &server{}
+	return &server{
+		IHandler: NewDefaultHandlerServer(),
+	}
 }
 
 // 网络 错误 暂时
@@ -39,12 +44,13 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
+func (p *server) Start(_ context.Context, packet xnetpacket.IPacket, opts ...*serverOptions) error {
 	p.options = mergeServerOptions(opts...)
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.event = newDefaultEvent(p.options.eventChan)
+	p.IEvent = newDefaultEvent(p.options.eventChan)
+	p.IPacket = packet
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -98,22 +104,18 @@ func (p *server) ActiveDisconnect(remote IRemote) error {
 	if remote == nil || !remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
-	remote.SetActiveDisconnection(true)
-	if err := p.options.handler.OnDisconnect(remote); err != nil {
+	remote.Disable()
+	if err := p.OnDisconnect(remote); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
 }
 
 func (p *server) handleConn(conn *net.TCPConn) {
-	remote := &DefaultRemote{
-		IHandler: p.options.handler,
-		Conn:     conn,
-		sendChan: make(chan interface{}, *p.options.sendChanCapacity),
-	}
-	if err := p.event.Connect(remote); err != nil {
+	remote := NewDefaultRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
+	if err := p.Connect(remote); err != nil {
 		xlog.PrintfErr("event.Connect err:%v", err)
 		return
 	}
-	remote.start(&p.options.connOptions, p.event)
+	remote.start(&p.options.connOptions, p.IEvent, p.IHandler)
 }

@@ -20,13 +20,13 @@ type Client struct {
 // Connect 连接
 //
 //	每个连接有 一个 发送协程, 一个 接收协程
-func (p *Client) Connect(ctx context.Context, handler IHandler, packet xnetpacket.IPacket, opts ...*clientOptions) error {
+func (p *Client) Connect(ctx context.Context, packet xnetpacket.IPacket, opts ...*clientOptions) error {
 	newOpts := mergeClientOptions(opts...)
 	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.IEvent = newDefaultEvent(newOpts.eventChan)
-	p.IHandler = handler
+	p.IHandler = NewDefaultHandlerClient()
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
