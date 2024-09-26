@@ -7,6 +7,10 @@ import (
 type DefaultHandlerClient struct {
 }
 
+func NewDefaultHandlerClient() IHandler {
+	return &DefaultHandlerClient{}
+}
+
 func (p *DefaultHandlerClient) OnConnect(_ IRemote) error {
 	return nil
 }
