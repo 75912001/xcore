@@ -3,7 +3,6 @@ package tcp
 import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
-	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -13,9 +12,7 @@ type clientOptions struct {
 	serverAddress    *string            // 服务端的地址 e.g.:127.0.0.1:8787
 	eventChan        chan<- interface{} // 外部传递的事件处理管道.连接的事件会放入该管道,以供外部处理
 	sendChanCapacity *uint32            // 发送管道容量
-	packet           xnetpacket.IPacket
 	connOptions      connOptions
-	handler          IHandler
 }
 
 // NewClientOptions 新的ClientOptions
@@ -48,16 +45,6 @@ func (p *clientOptions) SetSendChanCapacity(sendChanCapacity uint32) *clientOpti
 	return p
 }
 
-func (p *clientOptions) SetPacket(packet xnetpacket.IPacket) *clientOptions {
-	p.packet = packet
-	return p
-}
-
-func (p *clientOptions) SetHandler(handler IHandler) *clientOptions {
-	p.handler = handler
-	return p
-}
-
 // mergeClientOptions combines the given *clientOptions into a single *clientOptions in a last one wins fashion.
 // The specified options are merged with the existing options on the server, with the specified options taking
 // precedence.
@@ -76,17 +63,11 @@ func mergeClientOptions(opts ...*clientOptions) *clientOptions {
 		if opt.sendChanCapacity != nil {
 			newOptions.SetSendChanCapacity(*opt.sendChanCapacity)
 		}
-		if opt.packet != nil {
-			newOptions.SetPacket(opt.packet)
-		}
 		if opt.connOptions.readBuffer != nil {
 			newOptions.SetReadBuffer(*opt.connOptions.readBuffer)
 		}
 		if opt.connOptions.writeBuffer != nil {
 			newOptions.SetWriteBuffer(*opt.connOptions.writeBuffer)
-		}
-		if opt.handler != nil {
-			newOptions.SetHandler(opt.handler)
 		}
 	}
 	return newOptions
@@ -101,12 +82,6 @@ func clientConfigure(opts *clientOptions) error {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	if opts.sendChanCapacity == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.packet == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.handler == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	return nil
