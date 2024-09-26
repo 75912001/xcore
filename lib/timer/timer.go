@@ -13,7 +13,7 @@ import (
 	"xcore/lib/constants"
 	"xcore/lib/log"
 	"xcore/lib/runtime"
-	xutil "xcore/lib/switch"
+	"xcore/lib/xswitch"
 )
 
 // 定时器
@@ -166,7 +166,7 @@ func (p *defaultTimer) Stop() {
 func (p *defaultTimer) AddMillisecond(callBackFunc callback.ICallBack, expireMillisecond int64) *millisecond {
 	t := &millisecond{
 		ICallBack: callBackFunc,
-		ISwitch:   xutil.NewDefaultSwitch(true),
+		ISwitch:   xswitch.NewDefaultSwitch(true),
 		expire:    expireMillisecond,
 	}
 	p.milliSecondChan <- t
@@ -218,7 +218,7 @@ func (p *defaultTimer) AddSecond(callBackFunc callback.ICallBack, expire int64) 
 	t := &second{
 		millisecond{
 			ICallBack: callBackFunc,
-			ISwitch:   xutil.NewDefaultSwitch(true),
+			ISwitch:   xswitch.NewDefaultSwitch(true),
 			expire:    expire,
 		},
 	}

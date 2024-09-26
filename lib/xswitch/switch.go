@@ -1,6 +1,6 @@
-// Package util 开关
+// Package xswitch Package util 开关
 // 两种状态：开启、关闭
-package _switch
+package xswitch
 
 // ISwitch interface
 type ISwitch interface {

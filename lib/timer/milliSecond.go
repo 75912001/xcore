@@ -2,7 +2,7 @@ package timer
 
 import (
 	"xcore/lib/callback"
-	xswitch "xcore/lib/switch"
+	xswitch "xcore/lib/xswitch"
 )
 
 // 毫秒级定时器

@@ -3,7 +3,7 @@ package timer
 import (
 	"context"
 	xutil "xcore/lib/callback"
-	xswitch "xcore/lib/switch"
+	xswitch "xcore/lib/xswitch"
 )
 
 type ITimerSecond interface {
