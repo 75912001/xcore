@@ -1,34 +1,26 @@
 package callback
 
-type ICallBack interface {
-	Function() error
-	SetArg(arg interface{})
-	GetArg() interface{}
-}
+import "xcore/lib/parameters"
 
-// OnFunction 回调函数
-type OnFunction func(arg interface{}) error
+type ICallBack interface {
+	Execute() error        // 执行回调
+	parameters.IParameters // 参数
+}
 
 type callBack struct {
-	arg        interface{} // 参数
-	onFunction OnFunction  // 回调函数
+	onFunction func(arg ...interface{}) error // 回调函数
+	parameters.IParameters
 }
 
-func NewCallBack(onFunction OnFunction, arg interface{}) ICallBack {
+func NewCallBack(onFunction func(arg ...interface{}) error, arg ...interface{}) ICallBack {
+	par := parameters.NewParameters()
+	par.Set(arg...)
 	return &callBack{
-		arg:        arg,
-		onFunction: onFunction,
+		onFunction:  onFunction,
+		IParameters: par,
 	}
 }
 
-func (p *callBack) Function() error {
-	return p.onFunction(p.GetArg())
-}
-
-func (p *callBack) SetArg(arg interface{}) {
-	p.arg = arg
-}
-
-func (p *callBack) GetArg() interface{} {
-	return p.arg
+func (p *callBack) Execute() error {
+	return p.onFunction(p.Get())
 }
