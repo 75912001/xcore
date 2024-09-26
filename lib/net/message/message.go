@@ -2,14 +2,13 @@ package message
 
 import (
 	"context"
+	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	"xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
-	xutil "xcore/lib/util"
-
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
+	xutil "xcore/lib/switch"
 )
 
 type Message struct {

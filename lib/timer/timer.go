@@ -13,7 +13,7 @@ import (
 	"xcore/lib/constants"
 	"xcore/lib/log"
 	"xcore/lib/runtime"
-	xutil "xcore/lib/util"
+	xutil "xcore/lib/switch"
 )
 
 // mgr 定时器管理器

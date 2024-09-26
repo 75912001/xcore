@@ -5,21 +5,21 @@ package time
 
 import (
 	"time"
-	"xcore/lib/util"
+	"xcore/lib/switch"
 )
 
 // Mgr 时间管理器
 type Mgr struct {
-	timestampSecond       int64        // 上一次调用Update更新的时间戳-秒
-	timestampMillisecond  int64        // 上一次调用Update更新的时间戳-毫秒
-	time                  time.Time    // 上一次调用Update更新的时间
-	timestampSecondOffset int64        // 时间戳偏移量-秒
-	UTCSwitch             util.ISwitch // UTC 时间开关
+	timestampSecond       int64           // 上一次调用Update更新的时间戳-秒
+	timestampMillisecond  int64           // 上一次调用Update更新的时间戳-毫秒
+	time                  time.Time       // 上一次调用Update更新的时间
+	timestampSecondOffset int64           // 时间戳偏移量-秒
+	UTCSwitch             _switch.ISwitch // UTC 时间开关
 }
 
 func NewMgr() *Mgr {
 	return &Mgr{
-		UTCSwitch: util.NewDefaultSwitch(false),
+		UTCSwitch: _switch.NewDefaultSwitch(false),
 	}
 }
 

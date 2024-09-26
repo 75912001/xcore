@@ -2,7 +2,7 @@ package log
 
 import (
 	"sync"
-	xutil "xcore/lib/util"
+	xutil "xcore/lib/switch"
 )
 
 // entry的内存池选项
