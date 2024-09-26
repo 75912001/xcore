@@ -7,20 +7,20 @@ type ICallBack interface {
 	parameters.IParameters // 参数
 }
 
-type callBack struct {
+type defaultCallBack struct {
 	onFunction func(arg ...interface{}) error // 回调函数
 	parameters.IParameters
 }
 
-func NewCallBack(onFunction func(arg ...interface{}) error, arg ...interface{}) ICallBack {
+func NewDefaultCallBack(onFunction func(arg ...interface{}) error, arg ...interface{}) ICallBack {
 	par := parameters.NewParameters()
 	par.Set(arg...)
-	return &callBack{
+	return &defaultCallBack{
 		onFunction:  onFunction,
 		IParameters: par,
 	}
 }
 
-func (p *callBack) Execute() error {
+func (p *defaultCallBack) Execute() error {
 	return p.onFunction(p.Get())
 }
