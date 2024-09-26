@@ -2,14 +2,14 @@ package log
 
 import (
 	"sync"
-	xutil "xcore/lib/switch"
+	xswitch "xcore/lib/xswitch"
 )
 
 // entry的内存池选项
 type entryPoolOptions struct {
-	poolSwitch   xutil.ISwitch // 内存池开关 [default]: true
-	pool         *sync.Pool    // 内存池 [default]: &sync.Pool{New: func() interface{} { return newEntry() }}
-	newEntryFunc func() *entry // 创建 entry 的方法 [default]: func() *entry { return p.pool.Get().(*entry) }
+	poolSwitch   xswitch.ISwitch // 内存池开关 [default]: true
+	pool         *sync.Pool      // 内存池 [default]: &sync.Pool{New: func() interface{} { return newEntry() }}
+	newEntryFunc func() *entry   // 创建 entry 的方法 [default]: func() *entry { return p.pool.Get().(*entry) }
 }
 
 // newEntryPoolOptions 新的entryPoolOptions
@@ -20,7 +20,7 @@ func newEntryPoolOptions() *entryPoolOptions {
 		},
 	}
 	opt := &entryPoolOptions{
-		poolSwitch: xutil.NewDefaultSwitch(true),
+		poolSwitch: xswitch.NewDefaultSwitch(true),
 		pool:       pool,
 		newEntryFunc: func() *entry {
 			return pool.Get().(*entry)
