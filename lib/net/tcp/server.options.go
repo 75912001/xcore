@@ -3,7 +3,6 @@ package tcp
 import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
-	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -13,9 +12,7 @@ type serverOptions struct {
 	listenAddress    *string            // 127.0.0.1:8787
 	eventChan        chan<- interface{} // 待处理的事件
 	sendChanCapacity *uint32            // 发送 channel 大小
-	packet           xnetpacket.IPacket
 	connOptions      connOptions
-	handler          IHandler
 }
 
 // NewServerOptions 新的ServerOptions
@@ -38,11 +35,6 @@ func (p *serverOptions) SetSendChanCapacity(sendChanCapacity uint32) *serverOpti
 	return p
 }
 
-func (p *serverOptions) SetPacket(packet xnetpacket.IPacket) *serverOptions {
-	p.packet = packet
-	return p
-}
-
 func (p *serverOptions) SetReadBuffer(readBuffer int) *serverOptions {
 	p.connOptions.readBuffer = &readBuffer
 	return p
@@ -50,11 +42,6 @@ func (p *serverOptions) SetReadBuffer(readBuffer int) *serverOptions {
 
 func (p *serverOptions) SetWriteBuffer(writeBuffer int) *serverOptions {
 	p.connOptions.writeBuffer = &writeBuffer
-	return p
-}
-
-func (p *serverOptions) SetHandler(handler IHandler) *serverOptions {
-	p.handler = handler
 	return p
 }
 
@@ -76,17 +63,11 @@ func mergeServerOptions(opts ...*serverOptions) *serverOptions {
 		if opt.sendChanCapacity != nil {
 			newOptions.SetSendChanCapacity(*opt.sendChanCapacity)
 		}
-		if opt.packet != nil {
-			newOptions.SetPacket(opt.packet)
-		}
 		if opt.connOptions.readBuffer != nil {
 			newOptions.SetReadBuffer(*opt.connOptions.readBuffer)
 		}
 		if opt.connOptions.writeBuffer != nil {
 			newOptions.SetWriteBuffer(*opt.connOptions.writeBuffer)
-		}
-		if opt.handler != nil {
-			newOptions.SetHandler(opt.handler)
 		}
 	}
 	return newOptions
@@ -101,12 +82,6 @@ func serverConfigure(opts *serverOptions) error {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	if opts.sendChanCapacity == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.packet == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
-	if opts.handler == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	return nil
