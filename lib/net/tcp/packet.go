@@ -11,9 +11,9 @@ import (
 // DefaultPacket 数据包
 type DefaultPacket struct {
 	Header          packet.IHeader // 包头
-	Message         proto.Message  // 解析出的数据
+	ProtoMessage    proto.Message  // 解析出的数据
 	PassThroughData []byte         // 包体数据(不带包头)
-	Entity          *xnetmessage.Message
+	Message         *xnetmessage.IMessage
 	CTX             context.Context
 }
 
@@ -34,7 +34,7 @@ func (p *DefaultPacket) Unmarshal(data []byte) (header packet.IHeader, message p
 
 // IsPassThrough 是否透传
 // 是: DefaultPacket.PassThroughBody 可用
-// 否: DefaultPacket.Message 可用
+// 否: DefaultPacket.options 可用
 //func (p *DefaultPacket) IsPassThrough() bool {
 //	return p.PassThroughData != nil
 //}
