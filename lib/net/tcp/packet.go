@@ -5,36 +5,36 @@ import (
 	"google.golang.org/protobuf/proto"
 	xerror "xcore/lib/error"
 	xnetmessage "xcore/lib/net/message"
-	"xcore/lib/net/packet"
+	xnetpacket "xcore/lib/net/packet"
 )
 
-// DefaultPacket 数据包
-type DefaultPacket struct {
-	Header          packet.IHeader // 包头
-	ProtoMessage    proto.Message  // 解析出的数据
-	PassThroughData []byte         // 包体数据(不带包头)
-	Message         *xnetmessage.IMessage
-	CTX             context.Context
+// defaultPacket 数据包
+type defaultPacket struct {
+	xnetpacket.IHeader        // 包头
+	proto.Message             // 解析出的数据
+	PassThroughData    []byte // 包体数据(不带包头)
+	xnetmessage.IMessage
+	CTX context.Context
 }
 
 // NewDefaultPacket 新建数据包
-func NewDefaultPacket() *DefaultPacket {
-	return &DefaultPacket{}
+func NewDefaultPacket() xnetpacket.IPacket {
+	return &defaultPacket{}
 }
 
-func (p *DefaultPacket) Marshal() (data []byte, err error) {
+func (p *defaultPacket) Marshal() (data []byte, err error) {
 	// todo menglc 序列化
 	return nil, xerror.NotImplemented
 }
 
-func (p *DefaultPacket) Unmarshal(data []byte) (header packet.IHeader, message proto.Message, err error) {
+func (p *defaultPacket) Unmarshal(data []byte) (header xnetpacket.IHeader, message proto.Message, err error) {
 	// todo menglc 反序列化
 	return nil, nil, xerror.NotImplemented
 }
 
 // IsPassThrough 是否透传
-// 是: DefaultPacket.PassThroughBody 可用
-// 否: DefaultPacket.options 可用
-//func (p *DefaultPacket) IsPassThrough() bool {
+// 是: defaultPacket.PassThroughBody 可用
+// 否: defaultPacket.options 可用
+//func (p *defaultPacket) IsPassThrough() bool {
 //	return p.PassThroughData != nil
 //}
