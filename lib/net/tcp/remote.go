@@ -79,7 +79,7 @@ func (p *defaultRemote) start(tcpOptions *connOptions, event IEvent, handler IHa
 	p.cancelFunc = cancelFunc
 
 	go p.onSend(ctxWithCancel)
-	go p.onRecv(event, handler)
+	go p.onRead(event, handler)
 }
 
 // IsConnect 是否连接
@@ -228,7 +228,7 @@ func (p *defaultRemote) onSend(ctx context.Context) {
 const MsgLengthFieldSize uint32 = 4 // 消息总长度字段 的 大小
 
 // 处理接收
-func (p *defaultRemote) onRecv(event IEvent, handler IHandler) {
+func (p *defaultRemote) onRead(event IEvent, handler IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
