@@ -35,9 +35,8 @@ func (p *Client) Connect(ctx context.Context, packet xnetpacket.IPacket, opts ..
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	defaultRemote := NewDefaultRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
-	defaultRemote.start(&newOpts.connOptions, p.IEvent, p.IHandler)
-	p.IRemote = defaultRemote
+	p.IRemote = NewDefaultRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
+	p.IRemote.Start(&newOpts.connOptions, p.IEvent, p.IHandler)
 	p.IPacket = packet
 	return nil
 }
