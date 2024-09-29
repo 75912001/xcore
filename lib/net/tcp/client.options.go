@@ -20,27 +20,27 @@ func NewClientOptions() *clientOptions {
 	return new(clientOptions)
 }
 
-func (p *clientOptions) SetReadBuffer(readBuffer int) *clientOptions {
+func (p *clientOptions) WithReadBuffer(readBuffer int) *clientOptions {
 	p.connOptions.readBuffer = &readBuffer
 	return p
 }
 
-func (p *clientOptions) SetWriteBuffer(writeBuffer int) *clientOptions {
+func (p *clientOptions) WithWriteBuffer(writeBuffer int) *clientOptions {
 	p.connOptions.writeBuffer = &writeBuffer
 	return p
 }
 
-func (p *clientOptions) SetAddress(address string) *clientOptions {
+func (p *clientOptions) WithAddress(address string) *clientOptions {
 	p.serverAddress = &address
 	return p
 }
 
-func (p *clientOptions) SetEventChan(eventChan chan<- interface{}) *clientOptions {
+func (p *clientOptions) WithEventChan(eventChan chan<- interface{}) *clientOptions {
 	p.eventChan = eventChan
 	return p
 }
 
-func (p *clientOptions) SetSendChanCapacity(sendChanCapacity uint32) *clientOptions {
+func (p *clientOptions) WithSendChanCapacity(sendChanCapacity uint32) *clientOptions {
 	p.sendChanCapacity = &sendChanCapacity
 	return p
 }
@@ -55,19 +55,19 @@ func mergeClientOptions(opts ...*clientOptions) *clientOptions {
 			continue
 		}
 		if opt.serverAddress != nil {
-			newOptions.SetAddress(*opt.serverAddress)
+			newOptions.WithAddress(*opt.serverAddress)
 		}
 		if opt.eventChan != nil {
-			newOptions.SetEventChan(opt.eventChan)
+			newOptions.WithEventChan(opt.eventChan)
 		}
 		if opt.sendChanCapacity != nil {
-			newOptions.SetSendChanCapacity(*opt.sendChanCapacity)
+			newOptions.WithSendChanCapacity(*opt.sendChanCapacity)
 		}
 		if opt.connOptions.readBuffer != nil {
-			newOptions.SetReadBuffer(*opt.connOptions.readBuffer)
+			newOptions.WithReadBuffer(*opt.connOptions.readBuffer)
 		}
 		if opt.connOptions.writeBuffer != nil {
-			newOptions.SetWriteBuffer(*opt.connOptions.writeBuffer)
+			newOptions.WithWriteBuffer(*opt.connOptions.writeBuffer)
 		}
 	}
 	return newOptions
