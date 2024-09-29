@@ -24,9 +24,13 @@ type server struct {
 }
 
 // NewServer 新建服务
-func NewServer(handler IHandler, packet xnetpacket.IPacket) *server {
+func NewServer(packet xnetpacket.IPacket, handler IHandler) *server {
 	return &server{
+		IEvent:   nil,
 		IHandler: handler,
+		IPacket:  packet,
+		listener: nil,
+		options:  nil,
 	}
 }
 
@@ -44,13 +48,12 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *server) Start(_ context.Context, packet xnetpacket.IPacket, opts ...*serverOptions) error {
+func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
 	p.options = mergeServerOptions(opts...)
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.IEvent = newDefaultEvent(p.options.eventChan)
-	p.IPacket = packet
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())

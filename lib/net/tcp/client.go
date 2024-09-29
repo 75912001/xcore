@@ -17,16 +17,24 @@ type Client struct {
 	xnetpacket.IPacket
 }
 
+func NewClient(packet xnetpacket.IPacket, handler IHandler) *Client {
+	return &Client{
+		IEvent:   nil,
+		IHandler: handler,
+		IRemote:  nil,
+		IPacket:  packet,
+	}
+}
+
 // Connect 连接
 //
 //	每个连接有 一个 发送协程, 一个 接收协程
-func (p *Client) Connect(ctx context.Context, handler IHandler, packet xnetpacket.IPacket, opts ...*clientOptions) error {
+func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	newOpts := mergeClientOptions(opts...)
 	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.IEvent = newDefaultEvent(newOpts.eventChan)
-	p.IHandler = handler
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -37,7 +45,6 @@ func (p *Client) Connect(ctx context.Context, handler IHandler, packet xnetpacke
 	}
 	p.IRemote = NewDefaultRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
 	p.IRemote.Start(&newOpts.connOptions, p.IEvent, p.IHandler)
-	p.IPacket = packet
 	return nil
 }
 
