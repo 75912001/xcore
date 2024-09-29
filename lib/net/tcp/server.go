@@ -24,9 +24,9 @@ type server struct {
 }
 
 // NewServer 新建服务
-func NewServer() *server {
+func NewServer(handler IHandler, packet xnetpacket.IPacket) *server {
 	return &server{
-		IHandler: NewDefaultHandlerServer(),
+		IHandler: handler,
 	}
 }
 
@@ -99,23 +99,22 @@ func (p *server) Stop() {
 	}
 }
 
-// ActiveDisconnect 逻辑层 主动 断开连接
-func (p *server) ActiveDisconnect(remote IRemote) error {
+// Disconnect 逻辑层 主动 断开连接
+func (p *server) Disconnect(remote IRemote) error {
 	if remote == nil || !remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
-	remote.Disable()
-	if err := p.OnDisconnect(remote); err != nil {
-		return errors.WithMessage(err, xruntime.Location())
+	if remote.IsConnect() {
+		remote.Stop()
 	}
 	return nil
 }
 
 func (p *server) handleConn(conn *net.TCPConn) {
 	remote := NewDefaultRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
-	if err := p.Connect(remote); err != nil {
+	if err := p.Connect(p.IHandler, remote); err != nil {
 		xlog.PrintfErr("event.Connect err:%v", err)
 		return
 	}
-	remote.start(&p.options.connOptions, p.IEvent, p.IHandler)
+	remote.Start(&p.options.connOptions, p.IEvent, p.IHandler)
 }
