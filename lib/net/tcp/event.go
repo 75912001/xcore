@@ -4,13 +4,14 @@ import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
 type IEvent interface {
-	Connect(handler IHandler, remote IRemote) error                       // 链接 放入 事件中
-	Disconnect(handler IHandler, remote IRemote) error                    // 断开链接 放入 事件中
-	Packet(handler IHandler, remote IRemote, packet *DefaultPacket) error // 数据包 放入 事件中
+	Connect(handler IHandler, remote IRemote) error                           // 链接 放入 事件中
+	Disconnect(handler IHandler, remote IRemote) error                        // 断开链接 放入 事件中
+	Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error // 数据包 放入 事件中
 }
 
 type defaultEvent struct {
@@ -52,12 +53,12 @@ func (p *defaultEvent) Disconnect(handler IHandler, remote IRemote) error {
 }
 
 // Packet 数据包
-func (p *defaultEvent) Packet(handler IHandler, remote IRemote, packet *DefaultPacket) error {
+func (p *defaultEvent) Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error {
 	select {
 	case p.eventChan <- &EventPacket{
 		IHandler: handler,
 		IRemote:  remote,
-		Packet:   packet,
+		IPacket:  packet,
 	}:
 	default:
 		xlog.PrintfErr("push EventPacket failed with eventChan full. remote:%v packet:%v", remote, packet)
@@ -82,5 +83,5 @@ type EventConnect struct {
 type EventPacket struct {
 	IHandler
 	IRemote
-	Packet *DefaultPacket
+	xnetpacket.IPacket
 }
