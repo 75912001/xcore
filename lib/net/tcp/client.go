@@ -42,14 +42,11 @@ func (p *Client) Connect(ctx context.Context, packet xnetpacket.IPacket, opts ..
 	return nil
 }
 
-// ActiveDisconnect 主动断开连接
-func (p *Client) ActiveDisconnect() error {
+// Disconnect 主动断开连接
+func (p *Client) Disconnect() error {
 	if !p.IRemote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
-	p.IRemote.Disable()
-	if err := p.OnDisconnect(p.IRemote); err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
+	p.IRemote.Stop()
 	return nil
 }
