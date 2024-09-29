@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 )
 
@@ -24,17 +25,14 @@ func (p *Service) OnCheckPacketLength(length uint32) error {
 func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	return nil
 }
-func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (*xnettcp.DefaultPacket, error) {
+func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
 	return nil, nil
 }
-func (p *Service) OnPacket(packet *xnettcp.DefaultPacket) error {
+func (p *Service) OnPacket(packet xnetpacket.IPacket) error {
 	return nil
 }
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
 	// todo menglc
 
-	if err := p.DefaultService.OnDisconnect(remote); err != nil {
-		return err
-	}
 	return nil
 }

@@ -16,6 +16,7 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
 	xruntime "xcore/lib/runtime"
@@ -65,7 +66,7 @@ func (p *DefaultService) Stop() (err error) {
 	return xerror.NotImplemented
 }
 
-func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler, onHandlerBusFunc OnHandlerBusFunc, logCallbackFunc xlog.CallBackFunc) (err error) {
+func (p *DefaultService) PreStart(ctx context.Context, packet xnetpacket.IPacket, handler xnettcp.IHandler, onHandlerBusFunc OnHandlerBusFunc, logCallbackFunc xlog.CallBackFunc) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -168,12 +169,12 @@ func (p *DefaultService) PreStart(ctx context.Context, handler xnettcp.IHandler,
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
 		case "tcp": // 启动 TCP 服务
-			if err := xnettcp.NewServer().Start(ctx, xnettcp.NewServerOptions().
-				SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
-				SetEventChan(p.BusChannel).
-				SetSendChanCapacity(*p.BenchMgr.Json.Base.SendChanCapacity).
-				SetPacket(xnettcp.NewDefaultPacket()).
-				SetHandler(handler)); err != nil {
+			if err = xnettcp.NewServer(handler, xnettcp.NewDefaultPacket()).Start(ctx, packet,
+				xnettcp.NewServerOptions().
+					SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
+					SetEventChan(p.BusChannel).
+					SetSendChanCapacity(*p.BenchMgr.Json.Base.SendChanCapacity),
+			); err != nil {
 				return errors.WithMessage(err, xruntime.Location())
 			}
 		case "udp":

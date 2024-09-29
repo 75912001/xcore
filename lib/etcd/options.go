@@ -71,7 +71,7 @@ package etcd
 //	return p
 //}
 //
-//func (p *Options) SetEventChan(eventChan chan<- interface{}) *Options {
+//func (p *Options) WithEventChan(eventChan chan<- interface{}) *Options {
 //	p.eventChan = eventChan
 //	return p
 //}
@@ -104,7 +104,7 @@ package etcd
 //			no.SetOnFunc(opt.onFunc)
 //		}
 //		if opt.eventChan != nil {
-//			no.SetEventChan(opt.eventChan)
+//			no.WithEventChan(opt.eventChan)
 //		}
 //	}
 //	return no
