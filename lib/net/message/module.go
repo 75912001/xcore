@@ -2,9 +2,9 @@ package message
 
 import (
 	"github.com/pkg/errors"
-	"xcore/lib/callback"
+	xcallback "xcore/lib/callback"
 	xerror "xcore/lib/error"
-	"xcore/lib/net/packet"
+	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 	"xcore/lib/xswitch"
 )
@@ -12,15 +12,15 @@ import "context"
 import "google.golang.org/protobuf/proto"
 
 // HandlerFunc 处理函数
-type HandlerFunc func(ctx context.Context, header packet.IHeader, message proto.Message, obj interface{}) error
+type HandlerFunc func(ctx context.Context, header xnetpacket.IHeader, message proto.Message, obj interface{}) error
 
 type IMessage interface {
-	callback.ICallBack
+	xcallback.ICallBack
 	Unmarshal(data []byte) (message proto.Message, err error)
 }
 
 type defaultMessage struct {
-	callback.ICallBack
+	xcallback.ICallBack
 	newProtoMessage   func() proto.Message // 创建新的 proto.Message
 	stateSwitch       xswitch.ISwitch      // 状态开关-该消息是否启用
 	passThroughSwitch xswitch.ISwitch      // 透传开关-该消息是否透传
