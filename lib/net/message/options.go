@@ -3,14 +3,14 @@ package message
 import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	"xcore/lib/callback"
+	xcallback "xcore/lib/callback"
 	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
 	xswitch "xcore/lib/xswitch"
 )
 
 type options struct {
-	callback          callback.ICallBack   // [required] 消息回调
+	callback          xcallback.ICallBack  // [required] 消息回调
 	newProtoMessage   func() proto.Message // [required] 创建新的 proto.options
 	stateSwitch       xswitch.ISwitch      // [optional] 状态开关-该消息是否启用 [default]:true
 	passThroughSwitch xswitch.ISwitch      // [optional] 透传开关-该消息是否透传 [default]:false
@@ -21,7 +21,7 @@ func NewOptions() *options {
 	return &options{}
 }
 
-func (p *options) WithHandler(callback callback.ICallBack) *options {
+func (p *options) WithHandler(callback xcallback.ICallBack) *options {
 	p.callback = callback
 	return p
 }
