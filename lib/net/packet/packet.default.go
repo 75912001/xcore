@@ -1,24 +1,23 @@
-package tcp
+package packet
 
 import (
 	"context"
 	"google.golang.org/protobuf/proto"
 	xerror "xcore/lib/error"
 	xnetmessage "xcore/lib/net/message"
-	xnetpacket "xcore/lib/net/packet"
 )
 
 // defaultPacket 数据包
 type defaultPacket struct {
-	xnetpacket.IHeader        // 包头
-	proto.Message             // 解析出的数据
-	PassThroughData    []byte // 包体数据(不带包头)
+	IHeader                // 包头
+	proto.Message          // 解析出的数据
+	PassThroughData []byte // 包体数据(不带包头)
 	xnetmessage.IMessage
 	CTX context.Context
 }
 
 // NewDefaultPacket 新建数据包
-func NewDefaultPacket() xnetpacket.IPacket {
+func NewDefaultPacket() IPacket {
 	return &defaultPacket{}
 }
 
@@ -27,7 +26,7 @@ func (p *defaultPacket) Marshal() (data []byte, err error) {
 	return nil, xerror.NotImplemented
 }
 
-func (p *defaultPacket) Unmarshal(data []byte) (header xnetpacket.IHeader, message proto.Message, err error) {
+func (p *defaultPacket) Unmarshal(data []byte) (header IHeader, message proto.Message, err error) {
 	// todo menglc 反序列化
 	return nil, nil, xerror.NotImplemented
 }
