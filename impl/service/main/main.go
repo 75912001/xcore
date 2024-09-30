@@ -52,11 +52,9 @@ func main() {
 			defaultService.GroupID, defaultService.Name, defaultService.ID)
 	}
 	var service commonservice.IService
-	var serviceGateway *gateway.Service
 	switch defaultService.Name {
 	case common.ServiceNameGateway:
-		serviceGateway = gateway.NewService(defaultService)
-		service = serviceGateway
+		service = gateway.NewService(defaultService)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return
