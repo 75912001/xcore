@@ -16,6 +16,7 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	"xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
@@ -34,8 +35,6 @@ type DefaultService struct {
 	ID             uint32 // ID
 	ExecutablePath string // 执行程序路径 // 程序所在路径(如为link,则为link所在的路径)
 
-	*xnettcp.DefaultHandlerServer
-
 	Log     xlog.ILog
 	TimeMgr *xtime.Mgr
 	Timer   xtimer.ITimer
@@ -48,9 +47,8 @@ type DefaultService struct {
 
 func NewDefaultService() *DefaultService {
 	val := &DefaultService{
-		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
-		TimeMgr:              xtime.NewMgr(),
-		QuitChan:             make(chan struct{}),
+		TimeMgr:  xtime.NewMgr(),
+		QuitChan: make(chan struct{}),
 	}
 	// 程序所在路径(如为link,则为link所在的路径)
 	if executablePath, err := xruntime.GetExecutablePath(); err != nil {
@@ -74,7 +72,7 @@ func NewDefaultService() *DefaultService {
 //	return xerror.NotImplemented
 //}
 
-func (p *DefaultService) PreStart(ctx context.Context, packet xnetpacket.IPacket, handler xnettcp.IHandler, onHandlerBusFunc OnHandlerBusFunc, logCallbackFunc xlog.CallBackFunc) (err error) {
+func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, handler handler.IHandler, logCallbackFunc xlog.CallBackFunc) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -154,7 +152,7 @@ func (p *DefaultService) PreStart(ctx context.Context, packet xnetpacket.IPacket
 			p.Log.Infof(xconstants.GoroutineDone)
 		}()
 		p.BusChannelWaitGroup.Add(1)
-		_ = onHandlerBusFunc()
+		_ = p.Handle()
 	}()
 	// 是否开启http采集分析
 	if p.BenchMgr.Json.Base.PprofHttpPort != nil {
@@ -177,7 +175,7 @@ func (p *DefaultService) PreStart(ctx context.Context, packet xnetpacket.IPacket
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
 		case "tcp": // 启动 TCP 服务
-			if err = xnettcp.NewServer(handler, xnettcp.NewDefaultPacket()).Start(ctx, packet,
+			if err = xnettcp.NewServer(packet, handler).Start(ctx,
 				xnettcp.NewServerOptions().
 					SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
 					SetEventChan(p.BusChannel).
@@ -191,5 +189,9 @@ func (p *DefaultService) PreStart(ctx context.Context, packet xnetpacket.IPacket
 			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 		}
 	}
+	return nil
+}
+
+func (p *DefaultService) Stop() (err error) {
 	return nil
 }

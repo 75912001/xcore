@@ -2,84 +2,87 @@ package service
 
 import (
 	"time"
-	xerror "xcore/lib/error"
-	"xcore/lib/net/tcp"
+	xlog "xcore/lib/log"
+	xnetevent "xcore/lib/net/event"
+	xruntime "xcore/lib/runtime"
+	xtimer "xcore/lib/timer"
 )
 
 // HandleEvent todo [重要] issue 在处理 event 时候, 向 eventChan 中插入 事件，注意超出eventChan的上限会阻塞.
-func OnHandlerBus() error {
+func (p *DefaultService) Handle() error {
 	//在消费eventChan时可能会往eventChan中写入事件，所以关闭服务时不能close eventChan（造成写入阻塞），通过定时检查eventChan大小来关闭
 	for {
 		select {
-		case <-GBusChannelCheckChan:
-			xrlog.GetInstance().Warn("receive GBusChannelCheckChan")
-			if 0 == len(eventChan) && IsServerStopping() {
-				xrlog.GetInstance().Warn("server is stopping, stop consume GEventChan with length 0")
-				return
-			} else {
-				xrlog.GetInstance().Warnf("server is stopping, waiting for consume GEventChan with length:%d", len(eventChan))
-			}
-		case v := <-eventChan:
+		//case <-GBusChannelCheckChan:
+		//	xrlog.GetInstance().Warn("receive GBusChannelCheckChan")
+		//	if 0 == len(eventChan) && IsServerStopping() {
+		//		xrlog.GetInstance().Warn("server is stopping, stop consume GEventChan with length 0")
+		//		return
+		//	} else {
+		//		xrlog.GetInstance().Warnf("server is stopping, waiting for consume GEventChan with length:%d", len(eventChan))
+		//	}
+		case value := <-p.BusChannel:
 			//TODO [*] 应拿尽拿...
-			GMgr.TimeMgr.Update()
+			p.TimeMgr.Update()
 			var err error
-			switch t := v.(type) {
+			switch event := value.(type) {
 			//tcp
-			case *tcp.EventConnect:
-				err = t.IHandler.OnConnect(t.IRemote)
-			case *tcp.EventPacket:
-				err = t.IHandler.OnPacket(t.IPacket)
-			case *tcp.EventDisconnect:
-				err = t.IHandler.OnDisconnect(t.IRemote)
-				if t.IRemote.IsConnect() {
-					t.IRemote.Stop()
+			case *xnetevent.Connect:
+				err = event.IHandler.OnConnect(event.IRemote)
+			case *xnetevent.Packet:
+				err = event.IHandler.OnPacket(event.IPacket)
+			case *xnetevent.Disconnect:
+				err = event.IHandler.OnDisconnect(event.IRemote)
+				if event.IRemote.IsConnect() {
+					event.IRemote.Stop()
 				}
 				//timer
-			case *timer.Second:
-				if t.IsValid() {
-					t.Function(t.Arg)
-				}
-			case *timer.Millisecond:
-				if t.IsValid() {
-					t.Function(t.Arg)
-				}
-				//kcp server
-			case *xrkcp.EventConnect:
-				err = t.Remote.Server.GetOnEvent().OnConn(t.Remote)
-			case *xrkcp.EventDisconnect:
-				err = t.Remote.Server.GetOnEvent().OnDisconnect(t.Remote)
-			case *xrkcp.Packet:
-				if !t.Remote.IsConn() {
+			case *xtimer.EventTimerSecond:
+				if event.IsDisabled() {
 					continue
 				}
-				err = t.Remote.Server.GetOnEvent().OnPacket(t)
-			case *xretcd.KV:
-				err = xretcd.GetInstance().Handler(t.Key, t.Value)
-			case *mq_nats.Packet:
-				err = onNatsFunc(t)
-			default:
-				if onDefaultFunc == nil {
-					xrlog.GetInstance().Fatalf("non-existent event:%v %v", v, t)
-				} else {
-					err = onDefaultFunc(v)
+				_ = event.Execute()
+			case *xtimer.EventTimerMillisecond:
+				if event.IsDisabled() {
+					continue
 				}
+				_ = event.Execute()
+				//kcp server
+			//case *xrkcp.EventConnect:
+			//	err = event.Remote.Server.GetOnEvent().OnConn(event.Remote)
+			//case *xrkcp.EventDisconnect:
+			//	err = event.Remote.Server.GetOnEvent().OnDisconnect(event.Remote)
+			//case *xrkcp.Packet:
+			//	if !event.Remote.IsConn() {
+			//		continue
+			//	}
+			//	err = event.Remote.Server.GetOnEvent().OnPacket(event)
+			//case *xretcd.KV:
+			//	err = xretcd.GetInstance().Handler(event.Key, event.Value)
+			//case *mq_nats.Packet:
+			//	err = onNatsFunc(event)
+			default:
+				//	xrlog.GetInstance().Fatalf("non-existent event:%value %value", value, event)
+				//	if onDefaultFunc == nil {
+				//} else {
+				//	err = onDefaultFunc(value)
+				//}
+			}
+			if err != nil {
+				p.Log.Errorf("Handle event:%v error:%value", value, err)
 			}
 
-			if err != nil { // todo 将日志放在每个 case 中,实例化输出对应的数据...
-				xrlog.PrintErr(v, err)
-			}
-
-			if util.IsDebug() {
-				dt := time.Now().Sub(GMgr.TimeMgr.Time).Milliseconds()
+			if xruntime.IsDebug() {
+				dt := time.Now().Sub(p.TimeMgr.NowTime()).Milliseconds()
 				if dt > 50 {
-					xrlog.GetInstance().Warnf("cost time50: %v Millisecond with event type:%T", dt, v)
+					xlog.PrintfErr("cost time50: %value Millisecond with event type:%T", dt, value)
 				} else if dt > 20 {
-					xrlog.GetInstance().Warnf("cost time20: %v Millisecond with event type:%T", dt, v)
+					xlog.PrintfErr("cost time20: %value Millisecond with event type:%T", dt, value)
 				} else if dt > 10 {
-					xrlog.GetInstance().Warnf("cost time10: %v Millisecond with event type:%T", dt, v)
+					xlog.PrintfErr("cost time10: %value Millisecond with event type:%T", dt, value)
 				}
 			}
 		}
 	}
-	return xerror.NotImplemented
+	return nil
 }

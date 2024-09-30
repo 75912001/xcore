@@ -81,7 +81,7 @@
   - **common**: 公共模块 [todo menglc]
     - **db_async**: 异步数据库 [todo menglc]
     - **etcd**: etcd客户端 [todo menglc]
-    - **service**: 服务
+    - **service**: 服务 [todo menglc]
     - `common.go` 公共模块 [todo menglc]
   - **protobuf**: protobuf
     - **proto**: proto 文件
@@ -122,3 +122,7 @@
   - **scripts**: 脚本
   - **tools**: 工具
     - **client.simulator**: 客户端模拟器 [todo menglc]
+
+
+[todo menglc] 
+ 使用 显示命名接口字段, 禁止使用匿名字段

@@ -1,3 +1,6 @@
 package service
 
-type OnHandlerBusFunc func() error
+type IHandler interface {
+	// 事件处理
+	Handle() error
+}

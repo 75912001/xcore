@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"runtime"
 	commonservice "xcore/impl/common/service"
+	xnettcp "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -19,10 +20,11 @@ func NewService(defaultService *commonservice.DefaultService) *Service {
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	if err = p.DefaultService.PreStart(ctx, p, commonservice.OnHandlerBus, logCallBackFunc); err != nil {
+	packet := xnettcp.NewDefaultPacket()
+	if err = p.DefaultService.Start(ctx, packet, p, logCallBackFunc); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
-	_ = p.DefaultService.Start(ctx)
+	_ = p.Start(ctx)
 
 	// todo menglc 开启 jaeger
 	// 链路追踪jaeger
@@ -288,7 +290,6 @@ func (p *Service) Start(ctx context.Context) (err error) {
 //}
 
 func (p *Service) PreStop() error {
-	_ = p.DefaultService.PreStop()
 	return nil
 }
 func (p *Service) Stop() (err error) {

@@ -2,7 +2,7 @@ package gateway
 
 import (
 	xnetpacket "xcore/lib/net/packet"
-	xnettcp "xcore/lib/net/tcp"
+	xnettcp "xcore/lib/net/remote"
 )
 
 //type Server struct {

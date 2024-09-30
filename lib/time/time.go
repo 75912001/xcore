@@ -38,12 +38,12 @@ func (p *Mgr) Update() {
 	p.timestampMillisecond = p.time.UnixMilli()
 }
 
-// ShadowTimestampSecond 叠加偏移量的时间戳-秒
-func (p *Mgr) ShadowTimestampSecond() int64 {
+// ShadowTimestamp 叠加偏移量的时间戳-秒
+func (p *Mgr) ShadowTimestamp() int64 {
 	return p.timestampSecond + p.timestampSecondOffset
 }
 
-// SetTimestampSecondOffset 设置 时间戳偏移量-秒
-func (p *Mgr) SetTimestampSecondOffset(offset int64) {
+// SetTimestampOffset 设置 时间戳偏移量-秒
+func (p *Mgr) SetTimestampOffset(offset int64) {
 	p.timestampSecondOffset = offset
 }
