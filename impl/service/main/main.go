@@ -24,11 +24,8 @@ import (
 func main() {
 	var err error
 	defaultService := commonservice.NewDefaultService()
-	// 程序所在路径(如为link,则为link所在的路径)
-	defaultService.ExecutablePath, err = xruntime.GetExecutablePath()
-	if err != nil {
-		xlog.PrintErr(err, xruntime.Location())
-		return
+	if defaultService == nil {
+		panic("NewDefaultService failed")
 	}
 	args := os.Args
 	argNum := len(args)

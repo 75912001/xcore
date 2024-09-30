@@ -32,7 +32,7 @@ type DefaultService struct {
 	GroupID        uint32 // 组ID
 	Name           string // 名称
 	ID             uint32 // ID
-	ExecutablePath string // 执行程序路径
+	ExecutablePath string // 执行程序路径 // 程序所在路径(如为link,则为link所在的路径)
 
 	*xnettcp.DefaultHandlerServer
 
@@ -47,24 +47,32 @@ type DefaultService struct {
 }
 
 func NewDefaultService() *DefaultService {
-	return &DefaultService{
+	val := &DefaultService{
 		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
 		TimeMgr:              xtime.NewMgr(),
 		QuitChan:             make(chan struct{}),
 	}
+	// 程序所在路径(如为link,则为link所在的路径)
+	if executablePath, err := xruntime.GetExecutablePath(); err != nil {
+		xlog.PrintErr(err, xruntime.Location())
+		return nil
+	} else {
+		val.ExecutablePath = executablePath
+	}
+	return val
 }
 
-func (p *DefaultService) Start(ctx context.Context) (err error) {
-	return xerror.NotImplemented
-}
-
-func (p *DefaultService) PreStop() error {
-	return xerror.NotImplemented
-}
-
-func (p *DefaultService) Stop() (err error) {
-	return xerror.NotImplemented
-}
+//func (p *DefaultService) Start(ctx context.Context) (err error) {
+//	return xerror.NotImplemented
+//}
+//
+//func (p *DefaultService) PreStop() error {
+//	return xerror.NotImplemented
+//}
+//
+//func (p *DefaultService) Stop() (err error) {
+//	return xerror.NotImplemented
+//}
 
 func (p *DefaultService) PreStart(ctx context.Context, packet xnetpacket.IPacket, handler xnettcp.IHandler, onHandlerBusFunc OnHandlerBusFunc, logCallbackFunc xlog.CallBackFunc) (err error) {
 	rand.Seed(time.Now().UnixNano())
