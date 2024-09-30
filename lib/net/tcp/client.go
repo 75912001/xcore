@@ -5,19 +5,22 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	xerror "xcore/lib/error"
+	xnetevent "xcore/lib/net/event"
+	xnethandler "xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
+	xnetremote "xcore/lib/net/remote"
 	xruntime "xcore/lib/runtime"
 )
 
 // Client 客户端
 type Client struct {
-	IEvent
-	IHandler
-	IRemote
+	xnetevent.IEvent
+	xnethandler.IHandler
+	xnetremote.IRemote
 	xnetpacket.IPacket
 }
 
-func NewClient(packet xnetpacket.IPacket, handler IHandler) *Client {
+func NewClient(packet xnetpacket.IPacket, handler xnethandler.IHandler) *Client {
 	return &Client{
 		IEvent:   nil,
 		IHandler: handler,
@@ -34,7 +37,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent = newDefaultEvent(newOpts.eventChan)
+	p.IEvent = xnetevent.NewDefaultEvent(newOpts.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
