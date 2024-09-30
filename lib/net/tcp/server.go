@@ -119,7 +119,7 @@ func (p *server) Disconnect(remote xnetremote.IRemote) error {
 func (p *server) handleConn(conn *net.TCPConn) {
 	remote := NewDefaultRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
 	if err := p.Connect(p.IHandler, remote); err != nil {
-		xlog.PrintfErr("event.NetConnect err:%v", err)
+		xlog.PrintfErr("event.Connect err:%v", err)
 		return
 	}
 	remote.Start(&p.options.connOptions, p.IEvent, p.IHandler)
