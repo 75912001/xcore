@@ -12,7 +12,11 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnetconnect "xcore/lib/net/connect"
+	xnetevent "xcore/lib/net/event"
+	xnethandler "xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
+	xnetremote "xcore/lib/net/remote"
 	xpool "xcore/lib/pool"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
@@ -26,7 +30,7 @@ type defaultRemote struct {
 	Object     interface{} // 保存 应用层数据
 }
 
-func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) IRemote {
+func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) xnetremote.IRemote {
 	return &defaultRemote{
 		Conn:     Conn,
 		sendChan: sendChan,
@@ -42,7 +46,7 @@ func (p *defaultRemote) GetIP() string {
 	return slice[0]
 }
 
-func (p *defaultRemote) Start(tcpOptions *connOptions, event IEvent, handler IHandler) {
+func (p *defaultRemote) Start(tcpOptions *xnetconnect.ConnOptions, event xnetevent.IEvent, handler xnethandler.IHandler) {
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	log.Printf("SetKeepAlive war:%v", err)
 	//}
@@ -52,13 +56,13 @@ func (p *defaultRemote) Start(tcpOptions *connOptions, event IEvent, handler IHa
 	//if err := p.Conn.SetNoDelay(true); err != nil {
 	//	xrlog.PrintfErr("SetNoDelay war:%v", err)
 	//}
-	if tcpOptions.readBuffer != nil {
-		if err := p.Conn.SetReadBuffer(*tcpOptions.readBuffer); err != nil {
+	if tcpOptions.ReadBuffer != nil {
+		if err := p.Conn.SetReadBuffer(*tcpOptions.ReadBuffer); err != nil {
 			xlog.PrintfErr("WithReadBuffer err:%v", err)
 		}
 	}
-	if tcpOptions.writeBuffer != nil {
-		if err := p.Conn.SetWriteBuffer(*tcpOptions.writeBuffer); err != nil {
+	if tcpOptions.WriteBuffer != nil {
+		if err := p.Conn.SetWriteBuffer(*tcpOptions.WriteBuffer); err != nil {
 			xlog.PrintfErr("WithWriteBuffer err:%v", err)
 		}
 	}
@@ -216,7 +220,7 @@ func (p *defaultRemote) onSend(ctx context.Context) {
 const MsgLengthFieldSize uint32 = 4 // 消息总长度字段 的 大小
 
 // 处理接收
-func (p *defaultRemote) onRecv(event IEvent, handler IHandler) {
+func (p *defaultRemote) onRecv(event xnetevent.IEvent, handler xnethandler.IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
