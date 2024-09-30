@@ -1,4 +1,4 @@
-package tcp
+package send
 
 import (
 	"github.com/pkg/errors"
