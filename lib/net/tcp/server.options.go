@@ -3,6 +3,7 @@ package tcp
 import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
+	xnetconnect "xcore/lib/net/connect"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -12,7 +13,7 @@ type serverOptions struct {
 	listenAddress    *string            // 127.0.0.1:8787
 	eventChan        chan<- interface{} // 待处理的事件
 	sendChanCapacity *uint32            // 发送 channel 大小
-	connOptions      connOptions
+	connOptions      xnetconnect.ConnOptions
 }
 
 // NewServerOptions 新的ServerOptions
@@ -36,12 +37,12 @@ func (p *serverOptions) SetSendChanCapacity(sendChanCapacity uint32) *serverOpti
 }
 
 func (p *serverOptions) SetReadBuffer(readBuffer int) *serverOptions {
-	p.connOptions.readBuffer = &readBuffer
+	p.connOptions.ReadBuffer = &readBuffer
 	return p
 }
 
 func (p *serverOptions) SetWriteBuffer(writeBuffer int) *serverOptions {
-	p.connOptions.writeBuffer = &writeBuffer
+	p.connOptions.WriteBuffer = &writeBuffer
 	return p
 }
 
@@ -63,11 +64,11 @@ func mergeServerOptions(opts ...*serverOptions) *serverOptions {
 		if opt.sendChanCapacity != nil {
 			newOptions.SetSendChanCapacity(*opt.sendChanCapacity)
 		}
-		if opt.connOptions.readBuffer != nil {
-			newOptions.SetReadBuffer(*opt.connOptions.readBuffer)
+		if opt.connOptions.ReadBuffer != nil {
+			newOptions.SetReadBuffer(*opt.connOptions.ReadBuffer)
 		}
-		if opt.connOptions.writeBuffer != nil {
-			newOptions.SetWriteBuffer(*opt.connOptions.writeBuffer)
+		if opt.connOptions.WriteBuffer != nil {
+			newOptions.SetWriteBuffer(*opt.connOptions.WriteBuffer)
 		}
 	}
 	return newOptions
