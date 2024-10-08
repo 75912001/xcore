@@ -9,25 +9,22 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetevent "xcore/lib/net/event"
-	xnethandler "xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
-	xnetremote "xcore/lib/net/remote"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
 )
 
 // 己方作为服务端
 type server struct {
-	xnetevent.IEvent
-	xnethandler.IHandler
+	IEvent
+	IHandler
 	xnetpacket.IPacket
 	listener *net.TCPListener //监听
 	options  *serverOptions
 }
 
 // NewServer 新建服务
-func NewServer(packet xnetpacket.IPacket, handler xnethandler.IHandler) *server {
+func NewServer(packet xnetpacket.IPacket, handler IHandler) *server {
 	return &server{
 		IEvent:   nil,
 		IHandler: handler,
@@ -56,7 +53,7 @@ func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent = xnetevent.NewDefaultEvent(p.options.eventChan)
+	p.IEvent = NewDefaultEvent(p.options.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -106,7 +103,7 @@ func (p *server) Stop() {
 }
 
 // Disconnect 逻辑层 主动 断开连接
-func (p *server) Disconnect(remote xnetremote.IRemote) error {
+func (p *server) Disconnect(remote IRemote) error {
 	if remote == nil || !remote.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}

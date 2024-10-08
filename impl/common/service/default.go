@@ -16,7 +16,6 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	"xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
@@ -72,7 +71,7 @@ func NewDefaultService() *DefaultService {
 //	return xerror.NotImplemented
 //}
 
-func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, handler handler.IHandler, logCallbackFunc xlog.CallBackFunc) (err error) {
+func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, handler xnettcp.IHandler, logCallbackFunc xlog.CallBackFunc) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端

@@ -3,7 +3,6 @@ package tcp
 import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
-	xnetconnect "xcore/lib/net/connect"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -13,7 +12,7 @@ type serverOptions struct {
 	listenAddress    *string            // 127.0.0.1:8787
 	eventChan        chan<- interface{} // 待处理的事件
 	sendChanCapacity *uint32            // 发送 channel 大小
-	connOptions      xnetconnect.ConnOptions
+	connOptions      ConnOptions
 }
 
 // NewServerOptions 新的ServerOptions

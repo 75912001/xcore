@@ -1,12 +1,10 @@
-package event
+package tcp
 
 import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnethandler "xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
-	xnetremote "xcore/lib/net/remote"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -21,7 +19,7 @@ func NewDefaultEvent(eventChan chan<- interface{}) IEvent {
 }
 
 // Connect 连接
-func (p *defaultEvent) Connect(handler xnethandler.IHandler, remote xnetremote.IRemote) error {
+func (p *defaultEvent) Connect(handler IHandler, remote IRemote) error {
 	select {
 	case p.eventChan <- &Connect{
 		IHandler: handler,
@@ -35,7 +33,7 @@ func (p *defaultEvent) Connect(handler xnethandler.IHandler, remote xnetremote.I
 }
 
 // Disconnect 断开链接
-func (p *defaultEvent) Disconnect(handler xnethandler.IHandler, remote xnetremote.IRemote) error {
+func (p *defaultEvent) Disconnect(handler IHandler, remote IRemote) error {
 	select {
 	case p.eventChan <- &Disconnect{
 		IHandler: handler,
@@ -49,7 +47,7 @@ func (p *defaultEvent) Disconnect(handler xnethandler.IHandler, remote xnetremot
 }
 
 // Packet 数据包
-func (p *defaultEvent) Packet(handler xnethandler.IHandler, remote xnetremote.IRemote, packet xnetpacket.IPacket) error {
+func (p *defaultEvent) Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error {
 	select {
 	case p.eventChan <- &Packet{
 		IHandler: handler,

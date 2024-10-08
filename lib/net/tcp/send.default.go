@@ -1,4 +1,4 @@
-package send
+package tcp
 
 import (
 	"github.com/pkg/errors"
@@ -6,10 +6,6 @@ import (
 	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
-
-type ISend interface {
-	Send(packet xnetpacket.IPacket) error
-}
 
 type defaultSend struct {
 }

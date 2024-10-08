@@ -13,9 +13,9 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
-	"xcore/impl/common"
+	xcommon "xcore/impl/common"
 	commonservice "xcore/impl/common/service"
-	"xcore/impl/service/gateway"
+	xservicegateway "xcore/impl/service/gateway"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
@@ -53,8 +53,8 @@ func main() {
 	}
 	var service commonservice.IService
 	switch defaultService.Name {
-	case common.ServiceNameGateway:
-		service = gateway.NewService(defaultService)
+	case xcommon.ServiceNameGateway:
+		service = xservicegateway.NewService(defaultService)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return

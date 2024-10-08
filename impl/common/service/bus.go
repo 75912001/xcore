@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 	xlog "xcore/lib/log"
-	xnetevent "xcore/lib/net/event"
+	xnetevent "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 	xtimer "xcore/lib/timer"
 )

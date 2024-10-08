@@ -1,4 +1,4 @@
-package connect
+package tcp
 
 type ConnOptions struct {
 	ReadBuffer  *int // readBuffer sets the size of the operating system's receive buffer associated with the connection. [default]: 系统默认

@@ -12,11 +12,7 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetconnect "xcore/lib/net/connect"
-	xnetevent "xcore/lib/net/event"
-	xnethandler "xcore/lib/net/handler"
 	xnetpacket "xcore/lib/net/packet"
-	xnetremote "xcore/lib/net/remote"
 	xpool "xcore/lib/pool"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
@@ -30,7 +26,7 @@ type defaultRemote struct {
 	Object     interface{} // 保存 应用层数据
 }
 
-func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) xnetremote.IRemote {
+func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) IRemote {
 	return &defaultRemote{
 		Conn:     Conn,
 		sendChan: sendChan,
@@ -46,7 +42,7 @@ func (p *defaultRemote) GetIP() string {
 	return slice[0]
 }
 
-func (p *defaultRemote) Start(tcpOptions *xnetconnect.ConnOptions, event xnetevent.IEvent, handler xnethandler.IHandler) {
+func (p *defaultRemote) Start(tcpOptions *ConnOptions, event IEvent, handler IHandler) {
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	log.Printf("SetKeepAlive war:%v", err)
 	//}
@@ -220,7 +216,7 @@ func (p *defaultRemote) onSend(ctx context.Context) {
 const MsgLengthFieldSize uint32 = 4 // 消息总长度字段 的 大小
 
 // 处理接收
-func (p *defaultRemote) onRecv(event xnetevent.IEvent, handler xnethandler.IHandler) {
+func (p *defaultRemote) onRecv(event IEvent, handler IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
