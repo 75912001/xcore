@@ -1,8 +1,6 @@
 package tcp
 
 import (
-	"context"
-	"google.golang.org/protobuf/proto"
 	xnetpacket "xcore/lib/net/packet"
 )
 
@@ -17,4 +15,4 @@ type IHandler interface {
 }
 
 // HandlerFunc 处理函数
-type HandlerFunc func(ctx context.Context, header xnetpacket.IHeader, message proto.Message, obj interface{}) error
+//type HandlerFunc func(ctx context.Context, header xnetpacket.IHeader, message proto.Message, obj interface{}) error
