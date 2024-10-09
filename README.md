@@ -101,7 +101,7 @@
     - **constants**: 常量
     - **error**: 错误码
     - **etcd**: etcd客户端 [todo menglc]
-    - **event**: 事件
+    - **event**: 事件 [todo menglc]
     - **example**: 示例
     - **exec**: 执行器 [todo menglc]
     - **file**: 文件操作
