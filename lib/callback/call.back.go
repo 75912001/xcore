@@ -13,7 +13,7 @@ type defaultCallBack struct {
 }
 
 func NewDefaultCallBack(onFunction func(arg ...interface{}) error, arg ...interface{}) ICallBack {
-	par := parameters.NewParameters()
+	par := parameters.NewDefaultParameters()
 	par.Set(arg...)
 	return &defaultCallBack{
 		onFunction:  onFunction,
