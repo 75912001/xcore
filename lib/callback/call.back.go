@@ -22,5 +22,8 @@ func NewDefaultCallBack(onFunction func(arg ...interface{}) error, arg ...interf
 }
 
 func (p *defaultCallBack) Execute() error {
+	if p.onFunction == nil {
+		return nil
+	}
 	return p.onFunction(p.Get())
 }

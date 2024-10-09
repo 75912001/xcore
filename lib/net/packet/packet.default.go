@@ -4,7 +4,6 @@ import (
 	"context"
 	"google.golang.org/protobuf/proto"
 	xerror "xcore/lib/error"
-	xnetmessage "xcore/lib/net/message"
 )
 
 // defaultPacket 数据包
@@ -12,8 +11,7 @@ type defaultPacket struct {
 	IHeader                // 包头
 	proto.Message          // 解析出的数据
 	PassThroughData []byte // 包体数据(不带包头)
-	xnetmessage.IMessage
-	CTX context.Context
+	CTX             context.Context
 }
 
 // NewDefaultPacket 新建数据包
