@@ -66,6 +66,7 @@ func main() {
 	// 退出服务
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+
 EXIT:
 	for {
 		select {

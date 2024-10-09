@@ -170,6 +170,7 @@ func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, h
 			return errors.Errorf("timer Start err:%v %v", err, xruntime.Location())
 		}
 	}
+	// todo menglc 启动定时 日志 服务状态
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
