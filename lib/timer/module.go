@@ -2,17 +2,17 @@ package timer
 
 import (
 	"context"
-	xutil "xcore/lib/callback"
+	xcallback "xcore/lib/callback"
 	xswitch "xcore/lib/xswitch"
 )
 
 type ITimerSecond interface {
-	AddSecond(callBackFunc xutil.ICallBack, expire int64) *second
+	AddSecond(callBackFunc xcallback.ICallBack, expire int64) *second
 	DelSecond(second *second)
 }
 
 type ITimerMillisecond interface {
-	AddMillisecond(callBackFunc xutil.ICallBack, expireMillisecond int64) *millisecond
+	AddMillisecond(callBackFunc xcallback.ICallBack, expireMillisecond int64) *millisecond
 	DelMillisecond(millisecond *millisecond)
 }
 
@@ -25,10 +25,10 @@ type ITimer interface {
 
 type EventTimerSecond struct {
 	xswitch.ISwitch
-	xutil.ICallBack
+	xcallback.ICallBack
 }
 
 type EventTimerMillisecond struct {
 	xswitch.ISwitch
-	xutil.ICallBack
+	xcallback.ICallBack
 }

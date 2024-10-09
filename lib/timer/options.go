@@ -9,8 +9,7 @@ import (
 
 // NewOptions 新的Options
 func NewOptions() *options {
-	ops := new(options)
-	return ops
+	return &options{}
 }
 
 // options contains options to configure instance. Each option can be set through setter functions. See

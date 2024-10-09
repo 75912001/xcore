@@ -9,18 +9,18 @@ import (
 	"runtime/debug"
 	"sync"
 	"time"
-	"xcore/lib/callback"
-	"xcore/lib/constants"
-	"xcore/lib/log"
-	"xcore/lib/runtime"
-	"xcore/lib/xswitch"
+	xcallback "xcore/lib/callback"
+	xconstants "xcore/lib/constants"
+	xlog "xcore/lib/log"
+	xruntime "xcore/lib/runtime"
+	xswitch "xcore/lib/xswitch"
 )
 
 // 定时器
 type defaultTimer struct {
 	opts            *options
 	secondSlice     [cycleSize]list.List // 时间轮-数组. 秒,数据
-	millisecondList list.List            // 毫秒,数据
+	millisecondList list.List            // list. 毫秒,数据
 	cancelFunc      context.CancelFunc
 	waitGroup       sync.WaitGroup   // Stop 等待信号
 	milliSecondChan chan interface{} // 毫秒, channel
@@ -34,13 +34,13 @@ func NewTimer() ITimer {
 // 每秒更新
 func (p *defaultTimer) funcSecond(ctx context.Context) {
 	defer func() {
-		if runtime.IsRelease() {
+		if xruntime.IsRelease() {
 			if err := recover(); err != nil {
-				log.PrintErr(constants.GoroutinePanic, err, string(debug.Stack()))
+				xlog.PrintErr(xconstants.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
-		log.PrintInfo(constants.GoroutineDone)
+		xlog.PrintInfo(xconstants.GoroutineDone)
 	}()
 	idleDelay := time.NewTimer(*p.opts.scanSecondDuration)
 	defer func() {
@@ -49,7 +49,7 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			log.PrintInfo(constants.GoroutineDone)
+			xlog.PrintInfo(xconstants.GoroutineDone)
 			return
 		case v := <-p.secondChan:
 			s := v.(*second)
@@ -64,13 +64,13 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 // 每 millisecond 个毫秒更新
 func (p *defaultTimer) funcMillisecond(ctx context.Context) {
 	defer func() {
-		if runtime.IsRelease() {
+		if xruntime.IsRelease() {
 			if err := recover(); err != nil {
-				log.PrintErr(constants.GoroutinePanic, err, string(debug.Stack()))
+				xlog.PrintErr(xconstants.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
-		log.PrintInfo(constants.GoroutineDone)
+		xlog.PrintInfo(xconstants.GoroutineDone)
 	}()
 	scanMillisecondDuration := *p.opts.scanMillisecondDuration
 	scanMillisecond := scanMillisecondDuration / time.Millisecond
@@ -83,7 +83,7 @@ func (p *defaultTimer) funcMillisecond(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			log.PrintInfo(constants.GoroutineDone)
+			xlog.PrintInfo(xconstants.GoroutineDone)
 			return
 		case v := <-p.milliSecondChan:
 			p.millisecondList.PushBack(v)
@@ -125,7 +125,7 @@ func (p *defaultTimer) Start(ctx context.Context, opts ...*options) error {
 	p.opts = &options{}
 	p.opts = p.opts.merge(opts...)
 	if err := p.opts.configure(); err != nil {
-		return errors.WithMessage(err, runtime.Location())
+		return errors.WithMessage(err, xruntime.Location())
 	}
 
 	ctxWithCancel, cancelFunc := context.WithCancel(ctx)
@@ -163,7 +163,7 @@ func (p *defaultTimer) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *defaultTimer) AddMillisecond(callBackFunc callback.ICallBack, expireMillisecond int64) *millisecond {
+func (p *defaultTimer) AddMillisecond(callBackFunc xcallback.ICallBack, expireMillisecond int64) *millisecond {
 	t := &millisecond{
 		ICallBack: callBackFunc,
 		ISwitch:   xswitch.NewDefaultSwitch(true),
@@ -214,7 +214,7 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *defaultTimer) AddSecond(callBackFunc callback.ICallBack, expire int64) *second {
+func (p *defaultTimer) AddSecond(callBackFunc xcallback.ICallBack, expire int64) *second {
 	t := &second{
 		millisecond{
 			ICallBack: callBackFunc,
