@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"xcore/lib/constants"
+	xconstants "xcore/lib/constants"
 )
 
 // 代码位置
@@ -23,8 +23,8 @@ func (p *codeLocation) String() string {
 // Location 获取代码位置
 func Location() string {
 	location := &codeLocation{
-		fileName: constants.Unknown,
-		funcName: constants.Unknown,
+		fileName: xconstants.Unknown,
+		funcName: xconstants.Unknown,
 	}
 	pc, fileName, line, ok := runtime.Caller(1)
 	if ok {
