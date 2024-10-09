@@ -5,7 +5,7 @@ package time
 
 import (
 	"time"
-	"xcore/lib/xswitch"
+	xswitch "xcore/lib/xswitch"
 )
 
 // Mgr 时间管理器
