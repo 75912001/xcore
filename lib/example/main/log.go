@@ -15,7 +15,7 @@ func logCallBackFunc(level uint32, outString string) {
 }
 
 func exampleLog() {
-	if false {
+	if true {
 		return
 	}
 	xruntime.SetRunMode(xruntime.RunModeDebug)
