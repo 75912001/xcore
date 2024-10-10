@@ -4,7 +4,6 @@ import (
 	"runtime"
 	"runtime/debug"
 	xutil "xcore/lib/callback"
-	xconstants "xcore/lib/constants"
 	xlog "xcore/lib/log"
 	xtime "xcore/lib/time"
 	xtimer "xcore/lib/timer"
@@ -12,7 +11,7 @@ import (
 
 func StateStart(timer xtimer.ITimer, timeMgr *xtime.Mgr) {
 	defaultCallBack := xutil.NewDefaultCallBack(timeOut, timer, timeMgr)
-	timer.AddSecond(defaultCallBack, xconstants.ServiceInfoTimeOutSec)
+	timer.AddSecond(defaultCallBack, timeMgr.ShadowTimestamp()+1) //xconstants.ServiceInfoTimeOutSec)
 }
 
 // 服务信息 打印
