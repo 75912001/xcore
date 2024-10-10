@@ -4,16 +4,16 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"runtime"
-	commonservice "xcore/impl/common/service"
+	xcommonservice "xcore/impl/common/service"
 	xnettcp "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
 type Service struct {
-	*commonservice.DefaultService
+	*xcommonservice.DefaultService
 }
 
-func NewService(defaultService *commonservice.DefaultService) *Service {
+func NewService(defaultService *xcommonservice.DefaultService) *Service {
 	return &Service{
 		DefaultService: defaultService,
 	}

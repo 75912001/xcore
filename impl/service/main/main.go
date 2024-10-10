@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"syscall"
 	xcommon "xcore/impl/common"
-	commonservice "xcore/impl/common/service"
+	xcommonservice "xcore/impl/common/service"
 	xservicegateway "xcore/impl/service/gateway"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
@@ -23,7 +23,7 @@ import (
 
 func main() {
 	var err error
-	defaultService := commonservice.NewDefaultService()
+	defaultService := xcommonservice.NewDefaultService()
 	if defaultService == nil {
 		panic("NewDefaultService failed")
 	}
@@ -51,7 +51,7 @@ func main() {
 		xlog.PrintfInfo("groupID:%v name:%v, serviceID:%v",
 			defaultService.GroupID, defaultService.Name, defaultService.ID)
 	}
-	var service commonservice.IService
+	var service xcommonservice.IService
 	switch defaultService.Name {
 	case xcommon.ServiceNameGateway:
 		service = xservicegateway.NewService(defaultService)
