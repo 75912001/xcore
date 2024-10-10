@@ -10,12 +10,12 @@ import (
 )
 
 func cbSecond(arg ...interface{}) error {
-	fmt.Println("cbSecond:", arg[0].(uint64))
+	fmt.Printf("cbSecond:%v\n", arg...)
 	return nil
 }
 
 func cbMillisecond(arg ...interface{}) error {
-	fmt.Println("cbMillisecond:", arg[0].(uint64))
+	fmt.Printf("cbMillisecond:%v\n", arg...)
 	return nil
 }
 
@@ -25,7 +25,7 @@ type addMillisecondSignal struct {
 }
 
 func exampleTimer() {
-	if true {
+	if false {
 		return
 	}
 	var timer xtimer.ITimer
@@ -65,9 +65,9 @@ func exampleTimer() {
 					default:
 					}
 				}
-			case xtimer.EventTimerSecond:
+			case *xtimer.EventTimerSecond:
 				_ = t.Execute()
-			case xtimer.EventTimerMillisecond:
+			case *xtimer.EventTimerMillisecond:
 				_ = t.Execute()
 			}
 		}

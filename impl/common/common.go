@@ -17,9 +17,6 @@ var KCPHeartBeatTimeOutSec int64 = 30 // 心跳时间-秒 // todo menglc 可配�
 
 var LoginTokenDuration = time.Second * 60 // LoginTokenDuration 登录 token 有效持续时间
 
-// ServiceInfoTimeOutSec 信息 超时时间 秒
-const ServiceInfoTimeOutSec = 10
-
 const RateLimitIntervalSec = 60 // RateLimitIntervalSec 限流-间隔-秒 // todo 可配置...
 
 const RateLimitCount = 120 // RateLimitCount 限流-数量// todo 可配置...

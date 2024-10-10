@@ -196,7 +196,8 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 			continue
 		}
 		if t.expire <= ms {
-			p.opts.outgoingTimeoutChan <- EventTimerMillisecond{
+			p.opts.outgoingTimeoutChan <- &EventTimerMillisecond{
+				ISwitch:   t.ISwitch,
 				ICallBack: t.ICallBack,
 			}
 			next = e.Next()
@@ -278,7 +279,8 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 			continue
 		}
 		if t.expire <= timestamp {
-			p.opts.outgoingTimeoutChan <- EventTimerSecond{
+			p.opts.outgoingTimeoutChan <- &EventTimerSecond{
+				ISwitch:   t.ISwitch,
 				ICallBack: t.ICallBack,
 			}
 			next = e.Next()
@@ -301,7 +303,8 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 				continue
 			}
 			if t.expire <= timestamp {
-				p.opts.outgoingTimeoutChan <- EventTimerSecond{
+				p.opts.outgoingTimeoutChan <- &EventTimerSecond{
+					ISwitch:   t.ISwitch,
 					ICallBack: t.ICallBack,
 				}
 				next = e.Next()

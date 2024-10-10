@@ -189,6 +189,7 @@ func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, h
 			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 		}
 	}
+	StateStart(p.Timer, p.TimeMgr)
 	return nil
 }
 
