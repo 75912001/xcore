@@ -24,7 +24,7 @@ func (p *Service) Start(ctx context.Context) (err error) {
 	if err = p.DefaultService.Start(ctx, packet, p, logCallBackFunc); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
-	_ = p.Start(ctx)
+	//_ = p.Start(ctx)
 
 	// todo menglc 开启 jaeger
 	// 链路追踪jaeger

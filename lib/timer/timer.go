@@ -54,7 +54,7 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 		case v := <-p.secondChan:
 			s := v.(*second)
 			duration := s.expire - ShadowTimestamp()
-			if duration <= 0 {
+			if duration < 0 {
 				duration = 0
 			}
 			p.pushBackCycle(s, searchCycleIdxIteration(duration), true)
