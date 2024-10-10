@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"runtime"
 	xcommonservice "xcore/impl/common/service"
-	xnettcp "xcore/lib/net/packet"
+	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -20,7 +20,7 @@ func NewService(defaultService *xcommonservice.DefaultService) *Service {
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	packet := xnettcp.NewDefaultPacket()
+	packet := xnetpacket.NewDefaultPacket()
 	if err = p.DefaultService.Start(ctx, packet, p, logCallBackFunc); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
@@ -230,7 +230,7 @@ func (p *Service) Start(ctx context.Context) (err error) {
 	// 信息
 	//state.Start()
 
-	runtime.GC()
+	//runtime.GC()
 
 	//// 退出服务
 	//sigChan := make(chan os.Signal, 1)
@@ -246,7 +246,7 @@ func (p *Service) Start(ctx context.Context) (err error) {
 	//world.PreStop()
 	//_ = server_del.GMgr.Stop()
 
-	return err
+	//return err
 }
 
 //func (p *Service) Stop() (err error) {
