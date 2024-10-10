@@ -20,6 +20,7 @@ import (
 	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
 	xruntime "xcore/lib/runtime"
+	"xcore/lib/service"
 	xtime "xcore/lib/time"
 	xtimer "xcore/lib/timer"
 	xutil "xcore/lib/util"
@@ -189,7 +190,7 @@ func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, h
 			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 		}
 	}
-	StateStart(p.Timer)
+	service.StateTimerPrint(p.Timer)
 	return nil
 }
 
