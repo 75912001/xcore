@@ -1,0 +1,955 @@
+{
+	"user1Host": {
+		"commands": [
+			"loginU1",
+			"info",
+			"TeamCreateCust"
+		]
+	},
+	"user2": {
+		"commands": [
+			"loginU2",
+			"TeamJoin1",
+			"RoomUserReady"
+		]
+	},
+	"u1A": {
+		"commands": [
+			"loginU1",
+			"info"
+		]
+	},
+	"u2A": {
+		"commands": [
+			"loginU2",
+			"info"
+		]
+	},
+	"u3A": {
+		"commands": [
+			"loginU3",
+			"info"
+		]
+	},
+	"EditAvatar": {
+		"method": "/lobbyplatform.logic.Logic/EditAvatar",
+		"msg": {
+			"avatar": 102
+		}
+	},
+	"EditSex": {
+		"method": "/lobbyplatform.logic.Logic/EditSex",
+		"msg": {
+			"sex": 0
+		}
+	},
+	"EditNickName": {
+		"method": "/lobbyplatform.logic.Logic/EditNickName",
+		"msg": {
+			"nick_name": "时生"
+		}
+	},
+	"EditSignature": {
+		"method": "/lobbyplatform.logic.Logic/EditSignature",
+		"msg": {
+			"signature": "未来不仅仅是明天"
+		}
+	},
+	"EditNationality": {
+		"method": "/lobbyplatform.logic.Logic/EditNationality",
+		"msg": {
+			"nationality": 5
+		}
+	},
+	"EditMainHero": {
+		"method": "/lobbyplatform.logic.Logic/EditMainHero",
+		"msg": {
+			"main_hero_id": 32001,
+			"main_skin_id": 32001000
+		}
+	},
+	"EditShowHeroes": {
+		"method": "/lobbyplatform.logic.Logic/EditShowHeroes",
+		"msg": {
+			"type": 102,
+			"map_id": 11,
+			"hero_ids": [
+				0,
+				6001,
+				0
+			]
+		}
+	},
+	"EditPreferredLanes": {
+		"method": "/lobbyplatform.logic.Logic/EditPreferredLanes",
+		"msg": {
+			"type": 3,
+			"map_id": 11,
+			"lanes": [
+				4,
+				5
+			]
+		}
+	},
+	"1VisitOther2": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 2,
+			"uid": 1,
+			"avatar": 101,
+			"nick_name": "Player-1",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 14
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"1VisitOther3": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 3,
+			"uid": 1,
+			"avatar": 101,
+			"nick_name": "Player-1",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 14
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"1VisitOther4": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 5,
+			"uid": 1,
+			"avatar": 101,
+			"nick_name": "Player-1",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 14
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"3VisitOther1": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 4,
+			"uid": 3,
+			"avatar": 101,
+			"nick_name": "Player-3",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 34
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"3VisitOther2": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 2,
+			"uid": 3,
+			"avatar": 101,
+			"nick_name": "Player-3",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 34
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"3VisitOther4": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 5,
+			"uid": 3,
+			"avatar": 101,
+			"nick_name": "Player-3",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 34
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"2VisitOther1": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 1,
+			"uid": 2,
+			"avatar": 101,
+			"nick_name": "Player-2",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 23
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"2VisitOther3": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 3,
+			"uid": 2,
+			"avatar": 101,
+			"nick_name": "Player-2",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 23
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"2VisitOther4": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 5,
+			"uid": 2,
+			"avatar": 101,
+			"nick_name": "Player-2",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 1,
+					"map_id": 11,
+					"score": 23
+				},
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"4VisitOther1": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 1,
+			"uid": 5,
+			"avatar": 101,
+			"nick_name": "Player-5",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"4VisitOther2": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 2,
+			"uid": 5,
+			"avatar": 101,
+			"nick_name": "Player-5",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"4VisitOther3": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 3,
+			"uid": 5,
+			"avatar": 101,
+			"nick_name": "Player-5",
+			"sex": 1,
+			"level": 1,
+			"rank_score": [
+				{
+					"type": 3,
+					"map_id": 11,
+					"score": 0
+				}
+			]
+		}
+	},
+	"6VisitOther": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 2,
+			"uid": 6,
+			"avatar": 0,
+			"nick_name": "player-6",
+			"sex": 1,
+			"level": 1,
+			"rank_score": []
+		}
+	},
+	"7VisitOther": {
+		"method": "/lobbyplatform.logic.Logic/VisitOther",
+		"msg": {
+			"target_uid": 2,
+			"uid": 7,
+			"avatar": 0,
+			"nick_name": "player-7",
+			"sex": 1,
+			"level": 1,
+			"rank_score": []
+		}
+	},
+	"GetBattleRecordData": {
+		"method": "/lobbyplatform.logic.Logic/GetBattleRecordData",
+		"msg": {
+			"room_id": 200004
+		}
+	},
+	"RoomUserReady": {
+		"method": "/lobbyplatform.team.Team/TeamUserReady",
+		"msg": {
+			"team_id": 1
+		}
+	},
+	"startGame": {
+		"method": "/lobbyplatform.team.Team/TeamStartGame",
+		"msg": {
+			"team_id": 1
+		}
+	},
+	"pick": {
+		"method": "/lobbyplatform.room.Room/RoomUserPickHero",
+		"msg": {
+			"room_id": 400001,
+			"hero_id": 83001,
+			"op": 4
+		}
+	},
+	"TeamJoin1": {
+		"method": "/lobbyplatform.logic.Logic/TeamJoin",
+		"msg": {
+			"team_id": 1,
+			"passwd": "123456"
+		}
+	},
+	"user3": {
+		"commands": [
+			"loginU3",
+			"TeamJoin1",
+			"RoomUserReady"
+		]
+	},
+	"user4": {
+		"commands": [
+			"loginU4",
+			"TeamJoin1",
+			"RoomUserReady"
+		]
+	},
+	"setting01": {
+		"method": "/lobbyplatform.logic.Logic/HeroAttackSetting",
+		"msg": {
+			"hero_id": 5001,
+			"setting_data": "5001:a test data for HeroAttackSetting"
+		}
+	},
+	"setting03": {
+		"method": "/lobbyplatform.logic.Logic/HeroAttackSetting",
+		"msg": {
+			"hero_id": 32001,
+			"setting_data": "setting data for hero 32001"
+		}
+	},
+	"setting02": {
+		"method": "/lobbyplatform.logic.Logic/HeroAttackSetting",
+		"msg": {
+			"hero_id": 80001,
+			"setting_data": "80001:a test for HeroAttackSetting"
+		}
+	},
+	"mosetting01": {
+		"method": "/lobbyplatform.logic.Logic/HeroAttackSetting",
+		"msg": {
+			"hero_id": 5001,
+			"setting_data": "modify 5001 setting"
+		}
+	},
+	"mosetting02": {
+		"method": "/lobbyplatform.logic.Logic/HeroAttackSetting",
+		"msg": {
+			"hero_id": 80001,
+			"setting_data": "modify 80001 setting"
+		}
+	},
+	"getAllSetting": {
+		"method": "/lobbyplatform.logic.Logic/GetHeroAttackSettingInfo",
+		"msg": {}
+	},
+	"pick2": {
+		"method": "/lobbyplatform.room.Room/RoomUserPickHero",
+		"msg": {
+			"room_id": 200002,
+			"hero_id": 83001,
+			"op": 4
+		}
+	},
+	"RoomUserReady2": {
+		"method": "/lobbyplatform.team.Team/TeamUserReady",
+		"msg": {
+			"team_id": 2
+		}
+	},
+	"startGame2": {
+		"method": "/lobbyplatform.team.Team/TeamStartGame",
+		"msg": {
+			"team_id": 2
+		}
+	},
+	"TeamJoin2": {
+		"method": "/lobbyplatform.logic.Logic/TeamJoin",
+		"msg": {
+			"team_id": 2,
+			"passwd": "123456"
+		}
+	},
+	"user5": {
+		"commands": [
+			"authLoginU5",
+			"info",
+			"joinRoom1"
+		]
+	},
+	"user6": {
+		"commands": [
+			"authLoginU6",
+			"info",
+			"joinRoom1"
+		]
+	},
+	"loginU0": {
+		"method": "/demo.auth.Auth/Login",
+		"msg": {
+			"account_id": "wq001"
+		}
+	},
+	"loginU1": {
+		"method": "/lobbyplatform.auth.Auth/Login",
+		"msg": {
+			"account_id": "wq111",
+			"account_token": "1"
+		}
+	},
+	"loginU2": {
+		"method": "/lobbyplatform.auth.Auth/Login",
+		"msg": {
+			"account_id": "wq002"
+		}
+	},
+	"loginU3": {
+		"method": "/lobbyplatform.auth.Auth/Login",
+		"msg": {
+			"account_id": "wq003"
+		}
+	},
+	"loginU4": {
+		"method": "/lobbyplatform.auth.Auth/Login1",
+		"msg": {
+			"account_id": "wq004"
+		}
+	},
+	"loginU5": {
+		"method": "/lobbyplatform.auth.Auth/Login",
+		"msg": {
+			"account_id": "wq005"
+		}
+	},
+	"loginU6": {
+		"method": "/lobbyplatform.auth.Auth/Login",
+		"msg": {
+			"account_id": "GI9YgdiBkMb87aYs1122"
+		}
+	},
+	"loginU7": {
+		"method": "/lobbyplatform.auth.Auth/Login",
+		"msg": {
+			"account_id": "llf008"
+		}
+	},
+	"info": {
+		"method": "/lobbyplatform.logic.Logic/Info",
+		"msg": {}
+	},
+	"heroes": {
+		"method": "/lobbyplatform.logic.Logic/Heroes",
+		"msg": {
+			"user_id": 1
+		}
+	},
+	"gainHero": {
+		"method": "/lobbyplatform.logic.Logic/GainHero",
+		"msg": {
+			"hero_id": 8002
+		}
+	},
+	"TeamCreate1": {
+		"method": "/lobbyplatform.logic.Logic/TeamCreate",
+		"msg": {
+			"name": "房间11111号",
+			"passwd": "123456",
+			"game_mode_cfg_id": 102,
+			"versus_mode": 2,
+			"map_id": 11,
+			"enable_referee": true,
+			"is_private": false,
+			"game_mode_type_id": 1
+		}
+	},
+	"TeamCreateCust": {
+		"method": "/lobbyplatform.logic.Logic/TeamCreate",
+		"msg": {
+			"name": "自定义房间1V1号",
+			"passwd": "123456",
+			"game_mode_cfg_id": 102,
+			"versus_mode": 1,
+			"map_id": 11,
+			"enable_referee": true,
+			"is_private": false,
+			"game_mode_type_id": 1
+		}
+	},
+	"TeamCreateCompet": {
+		"method": "/lobbyplatform.logic.Logic/TeamCreate",
+		"msg": {
+			"name": "排位房间3V3号",
+			"passwd": "123456",
+			"game_mode_cfg_id": 101,
+			"versus_mode": 2,
+			"map_id": 11,
+			"enable_referee": true,
+			"is_private": false,
+			"game_mode_type_id": 1
+		}
+	},
+	"CompetJoin1": {
+		"method": "/lobbyplatform.logic.Logic/TeamJoin",
+		"msg": {
+			"team_id": 502,
+			"passwd": "123456"
+		}
+	},
+	"TeamList": {
+		"method": "/lobbyplatform.logic.Logic/TeamList",
+		"msg": {
+			"team_type": 1,
+			"page_offset": 0
+		}
+	},
+	"Ready": {
+		"method": "/lobbyplatform.team.Team/TeamUserReady",
+		"msg": {
+			"team_id": 2
+		}
+	},
+	"StartMatch": {
+		"method": "/lobbyplatform.team.Team/TeamStartMatch",
+		"msg": {
+			"team_id": 2
+		}
+	},
+	"CancelMatch": {
+		"method": "/lobbyplatform.team.Team/TeamCancelMatch",
+		"msg": {}
+	},
+	"ConfirmMatchResult": {
+		"method": "/lobbyplatform.room.Room/RoomUserConfirmMatchResult",
+		"msg": {}
+	},
+	"TeamLeave1": {
+		"method": "/lobbyplatform.team.Team/TeamLeave",
+		"msg": {}
+	},
+	"TeamLeave2": {
+		"method": "/lobbyplatform.team.Team/TeamLeave",
+		"msg": {
+			"user_id": 8,
+			"team_id": 1
+		}
+	},
+	"setRobot1": {
+		"method": "/lobbyplatform.team.Team/TeamSetRobot",
+		"msg": {
+			"team_id": 1,
+			"seat_idx": 1,
+			"camp": 1
+		}
+	},
+	"setRobot2": {
+		"method": "/lobbyplatform.team.Team/TeamSetRobot",
+		"msg": {
+			"team_id": 1,
+			"seat_idx": 2,
+			"camp": 1
+		}
+	},
+	"setRobot3": {
+		"method": "/lobbyplatform.team.Team/TeamSetRobot",
+		"msg": {
+			"team_id": 1,
+			"seat_idx": 0,
+			"camp": 1
+		}
+	},
+	"setRobot4": {
+		"method": "/lobbyplatform.team.Team/TeamSetRobot",
+		"msg": {
+			"team_id": 1,
+			"seat_idx": 2,
+			"camp": 2
+		}
+	},
+	"kick": {
+		"method": "/lobbyplatform.team.Team/TeamKickOutPlayer",
+		"msg": {
+			"team_id": 1,
+			"uid": 2
+		}
+	},
+	"chat1": {
+		"method": "/lobbyplatform.team.Team/TeamChatSend",
+		"msg": {
+			"user_id": 2,
+			"content": "你好，这里是玩家1发言"
+		}
+	},
+	"chat2": {
+		"method": "/lobbyplatform.team.Team/TeamChatSend",
+		"msg": {
+			"user_id": 4,
+			"content": "你好，这里是玩家4发言"
+		}
+	},
+	"hostTransfer": {
+		"method": "/lobbyplatform.team.Team/TeamHostTransfer",
+		"msg": {
+			"target_id": 4
+		}
+	},
+	"RoomSeatSwap": {
+		"method": "/lobbyplatform.team.Team/TeamSeatSwap",
+		"msg": {
+			"team_id": 1,
+			"seat_idx": 0,
+			"camp": 1
+		}
+	},
+	"RoomSeatSwapReply": {
+		"method": "/lobbyplatform.team.Team/TeamSeatSwapReply",
+		"msg": {
+			"team_id": 1,
+			"from_uid": 8,
+			"op": 2
+		}
+	},
+	"prePick": {
+		"method": "/lobbyplatform.room.Room/RoomUserPickHero",
+		"msg": {
+			"room_id": 1,
+			"hero_id": 7001,
+			"op": 3
+		}
+	},
+	"TeamSet": {
+		"method": "/lobbyplatform.team.Team/TeamSet",
+		"msg": {
+			"room_id": 1,
+			"hero_id": 7001,
+			"op": 3
+		}
+	},
+	"getBag": {
+		"method": "/lobbyplatform.logic.Logic/GetBag",
+		"msg": {}
+	},
+	"gainItemGold": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 100100001,
+			"item_num": 10000
+		}
+	},
+	"gainItemIngot": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 100100002,
+			"item_num": 10000
+		}
+	},
+	"gainItemTicket": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 100100003,
+			"item_num": 10000
+		}
+	},
+	"gainItemFixed": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 400000001,
+			"item_num": 7
+		}
+	},
+	"gainItemRandom": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 400000002,
+			"item_num": 9
+		}
+	},
+	"gainItemSelect": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 400000003,
+			"item_num": 3
+		}
+	},
+	"gainItemSale": {
+		"method": "/lobbyplatform.logic.Logic/GainItem",
+		"msg": {
+			"citem_id": 400000004,
+			"item_num": 99
+		}
+	},
+	"useItemFixed": {
+		"method": "/lobbyplatform.logic.Logic/UseItem",
+		"msg": {
+			"data_id": 40,
+			"item_num": 1,
+			"chose_info": []
+		}
+	},
+	"useItemRandom": {
+		"method": "/lobbyplatform.logic.Logic/UseItem",
+		"msg": {
+			"data_id": 42,
+			"item_num": 2
+		}
+	},
+	"useItemSelect": {
+		"method": "/lobbyplatform.logic.Logic/UseItem",
+		"msg": {
+			"data_id": 46,
+			"item_num": 1,
+			"chose_info": [
+				{
+					"award_type": 1,
+					"award_id": 400000001,
+					"award_num": 1
+				}
+			]
+		}
+	},
+	"sellItem": {
+		"method": "/lobbyplatform.logic.Logic/SellItem",
+		"msg": {
+			"data_id": 47,
+			"item_num": 9
+		}
+	},
+	"consumeGold": {
+		"method": "/lobbyplatform.logic.Logic/ConsumeItem",
+		"msg": {
+			"citem_id": 100100001,
+			"item_num": 9480
+		}
+	},
+	"consumeGift": {
+		"method": "/lobbyplatform.logic.Logic/ConsumeItem",
+		"msg": {
+			"citem_id": 400000002,
+			"item_num": 3
+		}
+	},
+	"GetBuyLimitInfo": {
+		"method": "/lobbyplatform.logic.Logic/GetBuyLimitInfo",
+		"msg": {
+			"store_type": 1
+		}
+	},
+	"BuyNoneLimit": {
+		"method": "/lobbyplatform.logic.Logic/BuyStoreItem",
+		"msg": {
+			"store_type": 1,
+			"store_item_id": 400000001,
+			"buy_num": 3,
+			"item_id": 100100001
+		}
+	},
+	"BuyDayLimit": {
+		"method": "/lobbyplatform.logic.Logic/BuyStoreItem",
+		"msg": {
+			"store_type": 1,
+			"store_item_id": 400000002,
+			"buy_num": 2,
+			"item_id": 100100002
+		}
+	},
+	"BuySelectPay": {
+		"method": "/lobbyplatform.logic.Logic/BuyStoreItem",
+		"msg": {
+			"store_type": 1,
+			"store_item_id": 400000003,
+			"buy_num": 2,
+			"item_id": 100100003
+		}
+	},
+	"getSysMailList": {
+		"method": "/lobbyplatform.logic.Logic/GetSysMailList",
+		"msg": {}
+	},
+	"sendMail": {
+		"method": "/lobbyplatform.logic.Logic/SendMail",
+		"msg": {
+			"send_type": 1,
+			"sender_id": 99999,
+			"title": {
+				"id": 1,
+				"value": [
+					101
+				]
+			},
+			"content": {
+				"id": 2,
+				"value": [
+					201
+				]
+			},
+			"start_time": 1701075414,
+			"expire_time": 1702085435,
+			"condition": {
+				"all": 0,
+				"level_min": 1,
+				"level_max": 100,
+				"ladder_score_min": 0,
+				"ladder_score_max": 100,
+				"users": []
+			},
+			"prizes": [
+				{
+					"type": 1,
+					"id": 100100001,
+					"num": 1
+				},
+				{
+					"type": 1,
+					"id": 100100002,
+					"num": 1
+				}
+			],
+			"extension": {
+				"id": 1,
+				"type": 1,
+				"hyper_link": [
+					{
+						"url": "http://www.baidu.com",
+						"tag": 2
+					}
+				]
+			}
+		}
+	},
+	"readMail": {
+		"method": "/lobbyplatform.logic.Logic/ReadMail",
+		"msg": {
+			"all": false,
+			"id": 1
+		}
+	},
+	"receiveMailPrize": {
+		"method": "/lobbyplatform.logic.Logic/ReceiveMailPrize",
+		"msg": {
+			"all": false,
+			"id": 17
+		}
+	},
+	"getServerInfo": {
+		"method": "/lobbyplatform.logic.Logic/GetServerInfo",
+		"msg": {}
+	}
+}

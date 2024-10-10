@@ -1,0 +1,27 @@
+{
+	"addr":"127.0.0.1:12345",
+	"codec": 2,
+	"proto": 1,
+	"errorProcessMethod":"/tevat.example.logic.Logic/NetMsgError",
+	"protoFileConfig": {
+		"path": "C:/Users/Administrator/go/src/lobbyplatform-go-rank-pve/proto",
+		"files": [
+			"auth/auth.proto",
+			"chat/chat.proto",
+			"game/game.proto",
+			"logic/logic.proto",
+			"mail/mail.proto",
+			"match/match.proto",
+			"matchconfirm/matchconfirm.proto",
+			"rank/rank.proto",
+			"room/room.proto",
+			"social/social.proto",
+			"team/team.proto",
+			"union/union.proto"
+		]
+	},
+	"ignoreMethod":[
+		"/tevat.example.auth.Auth/Login",
+		"118"
+	]
+}

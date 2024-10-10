@@ -20,7 +20,7 @@ func NewService(defaultService *xcommonservice.DefaultService) *Service {
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	packet := xnetpacket.NewDefaultPacket()
+	packet := xnetpacket.NewDefaultPacket(xnetpacket.NewDefaultHeader())
 	if err = p.DefaultService.Start(ctx, packet, p, logCallBackFunc); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}

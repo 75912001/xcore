@@ -2,60 +2,61 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"os"
+	"path"
+	"strconv"
 	"strings"
-	"time"
+	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
+	xnetpacket "xcore/lib/net/packet"
+	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
-	"xcore/tools/client.simulator/codec/model"
 )
 
 func main() {
 	var err error
 	xruntime.SetRunMode(xruntime.RunModeDebug)
 	// 启动日志
-	GLog, err = xlog.NewMgr(xlog.NewOptions().
+	glog, err = xlog.NewMgr(xlog.NewOptions().
 		WithLevelCallBack(logCallBackFunc, xlog.LevelFatal, xlog.LevelError, xlog.LevelWarn),
 	)
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		err = GLog.Stop()
+		err = glog.Stop()
 		if err != nil {
 			panic(err)
 		}
 	}()
+	ctx := context.Background()
+	// 程序所在路径(如为link,则为link所在的路径)
+	var executablePath string
+	if executablePath, err = xruntime.GetExecutablePath(); err != nil {
+		panic(err)
+	}
+	apiDataJsonPath := path.Join(executablePath, "apiData.json")
+
+	// todo menglc 加载所有proto的协议
 	for {
-		c := Client{}
-
-		resFunc := func(res Res) {
-			//if res.ID == 0 && !res.Result {
-			//	return
-			//}
-			out, _ := json.MarshalIndent(res, "", "    ")
-			fmt.Println("Res:\n", string(out))
-			fmt.Print("Command: ")
-		}
-
-		c.Init(resFunc)
-
-		err = c.Connect()
+		busChannel := make(chan interface{}, xconstants.BusChannelCapacityDefault)
+		client := &defaultClient{}
+		client.Client = xnettcp.NewClient(xnetpacket.NewDefaultPacket(xnetpacket.NewDefaultHeader()), client)
+		err := client.Connect(ctx, xnettcp.NewClientOptions().
+			WithAddress("127.0.0.1:30201").
+			WithEventChan(busChannel).
+			WithSendChanCapacity(1000))
 		if err != nil {
-			fmt.Printf("connect fail:%+v", err)
-			return
+			fmt.Println("connect fail:", err)
+			panic(err)
 		}
-
-		c.StartOnRec()
-
-		fmt.Println("Input Command,Please.")
-		fmt.Println("Example:{\"method\":\"/tevat.example.auth.Auth/Login\",\"msg\":{\"account_id\":\"1\",\"account_token\":\"1\"}}")
-		fmt.Println("Example:login")
-
 		for {
-			fmt.Print("Command: ")
+			fmt.Print("Command:")
 			_, err = fmt.Scan()
 			command, err := bufio.NewReader(os.Stdin).ReadString('\n')
 			if err != nil {
@@ -64,58 +65,63 @@ func main() {
 				continue
 			}
 			command = strings.TrimSpace(command)
-			data := ApiData{}
-
-			jsonDec := json.NewDecoder(strings.NewReader(command))
-			jsonDec.UseNumber()
-			err = jsonDec.Decode(&data)
-			if err != nil {
-				data.Method = command
-				err = nil
-			}
-
-			if data.Msg != nil {
-				msgBytes, err := c.MarshalMsg(data.Method, data.Msg)
+			// 创建一个 map 来存储 JSON 数据
+			data := make(map[string]ApiData)
+			apiData := ApiData{}
+			parseCommand := func(command string) error {
+				file, err := os.Open(apiDataJsonPath)
 				if err != nil {
-					fmt.Println("MarshalMsg fail, err:", err)
+					fmt.Printf("Error opening file:%v %v", apiDataJsonPath, err)
+					panic(err)
+				}
+				defer file.Close()
+				// 创建一个新的解码器
+				decoder := json.NewDecoder(file)
+				// 解码 JSON 数据到 map 中
+				err = decoder.Decode(&data)
+				if err != nil {
+					fmt.Println("Error decoding JSON:", err)
+					panic(err)
+				}
+				if info, ok := data[command]; ok {
+					fmt.Printf("apiData: %+v\n", info)
+					apiData = info
+				} else {
+					fmt.Printf("\033[31m%s\033[0m\n", "apiData not found")
+					return xerror.NonExistent
+				}
+				return nil
+			}
+			err = parseCommand(command)
+			if err != nil {
+				if errors.Is(err, xerror.NonExistent) {
 					continue
 				}
-				req := &model.Request{
-					Method: []byte(data.Method),
-					Msg:    msgBytes,
-				}
-				id := c.reqPack.GetNewId(string(req.Method))
-				req.ID = id
-				c.Send(req)
-			} else if data.Method == "LOAD" || data.Method == "L" || data.Method == "l" {
-				fmt.Println("Start reload api data...")
-				c.ReloadApi()
-				fmt.Println("Reload api data finish.")
-			} else if data.Method == "RESTART" {
-				fmt.Println("Restart client...")
-				break
-			} else if data.Method == "EXIT" {
-				fmt.Println("Goodbye.")
-				return
-			} else {
-				apiData := c.GetApiDataByName(data.Method)
-				if apiData.Commands == nil || len(apiData.Commands) == 0 {
-					c.SendReq(data.Method)
-				} else {
-					for _, v := range apiData.Commands {
-						fmt.Println(v)
-						ok := c.SendReq(v)
-						if !ok {
-							break
-						}
-						res := c.WaitRes()
-						if !res.Result {
-							break
-						}
-						time.Sleep(time.Millisecond * 500)
-					}
-				}
+				panic(err)
 			}
+			// todo menglc 打包数据
+			num, err := strconv.ParseUint(apiData.ID, 0, 32)
+			if err != nil {
+				fmt.Println("strconv.ParseUint fail, err:", err)
+				return
+			}
+			messageID := uint32(num)
+			fmt.Printf("%v %#x", messageID, messageID)
+			// 发送消息给服务器
+			//h := xnetpacket.NewDefaultHeader()
+			//h.SetPacketLength(24)
+			//packet := xnetpacket.NewDefaultPacket()
+			//
+			//if err = client.Send(ctx, data[command].Method, data[command].Msg); err != nil {
+			//
+			//}
 		}
 	}
+}
+
+type ApiData struct {
+	ID       string
+	Method   string
+	Msg      map[string]interface{}
+	Commands []string
 }

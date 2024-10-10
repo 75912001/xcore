@@ -17,6 +17,7 @@ import (
 //}
 
 func (p *Service) OnConnect(remote xnettcp.IRemote) error {
+	p.Log.Tracef("OnConnect: %v", remote)
 	return nil
 }
 func (p *Service) OnCheckPacketLength(length uint32) error {
@@ -32,7 +33,6 @@ func (p *Service) OnPacket(packet xnetpacket.IPacket) error {
 	return nil
 }
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
-	// todo menglc
-
+	p.Log.Tracef("OnDisconnect: %v", remote)
 	return nil
 }

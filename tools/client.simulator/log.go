@@ -6,7 +6,7 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-var GLog xlog.ILog
+var glog xlog.ILog
 
 func logCallBackFunc(level uint32, outString string) {
 	if xruntime.IsDebug() {

@@ -15,7 +15,7 @@ type defaultPacket struct {
 }
 
 // NewDefaultPacket 新建数据包
-func NewDefaultPacket() IPacket {
+func NewDefaultPacket(header IHeader) IPacket {
 	return &defaultPacket{}
 }
 
