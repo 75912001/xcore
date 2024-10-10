@@ -92,7 +92,7 @@
       - `struct.proto`
     - `gen.sh` 生成protobuf文件
   - **service**: 服务
-    - **gateway**: 网关服务 [todo menglc]
+    - **gateway**: 网关服务
     - **logic**: 逻辑服务 [todo menglc]
     - **main**: 服务入口
   - **lib**: 公共库

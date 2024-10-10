@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 	xlog "xcore/lib/log"
-	xnetevent "xcore/lib/net/tcp"
+	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 	xtimer "xcore/lib/timer"
 )
@@ -27,11 +27,11 @@ func (p *DefaultService) Handle() error {
 			var err error
 			switch event := value.(type) {
 			//tcp
-			case *xnetevent.Connect:
+			case *xnettcp.Connect:
 				err = event.IHandler.OnConnect(event.IRemote)
-			case *xnetevent.Packet:
+			case *xnettcp.Packet:
 				err = event.IHandler.OnPacket(event.IPacket)
-			case *xnetevent.Disconnect:
+			case *xnettcp.Disconnect:
 				err = event.IHandler.OnDisconnect(event.IRemote)
 				if event.IRemote.IsConnect() {
 					event.IRemote.Stop()
