@@ -24,11 +24,11 @@ type ITimer interface {
 }
 
 type EventTimerSecond struct {
-	xswitch.ISwitch
-	xcallback.ICallBack
+	ISwitch   xswitch.ISwitch
+	ICallBack xcallback.ICallBack
 }
 
 type EventTimerMillisecond struct {
-	xswitch.ISwitch
-	xcallback.ICallBack
+	ISwitch   xswitch.ISwitch
+	ICallBack xcallback.ICallBack
 }

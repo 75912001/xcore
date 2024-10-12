@@ -15,8 +15,8 @@ import (
 
 // 己方作为服务端
 type server struct {
-	IEvent
-	IHandler
+	IEvent   IEvent
+	IHandler IHandler
 	//xnetpacket.IPacket
 	listener *net.TCPListener //监听
 	options  *serverOptions
@@ -114,7 +114,7 @@ func (p *server) Disconnect(remote IRemote) error {
 
 func (p *server) handleConn(conn *net.TCPConn) {
 	remote := NewDefaultRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
-	if err := p.Connect(p.IHandler, remote); err != nil {
+	if err := p.IEvent.Connect(p.IHandler, remote); err != nil {
 		xlog.PrintfErr("event.Connect err:%v", err)
 		return
 	}

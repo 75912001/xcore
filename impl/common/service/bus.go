@@ -38,15 +38,15 @@ func (p *DefaultService) Handle() error {
 				}
 				//timer
 			case *xtimer.EventTimerSecond:
-				if event.IsDisabled() {
+				if event.ISwitch.IsDisabled() {
 					continue
 				}
-				_ = event.Execute()
+				_ = event.ICallBack.Execute()
 			case *xtimer.EventTimerMillisecond:
-				if event.IsDisabled() {
+				if event.ISwitch.IsDisabled() {
 					continue
 				}
-				_ = event.Execute()
+				_ = event.ICallBack.Execute()
 				//kcp server
 			//case *xrkcp.EventConnect:
 			//	err = event.Remote.Server.GetOnEvent().OnConn(event.Remote)

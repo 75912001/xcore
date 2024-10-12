@@ -10,9 +10,9 @@ import (
 
 // Client 客户端
 type Client struct {
-	IEvent
-	IHandler
-	IRemote
+	IEvent   IEvent
+	IHandler IHandler
+	IRemote  IRemote
 	//xnetpacket.IPacket
 }
 

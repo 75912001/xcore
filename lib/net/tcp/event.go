@@ -12,19 +12,19 @@ type IEvent interface {
 
 // Disconnect 事件数据-断开链接
 type Disconnect struct {
-	IHandler
-	IRemote
+	IHandler IHandler
+	IRemote  IRemote
 }
 
 // Connect 事件数据-链接成功
 type Connect struct {
-	IHandler
-	IRemote
+	IHandler IHandler
+	IRemote  IRemote
 }
 
 // Packet 事件数据-数据包
 type Packet struct {
-	IHandler
-	IRemote
-	xnetpacket.IPacket
+	IHandler IHandler
+	IRemote  IRemote
+	IPacket  xnetpacket.IPacket
 }
