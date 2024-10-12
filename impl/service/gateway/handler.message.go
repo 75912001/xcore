@@ -19,25 +19,15 @@ func UserOnlineMsg(args ...interface{}) error {
 	remote := args[0].(xnettcp.IRemote)
 	defaultPacket := args[1].(*xnetpacket.DefaultPacket)
 	pb := defaultPacket.PBMessage.(*xprotobufgateway.UserOnlineMsgReq)
-	fmt.Println(defaultPacket, pb, xruntime.Location())
+	fmt.Println(remote, defaultPacket, pb, xruntime.Location())
+
 	// todo menglc 处理用户上线
 
 	// 返回消息
-	res := &xprotobufgateway.UserOnlineRespMsgRes{
+	res := &xprotobufgateway.UserOnlineMsgRes{
 		Uid: 668599,
 	}
-
-	header := xnetpacket.NewDefaultHeader(
-		0,
-		xprotobufgateway.UserOnlineRespMsgRes_CMD,
-		0,
-		0,
-		668)
-
-	packet := xnetpacket.NewDefaultPacket(header, res)
-
-	err := remote.Send(packet)
-	if err != nil {
+	if err := xnettcp.Send(remote, res, xprotobufgateway.UserOnlineMsgRes_CMD, 0, 0); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil

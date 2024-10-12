@@ -14,7 +14,6 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 )
@@ -44,6 +43,9 @@ func main() {
 	apiDataJsonPath := path.Join(executablePath, "apiData.json")
 	for {
 		busChannel := make(chan interface{}, xconstants.BusChannelCapacityDefault)
+		go func() {
+			_ = Handle(busChannel)
+		}()
 		client := &defaultClient{}
 		client.Client = xnettcp.NewClient(client)
 		err := client.Connect(ctx, xnettcp.NewClientOptions().
@@ -83,7 +85,7 @@ func main() {
 					panic(err)
 				}
 				if info, ok := data[command]; ok {
-					fmt.Printf("apiData: %+v\n", info)
+					//fmt.Printf("apiData: %+v\n", info)
 					apiData = info
 				} else {
 					fmt.Printf("\033[31m%s\033[0m\n", "apiData not found")
@@ -105,7 +107,7 @@ func main() {
 				return
 			}
 			messageID := uint32(num)
-			fmt.Printf("%v %#x\n", messageID, messageID)
+			//fmt.Printf("%v %#x\n", messageID, messageID)
 
 			// gateway 中, 查找消息
 			message := xservicegateway.GMessage.Find(messageID)
@@ -113,7 +115,7 @@ func main() {
 				fmt.Println("message not found")
 				return
 			} else {
-				fmt.Printf("message: %v\n", message)
+				//fmt.Printf("message: %v\n", message)
 			}
 			// 将 apiData 的数据,构建成消息
 			msgData, err := json.Marshal(apiData.Msg)
@@ -126,22 +128,14 @@ func main() {
 				fmt.Println("message.Unmarshal fail, err:", err)
 				return
 			}
-			fmt.Printf("protoMsg: %v\n", protoMsg)
-			sendData, err := message.Marshal(protoMsg)
+			fmt.Printf("\033[34mmessageID:0x%x\nprotoMsg: %v\033[0m\n", messageID, protoMsg)
+			//sendData, err := message.Marshal(protoMsg)
 			if err != nil {
 				fmt.Println("message.Marshal fail, err:", err)
 				return
 			}
-			fmt.Printf("sendData: %v\n", sendData)
-
-			header := xnetpacket.NewDefaultHeader(
-				0,
-				messageID,
-				0,
-				0,
-				668)
-			packet := xnetpacket.NewDefaultPacket(header, protoMsg)
-			if err = client.Send(packet); err != nil {
+			//fmt.Printf("sendData: %v\n", sendData)
+			if err := xnettcp.Send(client.IRemote, protoMsg, messageID, 0, 0); err != nil {
 				fmt.Println("client.Send fail, err:", err)
 			}
 		}

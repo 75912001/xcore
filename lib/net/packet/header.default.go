@@ -5,6 +5,8 @@ import (
 	xutil "xcore/lib/util"
 )
 
+const DefaultHeaderSize uint32 = 24
+
 // DefaultHeader 默认包头
 type DefaultHeader struct {
 	PacketLength uint32 // 总包长度,包含包头＋包体长度
@@ -15,18 +17,33 @@ type DefaultHeader struct {
 }
 
 // NewDefaultHeader 新建包头
-func NewDefaultHeader(packetLength uint32,
-	messageID uint32,
-	sessionID uint32,
-	resultID uint32,
-	key uint64) *DefaultHeader {
-	return &DefaultHeader{
-		PacketLength: packetLength,
-		MessageID:    messageID,
-		SessionID:    sessionID,
-		ResultID:     resultID,
-		Key:          key,
-	}
+func NewDefaultHeader() *DefaultHeader {
+	return &DefaultHeader{}
+}
+
+func (p *DefaultHeader) WithPacketLength(packetLength uint32) *DefaultHeader {
+	p.PacketLength = packetLength
+	return p
+}
+
+func (p *DefaultHeader) WithMessageID(messageID uint32) *DefaultHeader {
+	p.MessageID = messageID
+	return p
+}
+
+func (p *DefaultHeader) WithSessionID(sessionID uint32) *DefaultHeader {
+	p.SessionID = sessionID
+	return p
+}
+
+func (p *DefaultHeader) WithResultID(resultID uint32) *DefaultHeader {
+	p.ResultID = resultID
+	return p
+}
+
+func (p *DefaultHeader) WithKey(key uint64) *DefaultHeader {
+	p.Key = key
+	return p
 }
 
 func (p *DefaultHeader) Pack(data []byte) {
@@ -42,5 +59,5 @@ func (p *DefaultHeader) Unpack(data []byte) {
 	p.MessageID = binary.LittleEndian.Uint32(data[4:8])
 	p.SessionID = binary.LittleEndian.Uint32(data[8:12])
 	p.ResultID = binary.LittleEndian.Uint32(data[12:16])
-	p.Key = binary.LittleEndian.Uint64(data[16:24])
+	p.Key = binary.LittleEndian.Uint64(data[16:DefaultHeaderSize])
 }

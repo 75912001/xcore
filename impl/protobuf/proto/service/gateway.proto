@@ -8,7 +8,7 @@ message UserOnlineMsgReq//0x20000#user->gateway.用户上线
     string token = 1;//验证时使用的token
 }
 
-message UserOnlineRespMsgRes//0x20001#gateway->user.用户上线-响应
+message UserOnlineMsgRes//0x20001#gateway->user.用户上线-响应
 {
     uint64 uid = 1;//用户id
 }

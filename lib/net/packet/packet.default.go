@@ -1,7 +1,6 @@
 package packet
 
 import (
-	"context"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	xerror "xcore/lib/error"
@@ -11,19 +10,29 @@ import (
 
 // DefaultPacket 默认数据包
 type DefaultPacket struct {
-	DefaultHeader   *DefaultHeader // 包头
-	PBMessage       proto.Message  // 消息
-	PassThroughData []byte         // 包体数据(不带包头)
-	CTX             context.Context
-	IMessage        xnetmessage.IMessage
+	DefaultHeader *DefaultHeader       // 包头
+	PBMessage     proto.Message        // 消息
+	IMessage      xnetmessage.IMessage // 记录该包对应的处理消息
 }
 
 // NewDefaultPacket 新建数据包
-func NewDefaultPacket(header *DefaultHeader, pb proto.Message) *DefaultPacket {
-	return &DefaultPacket{
-		DefaultHeader: header,
-		PBMessage:     pb,
-	}
+func NewDefaultPacket() *DefaultPacket {
+	return &DefaultPacket{}
+}
+
+func (p *DefaultPacket) WithDefaultHeader(header *DefaultHeader) *DefaultPacket {
+	p.DefaultHeader = header
+	return p
+}
+
+func (p *DefaultPacket) WithPBMessage(pb proto.Message) *DefaultPacket {
+	p.PBMessage = pb
+	return p
+}
+
+func (p *DefaultPacket) WithIMessage(iMessage xnetmessage.IMessage) *DefaultPacket {
+	p.IMessage = iMessage
+	return p
 }
 
 func (p *DefaultPacket) Marshal() (data []byte, err error) {
@@ -34,10 +43,10 @@ func (p *DefaultPacket) Marshal() (data []byte, err error) {
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
 	}
-	p.DefaultHeader.PacketLength = 24 + uint32(len(data))
+	p.DefaultHeader.PacketLength = DefaultHeaderSize + uint32(len(data))
 	buf := make([]byte, p.DefaultHeader.PacketLength)
 	p.DefaultHeader.Pack(buf)
-	copy(buf[24:p.DefaultHeader.PacketLength], data)
+	copy(buf[DefaultHeaderSize:p.DefaultHeader.PacketLength], data)
 	return buf, nil
 }
 
