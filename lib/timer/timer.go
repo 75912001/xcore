@@ -53,7 +53,7 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 			return
 		case v := <-p.secondChan:
 			s := v.(*second)
-			duration := s.millisecond.expire - ShadowTimestamp()
+			duration := s.expire - ShadowTimestamp()
 			if duration < 0 {
 				duration = 0
 			}
@@ -221,11 +221,9 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 //		秒定时器
 func (p *defaultTimer) AddSecond(callBackFunc xcallback.ICallBack, expire int64) *second {
 	t := &second{
-		millisecond{
-			ICallBack: callBackFunc,
-			ISwitch:   xswitch.NewDefaultSwitch(true),
-			expire:    expire,
-		},
+		ICallBack: callBackFunc,
+		ISwitch:   xswitch.NewDefaultSwitch(true),
+		expire:    expire,
 	}
 	p.secondChan <- t
 	return t
@@ -234,7 +232,7 @@ func (p *defaultTimer) AddSecond(callBackFunc xcallback.ICallBack, expire int64)
 // DelSecond 删除秒级定时器
 // 同 DelMillisecond
 func (p *defaultTimer) DelSecond(t *second) {
-	t.millisecond.reset()
+	t.reset()
 }
 
 // 将秒级定时器,添加到轮转IDX的末尾.之后,移动到合适的位置
@@ -258,7 +256,7 @@ func moveLastElementToProperPositionSecond(l *list.List) {
 	var element *list.Element
 	for element = lastElement.Prev(); element != nil; element = element.Prev() {
 		current := element.Value.(*second)
-		if current.millisecond.expire <= target.millisecond.expire {
+		if current.expire <= target.expire {
 			l.MoveAfter(lastElement, element)
 			return
 		}
@@ -277,15 +275,15 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 	cycle0 := &p.secondSlice[0]
 	for e := cycle0.Front(); nil != e; e = next {
 		t := e.Value.(*second)
-		if t.millisecond.ISwitch.IsDisabled() {
+		if t.ISwitch.IsDisabled() {
 			next = e.Next()
 			cycle0.Remove(e)
 			continue
 		}
-		if t.millisecond.expire <= timestamp {
+		if t.expire <= timestamp {
 			p.opts.outgoingTimeoutChan <- &EventTimerSecond{
-				ISwitch:   t.millisecond.ISwitch,
-				ICallBack: t.millisecond.ICallBack,
+				ISwitch:   t.ISwitch,
+				ICallBack: t.ICallBack,
 			}
 			next = e.Next()
 			cycle0.Remove(e)
@@ -301,21 +299,21 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 		c := &p.secondSlice[idx]
 		for e := c.Front(); e != nil; e = next {
 			t := e.Value.(*second)
-			if t.millisecond.ISwitch.IsDisabled() {
+			if t.ISwitch.IsDisabled() {
 				next = e.Next()
 				c.Remove(e)
 				continue
 			}
-			if t.millisecond.expire <= timestamp {
+			if t.expire <= timestamp {
 				p.opts.outgoingTimeoutChan <- &EventTimerSecond{
-					ISwitch:   t.millisecond.ISwitch,
-					ICallBack: t.millisecond.ICallBack,
+					ISwitch:   t.ISwitch,
+					ICallBack: t.ICallBack,
 				}
 				next = e.Next()
 				c.Remove(e)
 				continue
 			}
-			if newIdx := findPrevCycleIdx(t.millisecond.expire-timestamp, idx); idx != newIdx {
+			if newIdx := findPrevCycleIdx(t.expire-timestamp, idx); idx != newIdx {
 				next = e.Next()
 				c.Remove(e)
 				p.pushBackCycle(t, newIdx, false)
