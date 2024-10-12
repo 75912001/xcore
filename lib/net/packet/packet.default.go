@@ -11,33 +11,33 @@ import (
 
 // DefaultPacket 默认数据包
 type DefaultPacket struct {
-	*DefaultHeader         // 包头
-	proto.Message          // 消息
-	PassThroughData []byte // 包体数据(不带包头)
+	DefaultHeader   *DefaultHeader // 包头
+	PBMessage       proto.Message  // 消息
+	PassThroughData []byte         // 包体数据(不带包头)
 	CTX             context.Context
-	xnetmessage.IMessage
+	IMessage        xnetmessage.IMessage
 }
 
 // NewDefaultPacket 新建数据包
 func NewDefaultPacket(header *DefaultHeader, pb proto.Message) *DefaultPacket {
 	return &DefaultPacket{
 		DefaultHeader: header,
-		Message:       pb,
+		PBMessage:     pb,
 	}
 }
 
 func (p *DefaultPacket) Marshal() (data []byte, err error) {
-	if p.Message == nil {
+	if p.PBMessage == nil {
 		return nil, xerror.NotImplemented
 	}
-	data, err = proto.Marshal(p.Message)
+	data, err = proto.Marshal(p.PBMessage)
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
 	}
-	p.PacketLength = 24 + uint32(len(data))
-	buf := make([]byte, p.PacketLength)
-	p.Pack(buf)
-	copy(buf[24:p.PacketLength], data)
+	p.DefaultHeader.PacketLength = 24 + uint32(len(data))
+	buf := make([]byte, p.DefaultHeader.PacketLength)
+	p.DefaultHeader.Pack(buf)
+	copy(buf[24:p.DefaultHeader.PacketLength], data)
 	return buf, nil
 }
 

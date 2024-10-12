@@ -48,7 +48,7 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 	if err != nil {
 		return nil, err
 	}
-	packet.Message = pb
+	packet.PBMessage = pb
 	return packet, nil
 }
 func (p *Service) OnPacket(packet xnetpacket.IPacket) error {
@@ -56,7 +56,9 @@ func (p *Service) OnPacket(packet xnetpacket.IPacket) error {
 	if !ok {
 		return xerror.TypeMismatch
 	}
-	return defaultPacket.Execute()
+
+	defaultPacket.IMessage.Set(1, 2, 3, 4, 5)
+	return defaultPacket.IMessage.Execute()
 }
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnDisconnect: %v", remote)
