@@ -2,6 +2,10 @@ package gateway
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
+	xprotobufgateway "xcore/impl/protobuf/gateway"
+	xnetpacket "xcore/lib/net/packet"
+	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -12,7 +16,29 @@ import (
 //}
 
 func UserOnlineMsg(args ...interface{}) error {
+	remote := args[0].(xnettcp.IRemote)
+	defaultPacket := args[1].(*xnetpacket.DefaultPacket)
+	pb := defaultPacket.PBMessage.(*xprotobufgateway.UserOnlineMsgReq)
+	fmt.Println(defaultPacket, pb, xruntime.Location())
 	// todo menglc 处理用户上线
-	fmt.Println(args, xruntime.Location())
+
+	// 返回消息
+	res := &xprotobufgateway.UserOnlineRespMsgRes{
+		Uid: 668599,
+	}
+
+	header := xnetpacket.NewDefaultHeader(
+		0,
+		xprotobufgateway.UserOnlineRespMsgRes_CMD,
+		0,
+		0,
+		668)
+
+	packet := xnetpacket.NewDefaultPacket(header, res)
+
+	err := remote.Send(packet)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
 	return nil
 }

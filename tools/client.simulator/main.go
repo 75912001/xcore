@@ -135,7 +135,7 @@ func main() {
 			fmt.Printf("sendData: %v\n", sendData)
 
 			header := xnetpacket.NewDefaultHeader(
-				24+uint32(len(sendData)),
+				0,
 				messageID,
 				0,
 				0,

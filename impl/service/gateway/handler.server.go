@@ -51,13 +51,12 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 	packet.PBMessage = pb
 	return packet, nil
 }
-func (p *Service) OnPacket(packet xnetpacket.IPacket) error {
+func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
 	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
 	if !ok {
 		return xerror.TypeMismatch
 	}
-
-	defaultPacket.IMessage.Set(1, 2, 3, 4, 5)
+	defaultPacket.IMessage.Set(remote, defaultPacket)
 	return defaultPacket.IMessage.Execute()
 }
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {

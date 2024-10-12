@@ -11,9 +11,9 @@ var GMessage xnetmessage.Mgr
 
 func init() {
 	// todo menglc [优化] 通过配置文件配置,自动生成
-	GMessage.Register(xprotobufgateway.UserOnlineMsg_CMD,
+	GMessage.Register(xprotobufgateway.UserOnlineMsgReq_CMD,
 		xnetmessage.NewOptions().
 			WithHandler(xcallback.NewDefaultCallBack(UserOnlineMsg)).
-			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserOnlineMsg) }),
+			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserOnlineMsgReq) }),
 	)
 }

@@ -30,7 +30,7 @@ func (p *DefaultService) Handle() error {
 			case *xnettcp.Connect:
 				err = event.IHandler.OnConnect(event.IRemote)
 			case *xnettcp.Packet:
-				err = event.IHandler.OnPacket(event.IPacket)
+				err = event.IHandler.OnPacket(event.IRemote, event.IPacket)
 			case *xnettcp.Disconnect:
 				err = event.IHandler.OnDisconnect(event.IRemote)
 				if event.IRemote.IsConnect() {

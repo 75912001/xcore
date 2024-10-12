@@ -21,7 +21,7 @@ func (p *defaultClient) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
 	return nil, nil
 }
-func (p *defaultClient) OnPacket(packet xnetpacket.IPacket) error {
+func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
 	return nil
 }
 func (p *defaultClient) OnDisconnect(remote xnettcp.IRemote) error {
