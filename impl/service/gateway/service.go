@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"runtime"
 	xcommonservice "xcore/impl/common/service"
-	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -20,8 +19,7 @@ func NewService(defaultService *xcommonservice.DefaultService) *Service {
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	packet := xnetpacket.NewDefaultPacket(xnetpacket.NewDefaultHeader())
-	if err = p.DefaultService.Start(ctx, packet, p, logCallBackFunc); err != nil {
+	if err = p.DefaultService.Start(ctx, p, logCallBackFunc); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 	//_ = p.Start(ctx)

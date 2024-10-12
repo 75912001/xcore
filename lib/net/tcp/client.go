@@ -5,7 +5,6 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	xerror "xcore/lib/error"
-	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -14,15 +13,15 @@ type Client struct {
 	IEvent
 	IHandler
 	IRemote
-	xnetpacket.IPacket
+	//xnetpacket.IPacket
 }
 
-func NewClient(packet xnetpacket.IPacket, handler IHandler) *Client {
+func NewClient(handler IHandler) *Client {
 	return &Client{
 		IEvent:   nil,
 		IHandler: handler,
 		IRemote:  nil,
-		IPacket:  packet,
+		//IPacket:  packet,
 	}
 }
 

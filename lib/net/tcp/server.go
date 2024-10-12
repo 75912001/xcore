@@ -9,7 +9,6 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetpacket "xcore/lib/net/packet"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
 )
@@ -18,17 +17,17 @@ import (
 type server struct {
 	IEvent
 	IHandler
-	xnetpacket.IPacket
+	//xnetpacket.IPacket
 	listener *net.TCPListener //监听
 	options  *serverOptions
 }
 
 // NewServer 新建服务
-func NewServer(packet xnetpacket.IPacket, handler IHandler) *server {
+func NewServer(handler IHandler) *server {
 	return &server{
 		IEvent:   nil,
 		IHandler: handler,
-		IPacket:  packet,
+		//IPacket:  packet,
 		listener: nil,
 		options:  nil,
 	}

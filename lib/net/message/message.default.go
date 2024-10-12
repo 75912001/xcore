@@ -2,6 +2,7 @@ package message
 
 import (
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	xcallback "xcore/lib/callback"
 	xerror "xcore/lib/error"
@@ -32,12 +33,33 @@ func (p *defaultMessage) Execute() error {
 	return p.ICallBack.Execute()
 }
 
+// Marshal 序列化
+func (p *defaultMessage) Marshal(message proto.Message) (data []byte, err error) {
+	data, err = proto.Marshal(message)
+	if err != nil {
+		return nil, errors.WithMessage(err, xruntime.Location())
+	}
+	return data, nil
+}
+
 // Unmarshal 反序列化
 //
 //	message: 反序列化 得到的 消息
 func (p *defaultMessage) Unmarshal(data []byte) (message proto.Message, err error) {
 	message = p.newProtoMessage()
 	err = proto.Unmarshal(data, message)
+	if err != nil {
+		return nil, errors.WithMessage(err, xruntime.Location())
+	}
+	return message, nil
+}
+
+// JsonUnmarshal 反序列化
+//
+//	message: 反序列化 得到的 消息
+func (p *defaultMessage) JsonUnmarshal(data []byte) (message proto.Message, err error) {
+	message = p.newProtoMessage()
+	err = protojson.Unmarshal(data, message)
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
 	}

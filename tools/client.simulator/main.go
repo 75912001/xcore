@@ -10,6 +10,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	xservicegateway "xcore/impl/service/gateway"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
@@ -41,12 +42,10 @@ func main() {
 		panic(err)
 	}
 	apiDataJsonPath := path.Join(executablePath, "apiData.json")
-
-	// todo menglc 加载所有proto的协议
 	for {
 		busChannel := make(chan interface{}, xconstants.BusChannelCapacityDefault)
 		client := &defaultClient{}
-		client.Client = xnettcp.NewClient(xnetpacket.NewDefaultPacket(xnetpacket.NewDefaultHeader()), client)
+		client.Client = xnettcp.NewClient(client)
 		err := client.Connect(ctx, xnettcp.NewClientOptions().
 			WithAddress("127.0.0.1:30201").
 			WithEventChan(busChannel).
@@ -106,15 +105,45 @@ func main() {
 				return
 			}
 			messageID := uint32(num)
-			fmt.Printf("%v %#x", messageID, messageID)
-			// 发送消息给服务器
-			//h := xnetpacket.NewDefaultHeader()
-			//h.SetPacketLength(24)
-			//packet := xnetpacket.NewDefaultPacket()
-			//
-			//if err = client.Send(ctx, data[command].Method, data[command].Msg); err != nil {
-			//
-			//}
+			fmt.Printf("%v %#x\n", messageID, messageID)
+
+			// gateway 中, 查找消息
+			message := xservicegateway.GMessage.Find(messageID)
+			if message == nil {
+				fmt.Println("message not found")
+				return
+			} else {
+				fmt.Printf("message: %v\n", message)
+			}
+			// 将 apiData 的数据,构建成消息
+			msgData, err := json.Marshal(apiData.Msg)
+			if err != nil {
+				fmt.Println("json.Marshal fail, err:", err)
+				return
+			}
+			protoMsg, err := message.JsonUnmarshal(msgData)
+			if err != nil {
+				fmt.Println("message.Unmarshal fail, err:", err)
+				return
+			}
+			fmt.Printf("protoMsg: %v\n", protoMsg)
+			sendData, err := message.Marshal(protoMsg)
+			if err != nil {
+				fmt.Println("message.Marshal fail, err:", err)
+				return
+			}
+			fmt.Printf("sendData: %v\n", sendData)
+
+			header := xnetpacket.NewDefaultHeader(
+				24+uint32(len(sendData)),
+				messageID,
+				0,
+				0,
+				668)
+			packet := xnetpacket.NewDefaultPacket(header, protoMsg)
+			if err = client.Send(packet); err != nil {
+				fmt.Println("client.Send fail, err:", err)
+			}
 		}
 	}
 }

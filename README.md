@@ -115,7 +115,6 @@
     - **pprof**: 性能分析
     - **pubsub**: 发布订阅 [todo menglc]
     - **runtime**: 运行时
-    - **service**: 服务 [todo menglc]
     - **time**: 时间管理器
     - **timer**: 定时器
     - **util**: 工具类
@@ -125,5 +124,4 @@
     - **client.simulator**: 客户端模拟器 [todo menglc]
 
 
-[todo menglc] 
- 使用 显示命名接口字段, 禁止使用匿名字段
+[todo menglc]

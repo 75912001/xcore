@@ -10,8 +10,8 @@ import (
 	xtimer "xcore/lib/timer"
 )
 
-func StateTimerPrint(timer xtimer.ITimer) {
-	defaultCallBack := xutil.NewDefaultCallBack(timeOut, timer)
+func StateTimerPrint(timer xtimer.ITimer, l xlog.ILog) {
+	defaultCallBack := xutil.NewDefaultCallBack(timeOut, timer, l)
 	_ = timer.AddSecond(defaultCallBack, time.Now().Unix()+xconstants.ServiceInfoTimeOutSec)
 }
 
@@ -19,8 +19,11 @@ func StateTimerPrint(timer xtimer.ITimer) {
 func timeOut(arg ...interface{}) error {
 	s := debug.GCStats{}
 	debug.ReadGCStats(&s)
-	xlog.PrintfInfo("goroutineCnt:%v, numGC:%d, lastGC:%v, GCPauseTotal:%v",
+	l := arg[1].(xlog.ILog)
+	l.Infof("goroutineCnt:%v, numGC:%d, lastGC:%v, GCPauseTotal:%v",
 		runtime.NumGoroutine(), s.NumGC, s.LastGC, s.PauseTotal)
-	StateTimerPrint(arg[0].(xtimer.ITimer))
+	//xlog.PrintfInfo("goroutineCnt:%v, numGC:%d, lastGC:%v, GCPauseTotal:%v",
+	//	runtime.NumGoroutine(), s.NumGC, s.LastGC, s.PauseTotal)
+	StateTimerPrint(arg[0].(xtimer.ITimer), l)
 	return nil
 }

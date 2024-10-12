@@ -24,8 +24,8 @@ var (
 	//InvalidValue = NewError(0xf009, "InvalidValue", "invalid value")
 	//// Conflict 冲突
 	//Conflict = NewError(0xf00a, "Conflict", "conflict")
-	//// TypeMismatch 类型不匹配
-	//TypeMismatch = NewError(0xf00b, "TypeMismatch", "type mismatch")
+	// TypeMismatch 类型不匹配
+	TypeMismatch = NewError(0xf00b).WithName("TypeMismatch").WithDesc("type mismatch")
 	//// InvalidPointer 无效指针
 	//InvalidPointer = NewError(0xf00c, "InvalidPointer", "invalid pointer")
 	// LogLevel 日志等级
@@ -74,8 +74,8 @@ var (
 	//OutOfResources = NewError(0xf022, "OutOfResources", "out of resources")
 	//// NATS NATS错误
 	//NATS = NewError(0xf023, "NATS", "nats")
-	//// PacketQuantityLimit 包数量限制
-	//PacketQuantityLimit = NewError(0xf024, "PacketQuantityLimit", "packet quantity limit")
+	// PacketQuantityLimit 包数量限制
+	PacketQuantityLimit = NewError(0xf024).WithName("PacketQuantityLimit").WithDesc("packet quantity limit")
 	//// OverloadWarning 过载-告警
 	//OverloadWarning = NewError(0xf025, "OverloadWarning", "overload warning")
 	//// OverloadError 过载-错误
@@ -96,14 +96,16 @@ var (
 	//Unavailable = NewError(0xf02d, "Unavailable", "unavailable")
 	// NotImplemented 未实现
 	NotImplemented = NewError(0xf02e).WithName("NotImplemented").WithDesc("not implemented")
-	//// PacketHeaderLength 数据包头长度
-	//PacketHeaderLength = NewError(0xf02f, "PacketHeaderLength", "packet header length error")
+	// PacketHeaderLength 数据包头长度
+	PacketHeaderLength = NewError(0xf02f).WithName("PacketHeaderLength").WithDesc("packet header length error")
 	//// ChannelClosed 通道 已关闭
 	//ChannelClosed = NewError(0xf030, "ChannelClosed", "channel closed")
 	//// Unregistered 未注册
 	//Unregistered = NewError(0xf031, "Unregistered", "unregistered")
 	// ChannelNil 通道 未初始化
 	ChannelNil = NewError(0xf032).WithName("ChannelNil").WithDesc("channel is nil")
+	// MessageIDNonExistent 消息ID 不存在
+	MessageIDNonExistent = NewError(0xf033).WithName("MessageIDNonExistent").WithDesc("message id non-existent")
 	// Unknown 未知
 	Unknown = NewError(0xffff).WithName("Unknown").WithDesc("unknown error")
 	// 0xffff

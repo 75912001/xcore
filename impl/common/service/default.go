@@ -16,11 +16,9 @@ import (
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
 	xruntime "xcore/lib/runtime"
-	xservice "xcore/lib/service"
 	xtime "xcore/lib/time"
 	xtimer "xcore/lib/timer"
 	xutil "xcore/lib/util"
@@ -72,7 +70,7 @@ func NewDefaultService() *DefaultService {
 //	return xerror.NotImplemented
 //}
 
-func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, handler xnettcp.IHandler, logCallbackFunc xlog.CallBackFunc) (err error) {
+func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, logCallbackFunc xlog.CallBackFunc) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -121,6 +119,14 @@ func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, h
 	err = p.BenchMgr.Json.Parse(benchJson)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
+	}
+	switch *p.BenchMgr.Json.Base.RunMode {
+	case 0:
+		xruntime.SetRunMode(xruntime.RunModeRelease)
+	case 1:
+		xruntime.SetRunMode(xruntime.RunModeDebug)
+	default:
+		return errors.Errorf("runMode err:%v %v", *p.BenchMgr.Json.Base.RunMode, xruntime.Location())
 	}
 	// GoMaxProcess
 	previous := runtime.GOMAXPROCS(*p.BenchMgr.Json.Base.GoMaxProcess)
@@ -176,7 +182,7 @@ func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, h
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
 		case "tcp": // 启动 TCP 服务
-			if err = xnettcp.NewServer(packet, handler).Start(ctx,
+			if err = xnettcp.NewServer(handler).Start(ctx,
 				xnettcp.NewServerOptions().
 					SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
 					SetEventChan(p.BusChannel).
@@ -190,7 +196,7 @@ func (p *DefaultService) Start(ctx context.Context, packet xnetpacket.IPacket, h
 			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 		}
 	}
-	xservice.StateTimerPrint(p.Timer)
+	StateTimerPrint(p.Timer, p.Log)
 	return nil
 }
 
