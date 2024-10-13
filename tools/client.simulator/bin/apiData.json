@@ -1,9 +1,17 @@
 {
-	"UserOnlineMsg": {
-		"注释": "用户上线",
-		"id": "0x20000",
-		"msg": {
-			"token": "token-1234567890"
-		}
-	}
+  "LoginMsgReq": {
+    "注释": "user->gateway->login.用户登陆-请求",
+    "id": "0x10000",
+    "msg": {
+      "account": "account-menglc-001",
+      "verifyCode": "verifyCode-value"
+    }
+  },
+  "UserOnlineMsg": {
+    "注释": "用户上线",
+    "id": "0x20000",
+    "msg": {
+      "token": "token-1234567890"
+    }
+  }
 }

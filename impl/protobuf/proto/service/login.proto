@@ -1,0 +1,16 @@
+syntax="proto3";
+
+option go_package = "../protobuf/login";
+
+//[消息码 0x10000,0x1ffff]
+message LoginMsgReq//0x10000#user->gateway->login.用户登陆-请求
+{
+    string account = 1;//账号
+    string verifyCode = 2;//验证码
+}
+
+message LoginMsgRes//0x10001#login->gateway->user.用户登陆-响应
+{
+    uint64 uid = 1;//用户id
+    uint32 logicID = 2;//逻辑服id
+}

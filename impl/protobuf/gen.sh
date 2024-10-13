@@ -84,6 +84,12 @@ protoc --${genMod}=. ${srcDirFile}
 genProtoError ${srcDirFile}
 
 ########################################################################################################################
+#login.proto
+fileName="./proto/service/login.proto"
+protoc --${genMod}=. ${fileName}
+genCMD "login"
+
+########################################################################################################################
 #gateway.proto
 fileName="./proto/service/gateway.proto"
 protoc --${genMod}=. ${fileName}

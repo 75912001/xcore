@@ -125,4 +125,8 @@
 
 
 [todo menglc]
-不允许匿名导入
+gateway 将消息转发到logic,logic处理消息后,将消息返回给gateway,gateway将消息返回给客户端 
+  gateway 与 logic 之间通过tcp连接
+  gateway 通过 etcd 注册服务
+
+gateway 增加心跳检测,超时未登录断开连接
