@@ -1,10 +1,12 @@
 package gateway
 
 import (
+	"github.com/pkg/errors"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
+	xruntime "xcore/lib/runtime"
 )
 
 //type Server struct {
@@ -43,17 +45,27 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 
 	// todo menglc 判断消息是否禁用
 
-	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
-	packet.IMessage = GMessage.Find(header.MessageID)
-	if packet.IMessage == nil {
-		return nil, xerror.MessageIDNonExistent
+	// todo menglc 判断消息是否需要转发
+	if 0x10000 <= header.MessageID && header.MessageID <= 0x1ffff { // login
+		// todo menglc login
+		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+	} else if 0x20000 <= header.MessageID && header.MessageID <= 0x2ffff { // gateway
+		packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
+		packet.IMessage = GMessage.Find(header.MessageID)
+		if packet.IMessage == nil {
+			return nil, errors.WithMessage(xerror.MessageIDNonExistent, xruntime.Location())
+		}
+		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
+		if err != nil {
+			return nil, errors.WithMessage(err, xruntime.Location())
+		}
+		packet.PBMessage = pb
+		return packet, nil
+	} else if 0x30000 <= header.MessageID && header.MessageID <= 0x3ffff { // logic
+		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+	} else {
+		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	}
-	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
-	if err != nil {
-		return nil, err
-	}
-	packet.PBMessage = pb
-	return packet, nil
 }
 
 func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {

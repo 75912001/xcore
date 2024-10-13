@@ -16,9 +16,5 @@ func init() {
 			WithHandler(xcallback.NewDefaultCallBack(UserOnlineMsg)).
 			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserOnlineMsgReq) }),
 	)
-	GMessage.Register(xprotobufgateway.UserOnlineMsgRes_CMD,
-		xnetmessage.NewOptions().
-			WithHandler(xcallback.NewDefaultCallBack(nil)).
-			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserOnlineMsgRes) }),
-	)
+
 }

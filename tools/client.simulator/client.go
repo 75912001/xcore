@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	xservicegateway "xcore/impl/service/gateway"
+	"reflect"
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
@@ -16,12 +16,15 @@ type defaultClient struct {
 func (p *defaultClient) OnConnect(remote xnettcp.IRemote) error {
 	return nil
 }
+
 func (p *defaultClient) OnCheckPacketLength(length uint32) error {
 	return nil
 }
+
 func (p *defaultClient) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	return nil
 }
+
 func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
 	header := xnetpacket.NewDefaultHeader()
 	header.Unpack(data)
@@ -29,7 +32,7 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 	// todo menglc 判断消息是否禁用
 
 	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
-	packet.IMessage = xservicegateway.GMessage.Find(header.MessageID)
+	packet.IMessage = GMessage.Find(header.MessageID)
 	if packet.IMessage == nil {
 		return nil, xerror.MessageIDNonExistent
 	}
@@ -40,12 +43,15 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 	packet.PBMessage = pb
 	return packet, nil
 }
+
 func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
 	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
 	if !ok {
 		return xerror.TypeMismatch
 	}
 	{
+		fmt.Println()
+		fmt.Printf("\033[32mMessage Name: %s\033[0m\n", reflect.TypeOf(defaultPacket.PBMessage).Elem().Name())
 		type HexDefaultHeader struct {
 			PacketLength uint32
 			MessageID    string
@@ -66,7 +72,7 @@ func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPack
 			fmt.Printf("\033[31mJSON marshaling failed: %s\033[0m", err)
 		}
 		//fmt.Printf("\nHeader: %s\n", headerJson)
-		fmt.Printf("\033[32m\nHeader: %s\033[0m\n", headerJson)
+		fmt.Printf("\033[32mHeader: %s\033[0m\n", headerJson)
 	}
 	{
 		pbMessageJson, err := json.MarshalIndent(defaultPacket.PBMessage, "", "  ")

@@ -1,6 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/pkg/errors"
+	"os"
+	"strconv"
+	xerror "xcore/lib/error"
 	xnettcp "xcore/lib/net/tcp"
 )
 
@@ -19,6 +25,84 @@ func Handle(busChannel chan interface{}) error {
 				err = event.IHandler.OnDisconnect(event.IRemote)
 				if event.IRemote.IsConnect() {
 					event.IRemote.Stop()
+				}
+			case *EventCommand:
+				// 创建一个 map 来存储 JSON 数据
+				data := make(map[string]ApiData)
+				apiData := ApiData{}
+				parseCommand := func(command string) error {
+					file, err := os.Open(apiDataJsonPath)
+					if err != nil {
+						fmt.Printf("Error opening file:%v %v", apiDataJsonPath, err)
+						panic(err)
+					}
+					defer func() {
+						_ = file.Close()
+					}()
+					// 创建一个新的解码器
+					decoder := json.NewDecoder(file)
+					// 解码 JSON 数据到 map 中
+					err = decoder.Decode(&data)
+					if err != nil {
+						fmt.Println("Error decoding JSON:", err)
+						panic(err)
+					}
+					if info, ok := data[command]; ok {
+						//fmt.Printf("apiData: %+v\n", info)
+						apiData = info
+					} else {
+						fmt.Printf("\033[31m%s\033[0m\n", "apiData not found")
+						return xerror.NonExistent
+					}
+					return nil
+				}
+				err = parseCommand(event.Command)
+				if err != nil {
+					if errors.Is(err, xerror.NonExistent) {
+						continue
+					}
+					panic(err)
+				}
+				// todo menglc 打包数据
+				num, err := strconv.ParseUint(apiData.ID, 0, 32)
+				if err != nil {
+					fmt.Println("strconv.ParseUint fail, err:", err)
+					panic(err)
+				}
+				messageID := uint32(num)
+				//fmt.Printf("%v %#x\n", messageID, messageID)
+
+				// gateway 中, 查找消息
+				message := GMessage.Find(messageID)
+				if message == nil {
+					fmt.Printf("\033[31m%s\033[0m\n", "message not found")
+					continue
+				} else {
+					//fmt.Printf("message: %v\n", message)
+				}
+				// 将 apiData 的数据,构建成消息
+				msgData, err := json.Marshal(apiData.Msg)
+				if err != nil {
+					fmt.Println("json.Marshal fail, err:", err)
+					continue
+				}
+				protoMsg, err := message.JsonUnmarshal(msgData)
+				if err != nil {
+					fmt.Println("message.Unmarshal fail, err:", err)
+					continue
+				}
+				//sendData, err := message.Marshal(protoMsg)
+				if err != nil {
+					fmt.Println("message.Marshal fail, err:", err)
+					continue
+				}
+				fmt.Println()
+				fmt.Printf("\033[34mmessageID: 0x%x\033[0m\n", messageID)
+				fmt.Printf("\033[34mprotoMsg: %v\033[0m\n", protoMsg)
+
+				//fmt.Printf("sendData: %v\n", sendData)
+				if err := xnettcp.Send(client.IRemote, protoMsg, messageID, 0, 0); err != nil {
+					fmt.Println("client.Send fail, err:", err)
 				}
 			default:
 			}
