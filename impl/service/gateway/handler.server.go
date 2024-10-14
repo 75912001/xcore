@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"github.com/pkg/errors"
+	xcommonservice "xcore/impl/common/service"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
@@ -42,15 +43,14 @@ func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
 	header := xnetpacket.NewDefaultHeader()
 	header.Unpack(data)
-
 	// todo menglc 判断消息是否禁用
-
-	// todo menglc 判断消息是否需要转发
-	if 0x10000 <= header.MessageID && header.MessageID <= 0x1ffff { // login
-		// todo menglc login
-		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
-	} else if 0x20000 <= header.MessageID && header.MessageID <= 0x2ffff { // gateway
-		packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
+	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
+	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
+	case xcommonservice.LoginMessage, xcommonservice.LogicMessage:
+		packet.RawData = make([]byte, len(data))
+		copy(packet.RawData, data)
+		return packet, nil
+	case xcommonservice.GatewayMessage:
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
 			return nil, errors.WithMessage(xerror.MessageIDNonExistent, xruntime.Location())
@@ -61,9 +61,7 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 		}
 		packet.PBMessage = pb
 		return packet, nil
-	} else if 0x30000 <= header.MessageID && header.MessageID <= 0x3ffff { // logic
-		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
-	} else {
+	default:
 		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	}
 }
@@ -73,8 +71,21 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) er
 	if !ok {
 		return xerror.TypeMismatch
 	}
-	defaultPacket.IMessage.Set(remote, defaultPacket)
-	return defaultPacket.IMessage.Execute()
+	switch xcommonservice.GetServiceTypeByMessageID(defaultPacket.DefaultHeader.MessageID) {
+	case xcommonservice.LoginMessage:
+		// todo menglc 找到对应的 login service
+
+		// 将消息转发到 login service
+		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+	case xcommonservice.LogicMessage:
+		// todo menglc 处理 logic message
+		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+	case xcommonservice.GatewayMessage:
+		defaultPacket.IMessage.Set(remote, defaultPacket)
+		return defaultPacket.IMessage.Execute()
+	default:
+		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+	}
 }
 
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {

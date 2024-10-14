@@ -12,6 +12,7 @@ import (
 type DefaultPacket struct {
 	DefaultHeader *DefaultHeader       // 包头
 	PBMessage     proto.Message        // 消息
+	RawData       []byte               // 原始数据
 	IMessage      xnetmessage.IMessage // 记录该包对应的处理消息
 }
 
