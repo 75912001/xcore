@@ -15,6 +15,7 @@ import (
 	xbench "xcore/lib/bench"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
+	xetcd "xcore/lib/etcd"
 	xlog "xcore/lib/log"
 	xnettcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
@@ -36,6 +37,7 @@ type DefaultService struct {
 	Log     xlog.ILog
 	TimeMgr *xtime.Mgr
 	Timer   xtimer.ITimer
+	Etcd    xetcd.IEtcd
 
 	BusChannel          chan interface{} // 总线
 	BusChannelWaitGroup sync.WaitGroup   // 总线等待
@@ -92,6 +94,11 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
+	// 加载服务配置文件-公共部分
+	err = p.BenchMgr.Json.Parse(benchJson)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
 	if false { // 从etcd获取配置项 todo menglc
 		client, err := clientv3.New(
 			clientv3.Config{
@@ -104,7 +111,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		}
 		kv := clientv3.NewKV(client)
 		key := fmt.Sprintf("/%v/%v/%v/%v/%v",
-			p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
+			*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
 		getResponse, err := kv.Get(ctx, key, clientv3.WithPrefix())
 		if err != nil {
 			return errors.WithMessage(err, xruntime.Location())
@@ -115,8 +122,6 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		benchJson = string(getResponse.Kvs[0].Value)
 		xlog.PrintfInfo(benchJson)
 	}
-	// 加载服务配置文件-公共部分
-	err = p.BenchMgr.Json.Parse(benchJson)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
@@ -177,7 +182,19 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 			return errors.Errorf("timer Start err:%v %v", err, xruntime.Location())
 		}
 	}
-	// todo menglc 启动定时 日志 服务状态
+	// etcd
+	defaultEtcd := xetcd.NewDefaultEtcd(
+		xetcd.NewOptions().
+			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
+			WithTTL(*p.BenchMgr.RootJson.Etcd.TTL).
+			//WithKV(). todo menglc 用途?
+			//WithICallBack(). todo menglc 用途?
+			WithEventChan(p.BusChannel),
+	)
+	p.Etcd = defaultEtcd
+	if err = p.Etcd.Start(ctx); err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {

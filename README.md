@@ -130,3 +130,5 @@ gateway 将消息转发到logic,logic处理消息后,将消息返回给gateway,g
   gateway 通过 etcd 注册服务
 
 gateway 增加心跳检测,超时未登录断开连接
+
+gateway 路由功能放在配置文件中
