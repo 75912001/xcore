@@ -26,17 +26,19 @@ func (p *DefaultService) Handle() error {
 			p.TimeMgr.Update()
 			var err error
 			switch event := value.(type) {
-			//tcp
 			case *xnettcp.Connect:
 				err = event.IHandler.OnConnect(event.IRemote)
 			case *xnettcp.Packet:
+				if !event.IRemote.IsConnect() {
+					continue
+				}
 				err = event.IHandler.OnPacket(event.IRemote, event.IPacket)
 			case *xnettcp.Disconnect:
 				err = event.IHandler.OnDisconnect(event.IRemote)
-				if event.IRemote.IsConnect() {
-					event.IRemote.Stop()
+				if !event.IRemote.IsConnect() {
+					continue
 				}
-				//timer
+				event.IRemote.Stop()
 			case *xtimer.EventTimerSecond:
 				if event.ISwitch.IsDisabled() {
 					continue
@@ -62,11 +64,7 @@ func (p *DefaultService) Handle() error {
 			//case *mq_nats.Packet:
 			//	err = onNatsFunc(event)
 			default:
-				//	xrlog.GetInstance().Fatalf("non-existent event:%value %value", value, event)
-				//	if onDefaultFunc == nil {
-				//} else {
-				//	err = onDefaultFunc(value)
-				//}
+				xlog.PrintfErr("non-existent event:%value %value", value, event)
 			}
 			if err != nil {
 				p.Log.Errorf("Handle event:%v error:%value", value, err)

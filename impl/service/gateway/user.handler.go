@@ -23,6 +23,7 @@ import (
 
 func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnConnect: %v", remote)
+	// todo menglc 管理 user
 	return nil
 }
 
@@ -90,5 +91,6 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) er
 
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnDisconnect: %v", remote)
+	// todo menglc 管理 user
 	return nil
 }

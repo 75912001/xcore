@@ -187,7 +187,15 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
 			WithTTL(*p.BenchMgr.RootJson.Etcd.TTL).
-			//WithKV(). todo menglc 用途?
+			WithKV(&xetcd.KV{
+				Key: xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID),
+				Value: &xetcd.ValueJson{
+					ServiceNet:    &p.BenchMgr.Json.ServiceNet,
+					Version:       *p.BenchMgr.Json.Base.Version,
+					AvailableLoad: *p.BenchMgr.Json.Base.AvailableLoad,
+					SecondOffset:  0,
+				},
+			}).
 			//WithICallBack(). todo menglc 用途?
 			WithEventChan(p.BusChannel),
 	)
@@ -195,6 +203,30 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	if err = p.Etcd.Start(ctx); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
+	//etcdWatchChan := defaultEtcd.WatchPrefix(*p.BenchMgr.Json.Base.ProjectName)
+	//go func() { // todo menglc
+	//	defer func() {
+	//		if xruntime.IsRelease() {
+	//			if err := recover(); err != nil {
+	//				p.Log.Errorf(xconstants.GoroutinePanic, err, xruntime.Location())
+	//			}
+	//		}
+	//		p.BusChannelWaitGroup.Done()
+	//		p.Log.Infof(xconstants.GoroutineDone)
+	//	}()
+	//	p.BusChannelWaitGroup.Add(1)
+	//	for v := range etcdWatchChan {
+	//		key := string(v.Events[0].Kv.Key)
+	//		value := string(v.Events[0].Kv.Value)
+	//		p.BusChannel <- &xetcd.KV{
+	//			Key:   key,
+	//			Value: value,
+	//		}
+	//	}
+	//}
+	//defaultEtcd.GetPrefix(*p.BenchMgr.Json.Base.ProjectName)
+	// todo menglc 获取现有的服务列表
+
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {

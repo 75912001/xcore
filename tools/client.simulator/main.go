@@ -63,7 +63,9 @@ func main() {
 				continue
 			}
 			command = strings.TrimSpace(command)
-			busChannel <- &EventCommand{Command: command}
+			for i := 0; i < 10; i++ {
+				busChannel <- &EventCommand{Command: command}
+			}
 		}
 	}
 }

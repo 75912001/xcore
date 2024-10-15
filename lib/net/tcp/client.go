@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"net"
-	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -48,10 +47,10 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 }
 
 // Disconnect 主动断开连接
-func (p *Client) Disconnect() error {
-	if !p.IRemote.IsConnect() {
-		return errors.WithMessage(xerror.Link, xruntime.Location())
-	}
-	p.IRemote.Stop()
-	return nil
-}
+//func (p *Client) Disconnect() error {
+//	if !p.IRemote.IsConnect() {
+//		return errors.WithMessage(xerror.Link, xruntime.Location())
+//	}
+//	p.IRemote.Stop()
+//	return nil
+//}

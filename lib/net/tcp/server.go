@@ -7,7 +7,6 @@ import (
 	"runtime/debug"
 	"time"
 	xconstants "xcore/lib/constants"
-	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
@@ -102,15 +101,15 @@ func (p *server) Stop() {
 }
 
 // Disconnect 逻辑层 主动 断开连接
-func (p *server) Disconnect(remote IRemote) error {
-	if remote == nil || !remote.IsConnect() {
-		return errors.WithMessage(xerror.Link, xruntime.Location())
-	}
-	if remote.IsConnect() {
-		remote.Stop()
-	}
-	return nil
-}
+//func (p *server) Disconnect(remote IRemote) error {
+//	if remote == nil || !remote.IsConnect() {
+//		return errors.WithMessage(xerror.Link, xruntime.Location())
+//	}
+//	if remote.IsConnect() {
+//		remote.Stop()
+//	}
+//	return nil
+//}
 
 func (p *server) handleConn(conn *net.TCPConn) {
 	remote := NewDefaultRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))

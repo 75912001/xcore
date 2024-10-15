@@ -30,5 +30,6 @@ func UserOnlineMsg(args ...interface{}) error {
 	if err := xnettcp.Send(remote, res, xprotobufgateway.UserOnlineMsgRes_CMD, 0, 0); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
+	remote.Stop()
 	return nil
 }

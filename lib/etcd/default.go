@@ -2,19 +2,25 @@ package etcd
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	etcdclientv3 "go.etcd.io/etcd/client/v3"
+	"path"
+	"runtime/debug"
 	"sync"
+	"time"
+	xconstants "xcore/lib/constants"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 )
 
 type defaultEtcd struct {
-	client                        *clientv3.Client
-	kv                            clientv3.KV
-	lease                         clientv3.Lease
-	leaseGrantResponse            *clientv3.LeaseGrantResponse
-	leaseKeepAliveResponseChannel <-chan *clientv3.LeaseKeepAliveResponse
+	client                        *etcdclientv3.Client
+	kv                            etcdclientv3.KV
+	lease                         etcdclientv3.Lease
+	leaseGrantResponse            *etcdclientv3.LeaseGrantResponse
+	leaseKeepAliveResponseChannel <-chan *etcdclientv3.LeaseKeepAliveResponse
 
 	cancelFunc context.CancelFunc
 	waitGroup  sync.WaitGroup // Stop 等待信号
@@ -35,9 +41,9 @@ func NewDefaultEtcd(opts ...*options) *defaultEtcd {
 }
 
 // Start 开始
-func (p *defaultEtcd) Start(_ context.Context) error {
+func (p *defaultEtcd) Start(ctx context.Context) error {
 	var err error
-	p.client, err = clientv3.New(clientv3.Config{
+	p.client, err = etcdclientv3.New(etcdclientv3.Config{
 		Endpoints:   p.options.addrs,
 		DialTimeout: *p.options.dialTimeout,
 	})
@@ -45,24 +51,28 @@ func (p *defaultEtcd) Start(_ context.Context) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	// 获得kv api子集
-	p.kv = clientv3.NewKV(p.client)
+	p.kv = etcdclientv3.NewKV(p.client)
 	// 申请一个lease 租约
-	p.lease = clientv3.NewLease(p.client)
+	p.lease = etcdclientv3.NewLease(p.client)
 	// 申请一个ttl秒的租约
 	p.leaseGrantResponse, err = p.lease.Grant(context.TODO(), *p.options.ttl)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	// 先删除,再添加
-	for _, v := range p.options.kvSlice {
-		_, err = p.DelWithPrefix(v.Key)
-		if err != nil {
-			return errors.WithMessage(err, xruntime.Location())
-		}
-		_, err = p.PutWithLease(v.Key, v.Value)
-		if err != nil {
-			return errors.WithMessage(err, xruntime.Location())
-		}
+	// 删除
+	_, err = p.DelWithPrefix(p.options.kv.Key)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
+	// 添加
+	_, err = p.PutWithLease(p.options.kv.Key, GenValue(p.options.kv.Value))
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
+	// 续租
+	err = p.KeepAlive(ctx)
+	if err != nil {
+		return errors.WithMessagef(err, xruntime.Location())
 	}
 	return nil
 }
@@ -95,131 +105,164 @@ func (p *defaultEtcd) Stop() error {
 	return nil
 }
 
-//	func (p *Mgr) getLeaseKeepAliveResponseChannel() <-chan *clientv3.LeaseKeepAliveResponse {
-//		return p.leaseKeepAliveResponseChannel
-//	}
-//
-// // 多次重试 Start 和 KeepAlive
-//
-//	func (p *Mgr) retryKeepAlive(ctx context.Context) error {
-//		xrlog.PrintfErr("renewing etcd lease, reconfiguring.grantLeaseMaxRetries:%v, grantLeaseIntervalSecond:%v",
-//			*p.options.grantLeaseMaxRetries, grantLeaseRetryDuration/time.Second)
-//		var failedGrantLeaseAttempts = 0
-//		for {
-//			if err := p.Start(ctx, p.options); err != nil {
-//				failedGrantLeaseAttempts++
-//				if *p.options.grantLeaseMaxRetries <= failedGrantLeaseAttempts {
-//					return errors.WithMessagef(err, "%v exceeded max attempts to renew etcd lease %v %v",
-//						xrutil.GetCodeLocation(1), *p.options.grantLeaseMaxRetries, failedGrantLeaseAttempts)
-//				}
-//				xrlog.PrintErr("error granting etcd lease, will retry.", err)
-//				time.Sleep(grantLeaseRetryDuration)
-//				continue
-//			} else {
-//				// 续租
-//				if err = p.KeepAlive(ctx); err != nil {
-//					failedGrantLeaseAttempts++
-//					if failedGrantLeaseAttempts >= *p.options.grantLeaseMaxRetries {
-//						return errors.WithMessagef(err, "%v exceeded max attempts to renew etcd lease %v %v",
-//							xrutil.GetCodeLocation(1), *p.options.grantLeaseMaxRetries, failedGrantLeaseAttempts)
-//					}
-//					xrlog.PrintErr("error granting etcd lease, will retry.", err)
-//					time.Sleep(grantLeaseRetryDuration)
-//					continue
-//				} else {
-//					return nil
-//				}
-//			}
-//		}
-//	}
-//
-// // KeepAlive 更新租约
-//
-//	func (p *Mgr) KeepAlive(ctx context.Context) error {
-//		var err error
-//		p.leaseKeepAliveResponseChannel, err = p.lease.KeepAlive(ctx, p.leaseGrantResponse.ID)
-//		if err != nil {
-//			return errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
-//		}
-//
-//		p.waitGroup.Add(1)
-//
-//		ctxWithCancel, cancelFunc := context.WithCancel(ctx)
-//		p.cancelFunc = cancelFunc
-//
-//		go func(ctx context.Context) {
-//			defer func() {
-//				if xrutil.IsRelease() {
-//					if err := recover(); err != nil {
-//						xrlog.PrintErr(xrconstant.GoroutinePanic, err, debug.Stack())
-//					}
-//				}
-//				p.waitGroup.Done()
-//				xrlog.PrintInfo(xrconstant.GoroutineDone)
-//			}()
-//
-//			for {
-//				select {
-//				case <-ctx.Done():
-//					xrlog.PrintInfo(xrconstant.GoroutineDone)
-//					return
-//				case leaseKeepAliveResponse, ok := <-p.getLeaseKeepAliveResponseChannel():
-//					xrlog.PrintInfo(leaseKeepAliveResponse, ok)
-//					if leaseKeepAliveResponse != nil {
-//						continue
-//					}
-//					if ok {
-//						continue
-//					}
-//					// abnormal
-//					xrlog.PrintErr("etcd lease KeepAlive died, retrying")
-//					go func(ctx context.Context) {
-//						defer func() {
-//							if xrutil.IsRelease() {
-//								if err := recover(); err != nil {
-//									xrlog.PrintErr(xrconstant.Retry, xrconstant.GoroutinePanic, err, debug.Stack())
-//								}
-//							}
-//							xrlog.PrintInfo(xrconstant.Retry, xrconstant.GoroutineDone)
-//						}()
-//						if err := p.Stop(); err != nil {
-//							xrlog.PrintInfo(xrconstant.Retry, xrconstant.Failure, err)
-//							return
-//						}
-//						if err := p.retryKeepAlive(ctx); err != nil {
-//							xrlog.PrintErr(xrconstant.Retry, xrconstant.Failure, err)
-//							return
-//						}
-//					}(context.TODO())
-//					return
-//				}
-//			}
-//		}(ctxWithCancel)
-//		return nil
-//	}
+// Parse
+// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}
+func Parse(key string) (msgType string, groupID string, serviceName string, serviceID string) {
+	serviceID = path.Base(key)
+
+	key = path.Dir(key)
+	serviceName = path.Base(key)
+
+	key = path.Dir(key)
+	groupID = path.Base(key)
+
+	key = path.Dir(key)
+	msgType = path.Base(key)
+	return msgType, groupID, serviceName, serviceID
+}
+
+func GenKey(projectName string, etcdWatchMsgType string, groupID uint32, serviceName string, serviceID uint32) string {
+	return path.Join(
+		"/",
+		projectName,
+		etcdWatchMsgType,
+		fmt.Sprintf("%v", groupID),
+		serviceName,
+		fmt.Sprintf("%v", serviceID),
+	)
+}
+
+func GenPrefixKey(projectName string) string {
+	return path.Join(
+		"/",
+		projectName,
+		"/",
+	)
+}
+
+func GenValue(valueJson *ValueJson) string {
+	bytes, err := json.Marshal(valueJson)
+	if err != nil {
+		xlog.PrintfErr("Error marshaling ValueJson: %v", err)
+		return ""
+	}
+	return string(bytes)
+}
+
+// 多次重试 Start 和 KeepAlive
+func (p *defaultEtcd) retryKeepAlive(ctx context.Context) error {
+	xlog.PrintfErr("renewing etcd lease, reconfiguring.grantLeaseMaxRetries:%v, grantLeaseIntervalSecond:%v",
+		*p.options.grantLeaseMaxRetries, grantLeaseRetryDuration/time.Second)
+	var failedGrantLeaseAttempts = 0
+	for {
+		if err := p.Start(ctx); err != nil {
+			failedGrantLeaseAttempts++
+			if *p.options.grantLeaseMaxRetries <= failedGrantLeaseAttempts {
+				return errors.WithMessagef(err, "%v exceeded max attempts to renew etcd lease %v %v",
+					xruntime.Location(), *p.options.grantLeaseMaxRetries, failedGrantLeaseAttempts)
+			}
+			xlog.PrintErr("error granting etcd lease, will retry.", err)
+			time.Sleep(grantLeaseRetryDuration)
+			continue
+		} else {
+			// 续租
+			if err = p.KeepAlive(ctx); err != nil {
+				failedGrantLeaseAttempts++
+				if failedGrantLeaseAttempts >= *p.options.grantLeaseMaxRetries {
+					return errors.WithMessagef(err, "%v exceeded max attempts to renew etcd lease %v %v",
+						xruntime.Location(), *p.options.grantLeaseMaxRetries, failedGrantLeaseAttempts)
+				}
+				xlog.PrintErr("error granting etcd lease, will retry.", err)
+				time.Sleep(grantLeaseRetryDuration)
+				continue
+			} else {
+				return nil
+			}
+		}
+	}
+}
+
+// KeepAlive 更新租约
+func (p *defaultEtcd) KeepAlive(ctx context.Context) error {
+	var err error
+	p.leaseKeepAliveResponseChannel, err = p.lease.KeepAlive(ctx, p.leaseGrantResponse.ID)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
+	p.waitGroup.Add(1)
+	ctxWithCancel, cancelFunc := context.WithCancel(ctx)
+	p.cancelFunc = cancelFunc
+	go func(ctx context.Context) {
+		defer func() {
+			if xruntime.IsRelease() {
+				if err := recover(); err != nil {
+					xlog.PrintErr(xconstants.GoroutinePanic, err, debug.Stack())
+				}
+			}
+			p.waitGroup.Done()
+			xlog.PrintInfo(xconstants.GoroutineDone)
+		}()
+		for {
+			select {
+			case <-ctx.Done():
+				xlog.PrintInfo(xconstants.GoroutineDone)
+				return
+			case leaseKeepAliveResponse, ok := <-p.leaseKeepAliveResponseChannel:
+				xlog.PrintInfo(leaseKeepAliveResponse, ok)
+				if leaseKeepAliveResponse != nil {
+					continue
+				}
+				if ok {
+					continue
+				}
+				// abnormal
+				xlog.PrintErr("etcd lease KeepAlive died, retrying")
+				go func(ctx context.Context) {
+					defer func() {
+						if xruntime.IsRelease() {
+							if err := recover(); err != nil {
+								xlog.PrintErr(xconstants.Retry, xconstants.GoroutinePanic, err, debug.Stack())
+							}
+						}
+						xlog.PrintInfo(xconstants.Retry, xconstants.GoroutineDone)
+					}()
+					if err := p.Stop(); err != nil {
+						xlog.PrintInfo(xconstants.Retry, xconstants.Failure, err)
+						return
+					}
+					if err := p.retryKeepAlive(ctx); err != nil {
+						xlog.PrintErr(xconstants.Retry, xconstants.Failure, err)
+						return
+					}
+				}(context.TODO())
+				return
+			}
+		}
+	}(ctxWithCancel)
+	return nil
+}
 
 // PutWithLease 将一个键值对放入etcd中 WithLease 带ttl
-func (p *defaultEtcd) PutWithLease(key string, value string) (*clientv3.PutResponse, error) {
-	putResponse, err := p.kv.Put(context.TODO(), key, value, clientv3.WithLease(p.leaseGrantResponse.ID))
+func (p *defaultEtcd) PutWithLease(key string, value string) (*etcdclientv3.PutResponse, error) {
+	putResponse, err := p.kv.Put(context.TODO(), key, value, etcdclientv3.WithLease(p.leaseGrantResponse.ID))
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
 	}
 	return putResponse, nil
 }
 
-// // Put 将一个键值对放入etcd中
-//
-//	func (p *Mgr) Put(key string, value string) (*clientv3.PutResponse, error) {
-//		putResponse, err := p.kv.Put(context.TODO(), key, value)
-//		if err != nil {
-//			return nil, errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
-//		}
-//		return putResponse, nil
-//	}
+// Put 将一个键值对放入etcd中
+func (p *defaultEtcd) Put(key string, value string) (*etcdclientv3.PutResponse, error) {
+	putResponse, err := p.kv.Put(context.TODO(), key, value)
+	if err != nil {
+		return nil, errors.WithMessage(err, xruntime.Location())
+	}
+	return putResponse, nil
+}
 
 // DelWithPrefix 删除键值 匹配的键值
-func (p *defaultEtcd) DelWithPrefix(keyPrefix string) (*clientv3.DeleteResponse, error) {
-	deleteResponse, err := p.kv.Delete(context.TODO(), keyPrefix, clientv3.WithPrefix())
+func (p *defaultEtcd) DelWithPrefix(keyPrefix string) (*etcdclientv3.DeleteResponse, error) {
+	deleteResponse, err := p.kv.Delete(context.TODO(), keyPrefix, etcdclientv3.WithPrefix())
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
 	}
@@ -249,11 +292,12 @@ func (p *defaultEtcd) DelWithPrefix(keyPrefix string) (*clientv3.DeleteResponse,
 //	}
 //	return deleteResponse, nil
 //}
-//
-//// WatchPrefix 监视以key为前缀的所有 key value
-//func (p *Mgr) WatchPrefix(key string) clientv3.WatchChan {
-//	return p.client.Watch(context.TODO(), key, clientv3.WithPrefix())
-//}
+
+// WatchPrefix 监视以key为前缀的所有 key value
+func (p *defaultEtcd) WatchPrefix(key string) etcdclientv3.WatchChan {
+	return p.client.Watch(context.TODO(), key, etcdclientv3.WithPrefix())
+}
+
 //
 //// Get 检索键
 //func (p *Mgr) Get(key string) (*clientv3.GetResponse, error) {
@@ -263,16 +307,16 @@ func (p *defaultEtcd) DelWithPrefix(keyPrefix string) (*clientv3.DeleteResponse,
 //	}
 //	return getResponse, nil
 //}
-//
-//// GetPrefix 查找以key为前缀的所有 key value
-//func (p *Mgr) GetPrefix(key string) (*clientv3.GetResponse, error) {
-//	getResponse, err := p.kv.Get(context.TODO(), key, clientv3.WithPrefix())
-//	if err != nil {
-//		return nil, errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
-//	}
-//	return getResponse, nil
-//}
-//
+
+// GetPrefix 查找以key为前缀的所有 key value
+func (p *defaultEtcd) GetPrefix(key string) (*etcdclientv3.GetResponse, error) {
+	getResponse, err := p.kv.Get(context.TODO(), key, etcdclientv3.WithPrefix())
+	if err != nil {
+		return nil, errors.WithMessage(err, xruntime.Location())
+	}
+	return getResponse, nil
+}
+
 //// GetPrefixIntoChan  取得关心的前缀,放入 chan 中
 //func (p *Mgr) GetPrefixIntoChan(preFix string) (err error) {
 //	getResponse, err := p.GetPrefix(preFix)

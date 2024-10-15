@@ -96,6 +96,10 @@ func (p *benchJson) Parse(jsonString string) error {
 		defaultValue := uint32(xruntime.RunModeRelease)
 		p.Base.RunMode = &defaultValue
 	}
+	if p.Base.AvailableLoad == nil {
+		defaultValue := xconstants.AvailableLoadDefault
+		p.Base.AvailableLoad = &defaultValue
+	}
 	if p.Timer.ScanSecondDuration == nil {
 		defaultValue := time.Millisecond * 100
 		p.Timer.ScanSecondDuration = &defaultValue
@@ -129,6 +133,7 @@ type Base struct {
 	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]: 8192
 	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]: 1000
 	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]: 0,release
+	AvailableLoad      *uint32 `json:"availableLoad"`      // 剩余可用负载, 可用资源数 [default]: xconstants.AvailableLoadDefault
 }
 
 type Timer struct {
