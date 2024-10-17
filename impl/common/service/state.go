@@ -4,14 +4,14 @@ import (
 	"runtime"
 	"runtime/debug"
 	"time"
-	xutil "xcore/lib/callback"
+	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
 	xlog "xcore/lib/log"
 	xtimer "xcore/lib/timer"
 )
 
 func StateTimerPrint(timer xtimer.ITimer, l xlog.ILog) {
-	defaultCallBack := xutil.NewDefaultCallBack(timeOut, timer, l)
+	defaultCallBack := xcallback.NewDefaultCallBack(timeOut, timer, l)
 	_ = timer.AddSecond(defaultCallBack, time.Now().Unix()+xconstants.ServiceInfoTimeOutSec)
 }
 

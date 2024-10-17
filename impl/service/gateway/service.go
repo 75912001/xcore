@@ -19,7 +19,7 @@ func NewService(defaultService *xcommonservice.DefaultService) *Service {
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	if err = p.DefaultService.Start(ctx, p, logCallBackFunc); err != nil {
+	if err = p.DefaultService.Start(ctx, p, logCallBackFunc, EtcdKeyValue); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 

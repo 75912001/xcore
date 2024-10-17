@@ -72,7 +72,7 @@ func NewDefaultService() *DefaultService {
 //	return xerror.NotImplemented
 //}
 
-func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, logCallbackFunc xlog.CallBackFunc) (err error) {
+func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, logCallbackFunc xlog.CallBackFunc, etcdCallbackFun xetcd.CallbackFun) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -187,45 +187,35 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
 			WithTTL(*p.BenchMgr.RootJson.Etcd.TTL).
-			WithKV(&xetcd.KV{
-				Key: xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID),
-				Value: &xetcd.ValueJson{
+			WithWatchKeyPrefix(xetcd.GenPrefixKey(*p.BenchMgr.Json.Base.ProjectName)).
+			WithKey(xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)).
+			WithValue(
+				&xetcd.ValueJson{
 					ServiceNet:    &p.BenchMgr.Json.ServiceNet,
 					Version:       *p.BenchMgr.Json.Base.Version,
 					AvailableLoad: *p.BenchMgr.Json.Base.AvailableLoad,
 					SecondOffset:  0,
 				},
-			}).
-			//WithICallBack(). todo menglc 用途?
+			).
 			WithEventChan(p.BusChannel),
 	)
 	p.Etcd = defaultEtcd
 	if err = p.Etcd.Start(ctx); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	//etcdWatchChan := defaultEtcd.WatchPrefix(*p.BenchMgr.Json.Base.ProjectName)
-	//go func() { // todo menglc
-	//	defer func() {
-	//		if xruntime.IsRelease() {
-	//			if err := recover(); err != nil {
-	//				p.Log.Errorf(xconstants.GoroutinePanic, err, xruntime.Location())
-	//			}
-	//		}
-	//		p.BusChannelWaitGroup.Done()
-	//		p.Log.Infof(xconstants.GoroutineDone)
-	//	}()
-	//	p.BusChannelWaitGroup.Add(1)
-	//	for v := range etcdWatchChan {
-	//		key := string(v.Events[0].Kv.Key)
-	//		value := string(v.Events[0].Kv.Value)
-	//		p.BusChannel <- &xetcd.KV{
-	//			Key:   key,
-	//			Value: value,
-	//		}
-	//	}
-	//}
-	//defaultEtcd.GetPrefix(*p.BenchMgr.Json.Base.ProjectName)
-	// todo menglc 获取现有的服务列表
+	// 续租
+	err = defaultEtcd.KeepAlive(ctx)
+	if err != nil {
+		return errors.WithMessagef(err, xruntime.Location())
+	}
+	// etcd-watch
+	if err = defaultEtcd.WatchPrefixIntoChan(etcdCallbackFun); err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
+	// etcd-get
+	if err = defaultEtcd.GetPrefixIntoChan(etcdCallbackFun); err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
 
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {

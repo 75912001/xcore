@@ -2,6 +2,7 @@ package service
 
 import (
 	"time"
+	xetcd "xcore/lib/etcd"
 	xlog "xcore/lib/log"
 	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
@@ -59,8 +60,8 @@ func (p *DefaultService) Handle() error {
 			//		continue
 			//	}
 			//	err = event.Remote.Server.GetOnEvent().OnPacket(event)
-			//case *xretcd.KV:
-			//	err = xretcd.GetInstance().Handler(event.Key, event.Value)
+			case *xetcd.Event:
+				_ = event.ICallBack.Execute()
 			//case *mq_nats.Packet:
 			//	err = onNatsFunc(event)
 			default:

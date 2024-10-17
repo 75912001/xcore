@@ -10,6 +10,8 @@ import (
 	"runtime/debug"
 	"sync"
 	"time"
+	xbench "xcore/lib/bench"
+	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
@@ -40,6 +42,14 @@ func NewDefaultEtcd(opts ...*options) *defaultEtcd {
 	}
 }
 
+// ValueJson etcd 通讯的数据,由服务中的数据生成,定时更新->etcd->服务
+type ValueJson struct {
+	ServiceNet    *xbench.ServiceNet `json:"serviceNet"`    // 有:直接使用. 没有:使用 benchJson.ServiceNet
+	Version       string             `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
+	AvailableLoad uint32             `json:"availableLoad"` // 剩余可用负载, 可用资源数
+	SecondOffset  int32              `json:"secondOffset"`  // 服务 时间(秒)偏移量
+}
+
 // Start 开始
 func (p *defaultEtcd) Start(ctx context.Context) error {
 	var err error
@@ -60,19 +70,14 @@ func (p *defaultEtcd) Start(ctx context.Context) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	// 删除
-	_, err = p.DelWithPrefix(p.options.kv.Key)
+	_, err = p.DelWithPrefix(*p.options.key)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	// 添加
-	_, err = p.PutWithLease(p.options.kv.Key, GenValue(p.options.kv.Value))
+	_, err = p.PutWithLease(*p.options.key, GenValue(p.options.value))
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
-	}
-	// 续租
-	err = p.KeepAlive(ctx)
-	if err != nil {
-		return errors.WithMessagef(err, xruntime.Location())
 	}
 	return nil
 }
@@ -168,7 +173,7 @@ func (p *defaultEtcd) retryKeepAlive(ctx context.Context) error {
 			// 续租
 			if err = p.KeepAlive(ctx); err != nil {
 				failedGrantLeaseAttempts++
-				if failedGrantLeaseAttempts >= *p.options.grantLeaseMaxRetries {
+				if *p.options.grantLeaseMaxRetries <= failedGrantLeaseAttempts {
 					return errors.WithMessagef(err, "%v exceeded max attempts to renew etcd lease %v %v",
 						xruntime.Location(), *p.options.grantLeaseMaxRetries, failedGrantLeaseAttempts)
 				}
@@ -317,41 +322,51 @@ func (p *defaultEtcd) GetPrefix(key string) (*etcdclientv3.GetResponse, error) {
 	return getResponse, nil
 }
 
-//// GetPrefixIntoChan  取得关心的前缀,放入 chan 中
-//func (p *Mgr) GetPrefixIntoChan(preFix string) (err error) {
-//	getResponse, err := p.GetPrefix(preFix)
-//	if err != nil {
-//		return errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
-//	}
-//	for _, v := range getResponse.Kvs {
-//		p.options.eventChan <- &KV{
-//			Key:   string(v.Key),
-//			Value: string(v.Value),
-//		}
-//	}
-//	return
-//}
-//
-//// WatchPrefixIntoChan 监听key变化,放入 chan 中
-//func (p *Mgr) WatchPrefixIntoChan(preFix string) (err error) {
-//	eventChan := p.WatchPrefix(preFix)
-//	go func() {
-//		defer func() {
-//			if xrutil.IsRelease() {
-//				if err := recover(); err != nil {
-//					xrlog.PrintErr(xrconstant.GoroutinePanic, err, debug.Stack())
-//				}
-//			}
-//			xrlog.PrintInfo(xrconstant.GoroutineDone)
-//		}()
-//		for v := range eventChan {
-//			Key := string(v.Events[0].Kv.Key)
-//			Value := string(v.Events[0].Kv.Value)
-//			p.options.eventChan <- &KV{
-//				Key:   Key,
-//				Value: Value,
-//			}
-//		}
-//	}()
-//	return
-//}
+// GetPrefixIntoChan  取得关心的前缀,放入 chan 中
+func (p *defaultEtcd) GetPrefixIntoChan(callbackFun CallbackFun) (err error) {
+	getResponse, err := p.GetPrefix(*p.options.watchKeyPrefix)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
+	for _, v := range getResponse.Kvs {
+		// value 装换为json
+		var valueJson ValueJson
+		err := json.Unmarshal(v.Value, &valueJson)
+		if err != nil {
+			xlog.PrintfErr("Error unmarshaling ValueJson: %v %v", v.Value, err)
+			continue
+		}
+		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(callbackFun, string(v.Key), &valueJson)}
+	}
+	return
+}
+
+// WatchPrefixIntoChan 监听key变化,放入 chan 中
+func (p *defaultEtcd) WatchPrefixIntoChan(callbackFun CallbackFun) (err error) {
+	eventChan := p.WatchPrefix(*p.options.watchKeyPrefix)
+	go func() {
+		defer func() {
+			if xruntime.IsRelease() {
+				if err := recover(); err != nil {
+					xlog.PrintErr(xconstants.GoroutinePanic, err, debug.Stack())
+				}
+			}
+			xlog.PrintInfo(xconstants.GoroutineDone)
+		}()
+		for v := range eventChan {
+			Key := string(v.Events[0].Kv.Key)
+			Value := string(v.Events[0].Kv.Value)
+			// value 装换为json
+			var valueJson ValueJson
+			err := json.Unmarshal([]byte(Value), &valueJson)
+			if err != nil {
+				xlog.PrintfErr("Error unmarshaling ValueJson: %v %v", Value, err)
+				continue
+			}
+			p.options.eventChan <- &Event{
+				ICallBack: xcallback.NewDefaultCallBack(callbackFun, Key, &valueJson),
+			}
+		}
+	}()
+	return
+}

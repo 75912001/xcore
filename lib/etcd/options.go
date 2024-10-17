@@ -3,8 +3,6 @@ package etcd
 import (
 	"github.com/pkg/errors"
 	"time"
-	xbench "xcore/lib/bench"
-	xcallback "xcore/lib/callback"
 	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
 )
@@ -15,28 +13,15 @@ var (
 	dialTimeoutDefault          = time.Second * 5 // dialTimeout is the timeout for failing to establish a connection.
 )
 
-// KV key-value pair
-type KV struct {
-	Key   string
-	Value *ValueJson
-}
-
-// ValueJson etcd 通讯的数据,由服务中的数据生成,定时更新->etcd->服务
-type ValueJson struct {
-	ServiceNet    *xbench.ServiceNet `json:"serviceNet"`    // 有:直接使用. 没有:使用 benchJson.ServiceNet
-	Version       string             `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
-	AvailableLoad uint32             `json:"availableLoad"` // 剩余可用负载, 可用资源数
-	SecondOffset  int32              `json:"secondOffset"`  // 服务 时间(秒)偏移量
-}
-
 type options struct {
-	addrs                []string       // 地址
-	ttl                  *int64         // Time To Live, etcd内部会按照 ttl/3 的时间(最小1秒),保持连接
-	grantLeaseMaxRetries *int           // 授权租约 最大 重试次数 [default:600]
-	kv                   *KV            // 本服务的 etcd key,value [default: key:]
-	dialTimeout          *time.Duration // dialTimeout is the timeout for failing to establish a connection. [default:time.Second*5]
-	ICallBack            xcallback.ICallBack
+	addrs                []string           // 地址
+	ttl                  *int64             // Time To Live, etcd内部会按照 ttl/3 的时间(最小1秒),保持连接
+	grantLeaseMaxRetries *int               // 授权租约 最大 重试次数 [default:600]
+	dialTimeout          *time.Duration     // dialTimeout is the timeout for failing to establish a connection. [default:time.Second*5]
 	eventChan            chan<- interface{} // 传出 channel
+	watchKeyPrefix       *string            // 监视的键前缀
+	key                  *string            // 本服务的 etcd key
+	value                *ValueJson         // 本服务的 etcd value
 }
 
 // NewOptions 新的Options
@@ -60,23 +45,28 @@ func (p *options) WithGrantLeaseMaxRetries(retries int) *options {
 	return p
 }
 
-func (p *options) WithKV(kv *KV) *options {
-	p.kv = kv
-	return p
-}
-
 func (p *options) WithDialTimeout(dialTimeout time.Duration) *options {
 	p.dialTimeout = &dialTimeout
 	return p
 }
 
-func (p *options) WithICallBack(cb xcallback.ICallBack) *options {
-	p.ICallBack = cb
+func (p *options) WithEventChan(eventChan chan<- interface{}) *options {
+	p.eventChan = eventChan
 	return p
 }
 
-func (p *options) WithEventChan(eventChan chan<- interface{}) *options {
-	p.eventChan = eventChan
+func (p *options) WithWatchKeyPrefix(watchKeyPrefix string) *options {
+	p.watchKeyPrefix = &watchKeyPrefix
+	return p
+}
+
+func (p *options) WithKey(key string) *options {
+	p.key = &key
+	return p
+}
+
+func (p *options) WithValue(value *ValueJson) *options {
+	p.value = value
 	return p
 }
 
@@ -95,17 +85,20 @@ func mergeOptions(opts ...*options) *options {
 		if opt.grantLeaseMaxRetries != nil {
 			no.WithGrantLeaseMaxRetries(*opt.grantLeaseMaxRetries)
 		}
-		if opt.kv != nil {
-			no.WithKV(opt.kv)
-		}
 		if opt.dialTimeout != nil {
 			no.WithDialTimeout(*opt.dialTimeout)
 		}
-		if opt.ICallBack != nil {
-			no.WithICallBack(opt.ICallBack)
-		}
 		if opt.eventChan != nil {
 			no.WithEventChan(opt.eventChan)
+		}
+		if opt.watchKeyPrefix != nil {
+			no.WithWatchKeyPrefix(*opt.watchKeyPrefix)
+		}
+		if opt.key != nil {
+			no.WithKey(*opt.key)
+		}
+		if opt.value != nil {
+			no.WithValue(opt.value)
 		}
 	}
 	return no
@@ -123,16 +116,19 @@ func configure(opts *options) error {
 		var v = grantLeaseMaxRetriesDefault
 		opts.grantLeaseMaxRetries = &v
 	}
-	if opts.kv == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
 	if opts.dialTimeout == nil {
 		opts.WithDialTimeout(dialTimeoutDefault)
 	}
-	//if opts.ICallBack == nil { // todo menglc
-	//	return errors.WithMessage(xerror.Param, xruntime.Location())
-	//}
 	if opts.eventChan == nil {
+		return errors.WithMessage(xerror.Param, xruntime.Location())
+	}
+	if opts.watchKeyPrefix == nil {
+		return errors.WithMessage(xerror.Param, xruntime.Location())
+	}
+	if opts.key == nil {
+		return errors.WithMessage(xerror.Param, xruntime.Location())
+	}
+	if opts.value == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
 	return nil
