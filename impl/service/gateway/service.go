@@ -287,6 +287,7 @@ func (p *Service) Start(ctx context.Context) (err error) {
 //}
 
 func (p *Service) PreStop() error {
+	_ = p.Etcd.Stop()
 	return nil
 }
 func (p *Service) Stop() (err error) {

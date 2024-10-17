@@ -17,6 +17,8 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
+// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}
+
 type defaultEtcd struct {
 	client                        *etcdclientv3.Client
 	kv                            etcdclientv3.KV
@@ -75,7 +77,7 @@ func (p *defaultEtcd) Start(ctx context.Context) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	// 添加
-	_, err = p.PutWithLease(*p.options.key, GenValue(p.options.value))
+	_, err = p.PutWithLease(*p.options.key, ValueJson2String(p.options.value))
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
@@ -84,34 +86,28 @@ func (p *defaultEtcd) Start(ctx context.Context) error {
 
 // Stop 停止
 func (p *defaultEtcd) Stop() error {
-	//if p.client != nil {
-	//	// 删除
-	//	for _, v := range p.options.kvSlice {
-	//		_, err := p.DelWithPrefix(v.Key)
-	//		if err != nil {
-	//			xrlog.PrintErr(xrutil.GetCodeLocation(1).String())
-	//			//	return errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
-	//		}
-	//	}
-	//
-	//	err := p.client.Close()
-	//	if err != nil {
-	//		return errors.WithMessage(err, xrutil.GetCodeLocation(1).String())
-	//	}
-	//	p.client = nil
-	//}
-	//
-	//if p.cancelFunc != nil {
-	//	p.cancelFunc()
-	//	// 等待 goroutine退出.
-	//	p.waitGroup.Wait()
-	//	p.cancelFunc = nil
-	//}
+	if p.client != nil {
+		// 删除
+		if _, err := p.DelWithPrefix(*p.options.key); err != nil {
+			xlog.PrintfErr("DelWithPrefix err:%v %v", err, xruntime.Location())
+		}
+		err := p.client.Close()
+		if err != nil {
+			return errors.WithMessage(err, xruntime.Location())
+		}
+		p.client = nil
+	}
+
+	if p.cancelFunc != nil {
+		p.cancelFunc()
+		// 等待 goroutine退出.
+		p.waitGroup.Wait()
+		p.cancelFunc = nil
+	}
 	return nil
 }
 
 // Parse
-// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}
 func Parse(key string) (msgType string, groupID string, serviceName string, serviceID string) {
 	serviceID = path.Base(key)
 
@@ -127,31 +123,36 @@ func Parse(key string) (msgType string, groupID string, serviceName string, serv
 }
 
 func GenKey(projectName string, etcdWatchMsgType string, groupID uint32, serviceName string, serviceID uint32) string {
-	return path.Join(
-		"/",
+	return fmt.Sprintf("/%v/%v/%v/%v/%v/",
 		projectName,
 		etcdWatchMsgType,
-		fmt.Sprintf("%v", groupID),
+		groupID,
 		serviceName,
-		fmt.Sprintf("%v", serviceID),
+		serviceID,
 	)
 }
 
 func GenPrefixKey(projectName string) string {
-	return path.Join(
-		"/",
-		projectName,
-		"/",
-	)
+	return fmt.Sprintf("/%v/", projectName)
 }
 
-func GenValue(valueJson *ValueJson) string {
+func ValueJson2String(valueJson *ValueJson) string {
 	bytes, err := json.Marshal(valueJson)
 	if err != nil {
 		xlog.PrintfErr("Error marshaling ValueJson: %v", err)
 		return ""
 	}
 	return string(bytes)
+}
+
+func ValueString2Json(value string) *ValueJson {
+	var valueJson ValueJson
+	err := json.Unmarshal([]byte(value), &valueJson)
+	if err != nil {
+		xlog.PrintfErr("Error unmarshaling ValueJson: %v %v", value, err)
+		return nil
+	}
+	return &valueJson
 }
 
 // 多次重试 Start 和 KeepAlive
@@ -329,14 +330,8 @@ func (p *defaultEtcd) GetPrefixIntoChan(callbackFun CallbackFun) (err error) {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	for _, v := range getResponse.Kvs {
-		// value 装换为json
-		var valueJson ValueJson
-		err := json.Unmarshal(v.Value, &valueJson)
-		if err != nil {
-			xlog.PrintfErr("Error unmarshaling ValueJson: %v %v", v.Value, err)
-			continue
-		}
-		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(callbackFun, string(v.Key), &valueJson)}
+		valueJson := ValueString2Json(string(v.Value))
+		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(callbackFun, string(v.Key), valueJson)}
 	}
 	return
 }
@@ -357,14 +352,9 @@ func (p *defaultEtcd) WatchPrefixIntoChan(callbackFun CallbackFun) (err error) {
 			Key := string(v.Events[0].Kv.Key)
 			Value := string(v.Events[0].Kv.Value)
 			// value 装换为json
-			var valueJson ValueJson
-			err := json.Unmarshal([]byte(Value), &valueJson)
-			if err != nil {
-				xlog.PrintfErr("Error unmarshaling ValueJson: %v %v", Value, err)
-				continue
-			}
+			valueJson := ValueString2Json(Value)
 			p.options.eventChan <- &Event{
-				ICallBack: xcallback.NewDefaultCallBack(callbackFun, Key, &valueJson),
+				ICallBack: xcallback.NewDefaultCallBack(callbackFun, Key, valueJson),
 			}
 		}
 	}()
