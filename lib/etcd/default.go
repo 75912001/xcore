@@ -17,7 +17,7 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}
+// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}/
 
 type defaultEtcd struct {
 	client                        *etcdclientv3.Client
