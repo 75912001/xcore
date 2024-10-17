@@ -8,6 +8,7 @@ import (
 	etcdclientv3 "go.etcd.io/etcd/client/v3"
 	"path"
 	"runtime/debug"
+	"strconv"
 	"sync"
 	"time"
 	xbench "xcore/lib/bench"
@@ -107,16 +108,29 @@ func (p *defaultEtcd) Stop() error {
 	return nil
 }
 
-// Parse
-func Parse(key string) (msgType string, groupID string, serviceName string, serviceID string) {
-	serviceID = path.Base(key)
-
+// Parse 解析key
+func Parse(key string) (msgType string, groupID uint32, serviceName string, serviceID uint32) {
+	key = "/project.name.default/service/1/gateway/2/"
+	strServiceID := path.Base(key)
+	// strServiceID 转换成 serviceID
+	if serviceIDU64, err := strconv.ParseUint(strServiceID, 10, 32); err != nil {
+		xlog.PrintfErr("Parse err:%v %v %v", key, strServiceID, err)
+		return
+	} else {
+		serviceID = uint32(serviceIDU64)
+	}
+	key = path.Dir(key)
 	key = path.Dir(key)
 	serviceName = path.Base(key)
-
 	key = path.Dir(key)
-	groupID = path.Base(key)
-
+	strGroupID := path.Base(key)
+	// strGroupID 转换成 groupID
+	if groupIDU64, err := strconv.ParseUint(strGroupID, 10, 32); err != nil {
+		xlog.PrintfErr("Parse err:%v %v %v", key, strGroupID, err)
+		return
+	} else {
+		groupID = uint32(groupIDU64)
+	}
 	key = path.Dir(key)
 	msgType = path.Base(key)
 	return msgType, groupID, serviceName, serviceID
@@ -330,7 +344,10 @@ func (p *defaultEtcd) GetPrefixIntoChan(callbackFun CallbackFun) (err error) {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	for _, v := range getResponse.Kvs {
-		valueJson := ValueString2Json(string(v.Value))
+		var valueJson *ValueJson
+		if len(v.Value) != 0 {
+			valueJson = ValueString2Json(string(v.Value))
+		}
 		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(callbackFun, string(v.Key), valueJson)}
 	}
 	return
@@ -351,8 +368,10 @@ func (p *defaultEtcd) WatchPrefixIntoChan(callbackFun CallbackFun) (err error) {
 		for v := range eventChan {
 			Key := string(v.Events[0].Kv.Key)
 			Value := string(v.Events[0].Kv.Value)
-			// value 装换为json
-			valueJson := ValueString2Json(Value)
+			var valueJson *ValueJson
+			if len(Value) != 0 {
+				valueJson = ValueString2Json(Value)
+			}
 			p.options.eventChan <- &Event{
 				ICallBack: xcallback.NewDefaultCallBack(callbackFun, Key, valueJson),
 			}

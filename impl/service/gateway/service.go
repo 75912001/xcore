@@ -8,14 +8,17 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
+var gservice *Service
+
 type Service struct {
 	*xcommonservice.DefaultService
 }
 
 func NewService(defaultService *xcommonservice.DefaultService) *Service {
-	return &Service{
+	gservice = &Service{
 		DefaultService: defaultService,
 	}
+	return gservice
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
