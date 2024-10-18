@@ -30,7 +30,8 @@ type defaultEtcd struct {
 	cancelFunc context.CancelFunc
 	waitGroup  sync.WaitGroup // Stop 等待信号
 
-	options *options
+	options     *options
+	CallbackFun CallbackFun
 }
 
 func NewDefaultEtcd(opts ...*options) *defaultEtcd {
@@ -82,6 +83,16 @@ func (p *defaultEtcd) Start(ctx context.Context) error {
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
+	{
+		// etcd-watch
+		if err = p.WatchPrefixIntoChan(); err != nil {
+			return errors.WithMessage(err, xruntime.Location())
+		}
+		// etcd-get
+		if err = p.GetPrefixIntoChan(); err != nil {
+			return errors.WithMessage(err, xruntime.Location())
+		}
+	}
 	return nil
 }
 
@@ -110,7 +121,6 @@ func (p *defaultEtcd) Stop() error {
 
 // Parse 解析key
 func Parse(key string) (msgType string, groupID uint32, serviceName string, serviceID uint32) {
-	key = "/project.name.default/service/1/gateway/2/"
 	strServiceID := path.Base(key)
 	// strServiceID 转换成 serviceID
 	if serviceIDU64, err := strconv.ParseUint(strServiceID, 10, 32); err != nil {
@@ -338,7 +348,7 @@ func (p *defaultEtcd) GetPrefix(key string) (*etcdclientv3.GetResponse, error) {
 }
 
 // GetPrefixIntoChan  取得关心的前缀,放入 chan 中
-func (p *defaultEtcd) GetPrefixIntoChan(callbackFun CallbackFun) (err error) {
+func (p *defaultEtcd) GetPrefixIntoChan() (err error) {
 	getResponse, err := p.GetPrefix(*p.options.watchKeyPrefix)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -348,13 +358,13 @@ func (p *defaultEtcd) GetPrefixIntoChan(callbackFun CallbackFun) (err error) {
 		if len(v.Value) != 0 {
 			valueJson = ValueString2Json(string(v.Value))
 		}
-		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(callbackFun, string(v.Key), valueJson)}
+		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(p.CallbackFun, string(v.Key), valueJson)}
 	}
 	return
 }
 
 // WatchPrefixIntoChan 监听key变化,放入 chan 中
-func (p *defaultEtcd) WatchPrefixIntoChan(callbackFun CallbackFun) (err error) {
+func (p *defaultEtcd) WatchPrefixIntoChan() (err error) {
 	eventChan := p.WatchPrefix(*p.options.watchKeyPrefix)
 	go func() {
 		defer func() {
@@ -373,7 +383,7 @@ func (p *defaultEtcd) WatchPrefixIntoChan(callbackFun CallbackFun) (err error) {
 				valueJson = ValueString2Json(Value)
 			}
 			p.options.eventChan <- &Event{
-				ICallBack: xcallback.NewDefaultCallBack(callbackFun, Key, valueJson),
+				ICallBack: xcallback.NewDefaultCallBack(p.CallbackFun, Key, valueJson),
 			}
 		}
 	}()

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 	xbench "xcore/lib/bench"
+	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xetcd "xcore/lib/etcd"
@@ -37,7 +38,9 @@ type DefaultService struct {
 	Log     xlog.ILog
 	TimeMgr *xtime.Mgr
 	Timer   xtimer.ITimer
+
 	Etcd    xetcd.IEtcd
+	EtcdKey string // etcd key
 
 	BusChannel          chan interface{} // 总线
 	BusChannelWaitGroup sync.WaitGroup   // 总线等待
@@ -183,12 +186,13 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		}
 	}
 	// etcd
+	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)
 	defaultEtcd := xetcd.NewDefaultEtcd(
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
 			WithTTL(*p.BenchMgr.RootJson.Etcd.TTL).
 			WithWatchKeyPrefix(xetcd.GenPrefixKey(*p.BenchMgr.Json.Base.ProjectName)).
-			WithKey(xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)).
+			WithKey(p.EtcdKey).
 			WithValue(
 				&xetcd.ValueJson{
 					ServiceNet:    &p.BenchMgr.Json.ServiceNet,
@@ -199,6 +203,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 			).
 			WithEventChan(p.BusChannel),
 	)
+	defaultEtcd.CallbackFun = etcdCallbackFun
 	p.Etcd = defaultEtcd
 	if err = p.Etcd.Start(ctx); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -208,14 +213,18 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	if err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
-	// etcd-watch
-	if err = defaultEtcd.WatchPrefixIntoChan(etcdCallbackFun); err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
-	// etcd-get
-	if err = defaultEtcd.GetPrefixIntoChan(etcdCallbackFun); err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
+	//{ // todo menglc 放到 etcd.Start 里面
+	//	// etcd-watch
+	//	if err = defaultEtcd.WatchPrefixIntoChan(etcdCallbackFun); err != nil {
+	//		return errors.WithMessage(err, xruntime.Location())
+	//	}
+	//	// etcd-get
+	//	if err = defaultEtcd.GetPrefixIntoChan(etcdCallbackFun); err != nil {
+	//		return errors.WithMessage(err, xruntime.Location())
+	//	}
+	//}
+	// etcd-定时上报
+	p.Timer.AddSecond(xcallback.NewDefaultCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
 
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {

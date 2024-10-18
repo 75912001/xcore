@@ -125,6 +125,8 @@
 
 
 [todo menglc]
+
+
 gateway 将消息转发到logic,logic处理消息后,将消息返回给gateway,gateway将消息返回给客户端 
   gateway 与 logic 之间通过tcp连接
 
