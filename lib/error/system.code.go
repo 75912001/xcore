@@ -32,8 +32,8 @@ var (
 	LogLevel = NewError(0xf00d).WithName("LogLevel").WithDesc("log level error")
 	// NonExistent 不存在
 	NonExistent = NewError(0xf00e).WithName("NonExistent").WithDesc("non-existent")
-	//// Exists 存在
-	//Exists = NewError(0xf00f, "Exists", "exists")
+	// Exists 存在
+	Existent = NewError(0xf00f).WithName("Exists").WithDesc("exists")
 	//// Marshal 序列化
 	//Marshal = NewError(0xf010, "Marshal", "marshal")
 	//// Unmarshal 反序列化
@@ -46,8 +46,8 @@ var (
 	//Update = NewError(0xf014, "Update", "update error")
 	//// Delete 删除
 	//Delete = NewError(0xf015, "Delete", "delete error")
-	//// Duplicate 重复
-	//Duplicate = NewError(0xf016, "Duplicate", "duplicate error")
+	// Duplicate 重复
+	Duplicate = NewError(0xf016).WithName("Duplicate").WithDesc("duplicate error")
 	// Config 配置
 	Config = NewError(0xf017).WithName("Config").WithDesc("config error")
 	//// InvalidOperation 无效操作
@@ -92,8 +92,8 @@ var (
 	//MISSING = NewError(0xf02b, "MISSING", "missing")
 	//// VersionMismatch 版本 不匹配
 	//VersionMismatch = NewError(0xf02c, "VersionMismatch", "version mismatch")
-	//// Unavailable 不可用
-	//Unavailable = NewError(0xf02d, "Unavailable", "unavailable")
+	// Unavailable 不可用
+	Unavailable = NewError(0xf02d).WithName("Unavailable").WithDesc("unavailable")
 	// NotImplemented 未实现
 	NotImplemented = NewError(0xf02e).WithName("NotImplemented").WithDesc("not implemented")
 	// PacketHeaderLength 数据包头长度

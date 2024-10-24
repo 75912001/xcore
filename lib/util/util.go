@@ -6,6 +6,7 @@ import (
 	"net"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"unsafe"
 	xconstants "xcore/lib/constants"
@@ -113,4 +114,17 @@ func PackUint64(v uint64, buf []byte) {
 	buf[5] = byte(v >> 40)
 	buf[6] = byte(v >> 48)
 	buf[7] = byte(v >> 56)
+}
+
+func HexStringToUint32(hexStr string) (uint32, error) {
+	// Remove the "0x" prefix if it exists
+	if len(hexStr) > 2 && hexStr[:2] == "0x" {
+		hexStr = hexStr[2:]
+	}
+	// Parse the hex string to a uint32
+	value, err := strconv.ParseUint(hexStr, 16, 32)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(value), nil
 }

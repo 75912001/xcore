@@ -1,35 +1,16 @@
 {
     "etcd": {
-        "Addrs": ["127.0.0.1:2379"],
-        "__kvSlice": [
-            {"key": "/${projectName}/service/${groupID}/${serviceName}/${serviceID}", "value": "sssss"},
-            {"key": "ddd", "value": "sssss"}
-        ]
+        "Addrs": ["127.0.0.1:2379"]
     },
     "base": {
-        "runMode": 1
+        "runMode": 1,
+        "CmdMin": "0x20000",
+        "CmdMax": "0x2ffff"
     },
     "timer": {
     },
     "serviceNet": {
         "addr": "127.0.0.1:30201"
-    },
-    "routes": [
-        {
-            "service": {
-                "name": "login",
-                "cmdMin": "0x10000",
-                "cmdMax": "0x1ffff"
-            }
-        },
-        {
-            "service": {
-                "name": "logic",
-                "cmdMin": "0x30000",
-                "cmdMax": "0x3ffff"
-            }
-        }
-    ]
-
+    }
 }
 

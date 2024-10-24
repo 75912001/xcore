@@ -52,6 +52,8 @@ type ValueJson struct {
 	Version       string             `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
 	AvailableLoad uint32             `json:"availableLoad"` // 剩余可用负载, 可用资源数
 	SecondOffset  int32              `json:"secondOffset"`  // 服务 时间(秒)偏移量
+	CmdMin        uint32             `json:"cmdMin"`        // 命令最小值 [default]: 0
+	CmdMax        uint32             `json:"cmdMax"`        // 命令最大值 [default]: 0xFFFFFFFF
 }
 
 // Start 开始

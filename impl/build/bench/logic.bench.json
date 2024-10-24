@@ -3,7 +3,9 @@
         "Addrs": ["10.18.24.42:27013","10.18.24.43:27013"]
     },
     "base": {
-        "runMode": 1
+        "runMode": 1,
+        "CmdMin": "0x30000",
+        "CmdMax": "0x3ffff"
     },
     "timer": {
     },

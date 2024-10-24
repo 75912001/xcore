@@ -32,7 +32,6 @@ func (p *rootJson) Parse(strJson string) error {
 	if err := json.Unmarshal([]byte(strJson), &p); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-
 	if p.Etcd.TTL == nil {
 		defaultValue := xconstants.EtcdTtlSecondDefault
 		p.Etcd.TTL = &defaultValue
@@ -100,6 +99,14 @@ func (p *benchJson) Parse(jsonString string) error {
 		defaultValue := xconstants.AvailableLoadDefault
 		p.Base.AvailableLoad = &defaultValue
 	}
+	if p.Base.CmdMin == nil {
+		defaultValue := "0x0"
+		p.Base.CmdMin = &defaultValue
+	}
+	if p.Base.CmdMax == nil {
+		defaultValue := "0xffffffff"
+		p.Base.CmdMax = &defaultValue
+	}
 	if p.Timer.ScanSecondDuration == nil {
 		defaultValue := time.Millisecond * 100
 		p.Timer.ScanSecondDuration = &defaultValue
@@ -134,6 +141,8 @@ type Base struct {
 	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]: 1000
 	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]: 0,release
 	AvailableLoad      *uint32 `json:"availableLoad"`      // 剩余可用负载, 可用资源数 [default]: xconstants.AvailableLoadDefault
+	CmdMin             *string `json:"cmdMin"`             // 命令最小值 [default]: "0x0"
+	CmdMax             *string `json:"cmdMax"`             // 命令最大值 [default]: "0xffffffff"
 }
 
 type Timer struct {

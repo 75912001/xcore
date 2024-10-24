@@ -12,11 +12,13 @@ var gservice *Service
 
 type Service struct {
 	*xcommonservice.DefaultService
+	LoginServiceMgr *LoginServiceMgr
 }
 
 func NewService(defaultService *xcommonservice.DefaultService) *Service {
 	gservice = &Service{
-		DefaultService: defaultService,
+		DefaultService:  defaultService,
+		LoginServiceMgr: NewLoginServiceMgr(),
 	}
 	return gservice
 }

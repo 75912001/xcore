@@ -47,10 +47,6 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 	// todo menglc 判断消息是否禁用
 	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
 	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
-	case xcommonservice.LoginMessage, xcommonservice.LogicMessage:
-		packet.RawData = make([]byte, len(data))
-		copy(packet.RawData, data)
-		return packet, nil
 	case xcommonservice.GatewayMessage:
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
@@ -62,6 +58,10 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 		}
 		packet.PBMessage = pb
 		return packet, nil
+	case xcommonservice.LoginMessage, xcommonservice.LogicMessage:
+		packet.RawData = make([]byte, len(data))
+		copy(packet.RawData, data)
+		return packet, nil
 	default:
 		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	}
@@ -72,11 +72,23 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) er
 	if !ok {
 		return xerror.TypeMismatch
 	}
+	defaultRemote := remote.(*xnettcp.DefaultRemote)
+	user := defaultRemote.Object.(*User)
 	switch xcommonservice.GetServiceTypeByMessageID(defaultPacket.DefaultHeader.MessageID) {
 	case xcommonservice.LoginMessage:
-		// todo menglc 找到对应的 login service
-
+		if user.LoginService != nil {
+			return errors.WithMessage(xerror.Duplicate, xruntime.Location())
+		}
+		loginService := p.LoginServiceMgr.GetLoginService()
+		if loginService == nil {
+			return errors.WithMessage(xerror.Unavailable, xruntime.Location())
+		}
+		user.LoginService = loginService
 		// 将消息转发到 login service
+		err := user.LoginService.IRemote.Send(defaultPacket)
+		if err != nil {
+			return errors.WithMessage(err, xruntime.Location())
+		}
 		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	case xcommonservice.LogicMessage:
 		// todo menglc 处理 logic message

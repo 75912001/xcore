@@ -187,6 +187,14 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	}
 	// etcd
 	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)
+	cmdMin, err := xutil.HexStringToUint32(*p.BenchMgr.Json.Base.CmdMin)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
+	cmdMax, err := xutil.HexStringToUint32(*p.BenchMgr.Json.Base.CmdMax)
+	if err != nil {
+		return errors.WithMessage(err, xruntime.Location())
+	}
 	defaultEtcd := xetcd.NewDefaultEtcd(
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
@@ -199,6 +207,8 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 					Version:       *p.BenchMgr.Json.Base.Version,
 					AvailableLoad: *p.BenchMgr.Json.Base.AvailableLoad,
 					SecondOffset:  0,
+					CmdMin:        cmdMin,
+					CmdMax:        cmdMax,
 				},
 			).
 			WithEventChan(p.BusChannel),
@@ -213,16 +223,6 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	if err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
-	//{ // todo menglc 放到 etcd.Start 里面
-	//	// etcd-watch
-	//	if err = defaultEtcd.WatchPrefixIntoChan(etcdCallbackFun); err != nil {
-	//		return errors.WithMessage(err, xruntime.Location())
-	//	}
-	//	// etcd-get
-	//	if err = defaultEtcd.GetPrefixIntoChan(etcdCallbackFun); err != nil {
-	//		return errors.WithMessage(err, xruntime.Location())
-	//	}
-	//}
 	// etcd-定时上报
 	p.Timer.AddSecond(xcallback.NewDefaultCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
 
