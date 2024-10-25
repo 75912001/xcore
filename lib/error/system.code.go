@@ -13,31 +13,38 @@ func getErrorCode() uint32 {
 var (
 	Success = NewError(0x0000).WithName("Success").WithDesc("success-成功")
 	// 通用
-	Fail          = NewError(0x0101).WithName("Fail").WithDesc("fail-失败")
-	Valid         = NewError(0x0102).WithName("Valid").WithDesc("valid-有效")
-	Invalid       = NewError(0x0103).WithName("Invalid").WithDesc("invalid-无效")
-	Available     = NewError(0x0104).WithName("Available").WithDesc("available-可用")
-	Unavailable   = NewError(0x0105).WithName("Unavailable").WithDesc("unavailable-不可用")
-	Existent      = NewError(0x0106).WithName("Exists").WithDesc("exists-存在")
-	NonExistent   = NewError(0x0107).WithName("NonExistent").WithDesc("nonexistent-不存在")
-	Legal         = NewError(0x0108).WithName("Legal").WithDesc("legal-合法")
-	Illegal       = NewError(0x0109).WithName("Illegal").WithDesc("illegal-非法")
-	Permitted     = NewError(0x010a).WithName("Permitted").WithDesc("permitted-允许的")
-	Prohibited    = NewError(0x010b).WithName("Prohibited").WithDesc("prohibited-禁止的")
-	Expect        = NewError(0x010c).WithName("Expect").WithDesc("expect-期望")
-	Unexpected    = NewError(0x010d).WithName("Unexpected").WithDesc("unexpected-不期望")
-	Enable        = NewError(0x010e).WithName("Enable").WithDesc("enable-启用")
-	Disable       = NewError(0x010f).WithName("Disable").WithDesc("disable-禁用")
-	Normal        = NewError(0x0110).WithName("Normal").WithDesc("normal-正常")
-	Abnormal      = NewError(0x0111).WithName("Abnormal").WithDesc("abnormal-异常")
-	NotTimeout    = NewError(0x0112).WithName("NotTimeout").WithDesc("not-timeout-未超时")
-	Timeout       = NewError(0x0113).WithName("Timeout").WithDesc("timeout-超时")
-	NotOutOfRange = NewError(0x0114).WithName("NotOutOfRange").WithDesc("not-out-of-range-未超出范围")
-	OutOfRange    = NewError(0x0115).WithName("OutOfRange").WithDesc("out-of-range-超出范围")
-	NotConflict   = NewError(0x0116).WithName("NotConflict").WithDesc("not-conflict-未冲突")
-	Conflict      = NewError(0x0117).WithName("Conflict").WithDesc("conflict-冲突")
-	Matched       = NewError(0x0118).WithName("Matched").WithDesc("matched-匹配")
-	Mismatch      = NewError(0x0119).WithName("Mismatch").WithDesc("mismatch-不匹配")
+	Fail           = NewError(0x0101).WithName("Fail").WithDesc("fail-失败")
+	Valid          = NewError(0x0102).WithName("Valid").WithDesc("valid-有效")
+	Invalid        = NewError(0x0103).WithName("Invalid").WithDesc("invalid-无效")
+	Available      = NewError(0x0104).WithName("Available").WithDesc("available-可用")
+	Unavailable    = NewError(0x0105).WithName("Unavailable").WithDesc("unavailable-不可用")
+	Existent       = NewError(0x0106).WithName("Exists").WithDesc("exists-存在")
+	NonExistent    = NewError(0x0107).WithName("NonExistent").WithDesc("nonexistent-不存在")
+	Legal          = NewError(0x0108).WithName("Legal").WithDesc("legal-合法")
+	Illegal        = NewError(0x0109).WithName("Illegal").WithDesc("illegal-非法")
+	Permitted      = NewError(0x010a).WithName("Permitted").WithDesc("permitted-允许的")
+	Prohibited     = NewError(0x010b).WithName("Prohibited").WithDesc("prohibited-禁止的")
+	Expect         = NewError(0x010c).WithName("Expect").WithDesc("expect-期望")
+	Unexpected     = NewError(0x010d).WithName("Unexpected").WithDesc("unexpected-不期望")
+	Enable         = NewError(0x010e).WithName("Enable").WithDesc("enable-启用")
+	Disable        = NewError(0x010f).WithName("Disable").WithDesc("disable-禁用")
+	Normal         = NewError(0x0110).WithName("Normal").WithDesc("normal-正常")
+	Abnormal       = NewError(0x0111).WithName("Abnormal").WithDesc("abnormal-异常")
+	NotTimeout     = NewError(0x0112).WithName("NotTimeout").WithDesc("not-timeout-未超时")
+	Timeout        = NewError(0x0113).WithName("Timeout").WithDesc("timeout-超时")
+	NotOutOfRange  = NewError(0x0114).WithName("NotOutOfRange").WithDesc("not-out-of-range-未超出范围")
+	OutOfRange     = NewError(0x0115).WithName("OutOfRange").WithDesc("out-of-range-超出范围")
+	NotConflict    = NewError(0x0116).WithName("NotConflict").WithDesc("not-conflict-未冲突")
+	Conflict       = NewError(0x0117).WithName("Conflict").WithDesc("conflict-冲突")
+	Matched        = NewError(0x0118).WithName("Matched").WithDesc("matched-匹配")
+	Mismatch       = NewError(0x0119).WithName("Mismatch").WithDesc("mismatch-不匹配")
+	Implemented    = NewError(0x011a).WithName("Implemented").WithDesc("implemented-已实现")
+	NotImplemented = NewError(0x011b).WithName("NotImplemented").WithDesc("not-implemented-未实现")
+	Registered     = NewError(0x011c).WithName("Registered").WithDesc("registered-已注册")
+	Unregistered   = NewError(0x011d).WithName("Unregistered").WithDesc("unregistered-未注册")
+	Marshal        = NewError(0x011e).WithName("Marshal").WithDesc("marshal-序列化")
+	Unmarshal      = NewError(0x011f).WithName("Unmarshal").WithDesc("unmarshal-反序列化")
+
 	// 协程
 	GoroutinePanic = NewError(0x0200).WithName("GoroutinePanic").WithDesc("goroutine-panic-协程-panic")
 	GoroutineDone  = NewError(0x0201).WithName("GoroutineDone").WithDesc("goroutine-done-协程-结束")
@@ -45,8 +52,10 @@ var (
 	FunctionPanic = NewError(0x0300).WithName("FunctionPanic").WithDesc("function-panic-函数-panic")
 	FunctionDone  = NewError(0x0301).WithName("FunctionDone").WithDesc("function-done-函数-结束")
 	// channel
-	ChannelFull  = NewError(0x0400).WithName("ChannelFull").WithDesc("channel-full-通道-满")
-	ChannelEmpty = newError(0x0401).WithName("ChannelEmpty").WithDesc("channel-empty-通道-空")
+	ChannelFull      = NewError(0x0400).WithName("ChannelFull").WithDesc("channel-full-通道-满")
+	ChannelEmpty     = newError(0x0401).WithName("ChannelEmpty").WithDesc("channel-empty-通道-空")
+	ChannelNotClosed = NewError(0x0402).WithName("ChannelNotClosed").WithDesc("channel-not-closed-通道-未关闭")
+	ChannelClosed    = NewError(0x0403).WithName("ChannelClosed").WithDesc("channel-closed-通道-已关闭")
 
 	Retry     = "retry"     // 重试
 	Parameter = "parameter" // 参数
@@ -66,15 +75,9 @@ var (
 	//// Packet 数据包
 	//Packet = NewError(0xf004, "Packet", "packet error")
 
-	//// InvalidPointer 无效指针
-	//InvalidPointer = NewError(0xf00c, "InvalidPointer", "invalid pointer")
 	// LogLevel 日志等级
 	LogLevel = NewError(0xf00d).WithName("LogLevel").WithDesc("log level error")
 
-	//// Marshal 序列化
-	//Marshal = NewError(0xf010, "Marshal", "marshal")
-	//// Unmarshal 反序列化
-	//Unmarshal = NewError(0xf011, "Unmarshal", "unmarshal")
 	//// Insert 插入
 	//Insert = NewError(0xf012, "Insert", "insert error")
 	//// Find 查找
@@ -131,14 +134,9 @@ var (
 	//// VersionMismatch 版本 不匹配
 	//VersionMismatch = NewError(0xf02c, "VersionMismatch", "version mismatch")
 
-	// NotImplemented 未实现
-	NotImplemented = NewError(0xf02e).WithName("NotImplemented").WithDesc("not implemented")
 	// PacketHeaderLength 数据包头长度
 	PacketHeaderLength = NewError(0xf02f).WithName("PacketHeaderLength").WithDesc("packet header length error")
-	//// ChannelClosed 通道 已关闭
-	//ChannelClosed = NewError(0xf030, "ChannelClosed", "channel closed")
-	//// Unregistered 未注册
-	//Unregistered = NewError(0xf031, "Unregistered", "unregistered")
+
 	// ChannelNil 通道 未初始化
 	ChannelNil = NewError(0xf032).WithName("ChannelNil").WithDesc("channel is nil")
 	// MessageIDNonExistent 消息ID 不存在
