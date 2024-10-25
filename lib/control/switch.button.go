@@ -1,5 +1,3 @@
-// Package control 控件
-
 package control
 
 // ISwitchButton 两种状态：开启、关闭
