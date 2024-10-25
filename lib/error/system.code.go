@@ -1,9 +1,62 @@
 package error
 
+var errorCode uint32 = 0x0000
+
+// 获取当前错误码, 并且自增
+func getErrorCode() uint32 {
+	code := errorCode
+	errorCode++
+	return code
+}
+
 // [系统错误码] lib/system 级别的错误码
 var (
-	// Success 成功
-	Success = NewError(0x0000).WithName("Success").WithDesc("success")
+	Success = NewError(0x0000).WithName("Success").WithDesc("success-成功")
+	// 通用
+	Fail          = NewError(0x0101).WithName("Fail").WithDesc("fail-失败")
+	Valid         = NewError(0x0102).WithName("Valid").WithDesc("valid-有效")
+	Invalid       = NewError(0x0103).WithName("Invalid").WithDesc("invalid-无效")
+	Available     = NewError(0x0104).WithName("Available").WithDesc("available-可用")
+	Unavailable   = NewError(0x0105).WithName("Unavailable").WithDesc("unavailable-不可用")
+	Existent      = NewError(0x0106).WithName("Exists").WithDesc("exists-存在")
+	NonExistent   = NewError(0x0107).WithName("NonExistent").WithDesc("nonexistent-不存在")
+	Legal         = NewError(0x0108).WithName("Legal").WithDesc("legal-合法")
+	Illegal       = NewError(0x0109).WithName("Illegal").WithDesc("illegal-非法")
+	Permitted     = NewError(0x010a).WithName("Permitted").WithDesc("permitted-允许的")
+	Prohibited    = NewError(0x010b).WithName("Prohibited").WithDesc("prohibited-禁止的")
+	Expect        = NewError(0x010c).WithName("Expect").WithDesc("expect-期望")
+	Unexpected    = NewError(0x010d).WithName("Unexpected").WithDesc("unexpected-不期望")
+	Enable        = NewError(0x010e).WithName("Enable").WithDesc("enable-启用")
+	Disable       = NewError(0x010f).WithName("Disable").WithDesc("disable-禁用")
+	Normal        = NewError(0x0110).WithName("Normal").WithDesc("normal-正常")
+	Abnormal      = NewError(0x0111).WithName("Abnormal").WithDesc("abnormal-异常")
+	NotTimeout    = NewError(0x0112).WithName("NotTimeout").WithDesc("not-timeout-未超时")
+	Timeout       = NewError(0x0113).WithName("Timeout").WithDesc("timeout-超时")
+	NotOutOfRange = NewError(0x0114).WithName("NotOutOfRange").WithDesc("not-out-of-range-未超出范围")
+	OutOfRange    = NewError(0x0115).WithName("OutOfRange").WithDesc("out-of-range-超出范围")
+	NotConflict   = NewError(0x0116).WithName("NotConflict").WithDesc("not-conflict-未冲突")
+	Conflict      = NewError(0x0117).WithName("Conflict").WithDesc("conflict-冲突")
+	Matched       = NewError(0x0118).WithName("Matched").WithDesc("matched-匹配")
+	Mismatch      = NewError(0x0119).WithName("Mismatch").WithDesc("mismatch-不匹配")
+	// 协程
+	GoroutinePanic = NewError(0x0200).WithName("GoroutinePanic").WithDesc("goroutine-panic-协程-panic")
+	GoroutineDone  = NewError(0x0201).WithName("GoroutineDone").WithDesc("goroutine-done-协程-结束")
+	// 函数
+	FunctionPanic = NewError(0x0300).WithName("FunctionPanic").WithDesc("function-panic-函数-panic")
+	FunctionDone  = NewError(0x0301).WithName("FunctionDone").WithDesc("function-done-函数-结束")
+	// channel
+	ChannelFull  = NewError(0x0400).WithName("ChannelFull").WithDesc("channel-full-通道-满")
+	ChannelEmpty = newError(0x0401).WithName("ChannelEmpty").WithDesc("channel-empty-通道-空")
+
+	Retry     = "retry"     // 重试
+	Parameter = "parameter" // 参数
+	Etcd      = "etcd"      // Etcd
+	Redis     = "redis"     // Redis
+	Mongodb   = "mongodb"   // Mongodb
+	Mysql     = "mysql"     // Mysql
+	Kafka     = "kafka"     // Kafka
+	Nats      = "nats"      // Nats
+	Nil       = "nil"       // 空
 	// Link 链接
 	Link = NewError(0xf001).WithName("Link").WithDesc("link error")
 	// System 系统
@@ -12,28 +65,12 @@ var (
 	Param = NewError(0xf003).WithName("Param").WithDesc("parameter error")
 	//// Packet 数据包
 	//Packet = NewError(0xf004, "Packet", "packet error")
-	//// Timeout 超时
-	//Timeout = NewError(0xf005, "Timeout", "time out")
-	// ChannelFull 通道 满
-	ChannelFull = NewError(0xf006).WithName("ChannelFull").WithDesc("channel full")
-	// ChannelEmpty 通道 空
-	ChannelEmpty = NewError(0xf007).WithName("ChannelEmpty").WithDesc("channel empty")
-	//// OutOfRange 超出范围
-	//OutOfRange = NewError(0xf008, "OutOfRange", "out of range")
-	//// InvalidValue 无效数值
-	//InvalidValue = NewError(0xf009, "InvalidValue", "invalid value")
-	//// Conflict 冲突
-	//Conflict = NewError(0xf00a, "Conflict", "conflict")
-	// TypeMismatch 类型不匹配
-	TypeMismatch = NewError(0xf00b).WithName("TypeMismatch").WithDesc("type mismatch")
+
 	//// InvalidPointer 无效指针
 	//InvalidPointer = NewError(0xf00c, "InvalidPointer", "invalid pointer")
 	// LogLevel 日志等级
 	LogLevel = NewError(0xf00d).WithName("LogLevel").WithDesc("log level error")
-	// NonExistent 不存在
-	NonExistent = NewError(0xf00e).WithName("NonExistent").WithDesc("non-existent")
-	// Exists 存在
-	Existent = NewError(0xf00f).WithName("Exists").WithDesc("exists")
+
 	//// Marshal 序列化
 	//Marshal = NewError(0xf010, "Marshal", "marshal")
 	//// Unmarshal 反序列化
@@ -50,6 +87,7 @@ var (
 	Duplicate = NewError(0xf016).WithName("Duplicate").WithDesc("duplicate error")
 	// Config 配置
 	Config = NewError(0xf017).WithName("Config").WithDesc("config error")
+
 	//// InvalidOperation 无效操作
 	//InvalidOperation = NewError(0xf018, "InvalidOperation", "invalid operation")
 	//// IllConditioned 条件不足
@@ -92,8 +130,7 @@ var (
 	//MISSING = NewError(0xf02b, "MISSING", "missing")
 	//// VersionMismatch 版本 不匹配
 	//VersionMismatch = NewError(0xf02c, "VersionMismatch", "version mismatch")
-	// Unavailable 不可用
-	Unavailable = NewError(0xf02d).WithName("Unavailable").WithDesc("unavailable")
+
 	// NotImplemented 未实现
 	NotImplemented = NewError(0xf02e).WithName("NotImplemented").WithDesc("not implemented")
 	// PacketHeaderLength 数据包头长度
@@ -106,6 +143,7 @@ var (
 	ChannelNil = NewError(0xf032).WithName("ChannelNil").WithDesc("channel is nil")
 	// MessageIDNonExistent 消息ID 不存在
 	MessageIDNonExistent = NewError(0xf033).WithName("MessageIDNonExistent").WithDesc("message id non-existent")
+
 	// Unknown 未知
 	Unknown = NewError(0xffff).WithName("Unknown").WithDesc("unknown error")
 	// 0xffff
