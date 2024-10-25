@@ -97,7 +97,6 @@
     - **main**: 服务入口
   - **lib**: 公共库
     - **bench**: 服务基础配置
-    - **callback**: 回调
     - **constants**: 常量
     - **control**: 控件
     - **error**: 错误码

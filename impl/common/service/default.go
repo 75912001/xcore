@@ -28,7 +28,7 @@ import (
 
 type DefaultService struct {
 	BenchMgr xbench.Mgr
-	BenchSub xbench.IBenchSub
+	BenchSub xbench.ISub
 
 	GroupID        uint32 // 组ID
 	Name           string // 名称

@@ -25,7 +25,7 @@ type Mgr struct {
 }
 
 type rootJson struct {
-	Etcd Etcd `json:"etcd"` // todo menglc [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
+	Etcd Etcd `json:"etcd"` // todo [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
 }
 
 func (p *rootJson) Parse(strJson string) error {
@@ -60,7 +60,7 @@ func (p *benchJson) Parse(jsonString string) error {
 		p.Base.ProjectName = &defaultValue
 	}
 	if p.Base.Version == nil {
-		defaultValue := "0.0.1.beta.2024.09.03.2034"
+		defaultValue := xconstants.VersionDefault
 		p.Base.Version = &defaultValue
 	}
 	if p.Base.LogLevel == nil {
@@ -99,20 +99,12 @@ func (p *benchJson) Parse(jsonString string) error {
 		defaultValue := xconstants.AvailableLoadDefault
 		p.Base.AvailableLoad = &defaultValue
 	}
-	if p.Base.CmdMin == nil {
-		defaultValue := "0x0"
-		p.Base.CmdMin = &defaultValue
-	}
-	if p.Base.CmdMax == nil {
-		defaultValue := "0xffffffff"
-		p.Base.CmdMax = &defaultValue
-	}
 	if p.Timer.ScanSecondDuration == nil {
-		defaultValue := time.Millisecond * 100
+		defaultValue := xconstants.TimerScanSecondDurationDefault
 		p.Timer.ScanSecondDuration = &defaultValue
 	}
 	if p.Timer.ScanMillisecondDuration == nil {
-		defaultValue := time.Millisecond * 25
+		defaultValue := xconstants.TimerScanMillisecondDurationDefault
 		p.Timer.ScanMillisecondDuration = &defaultValue
 	}
 	if p.ServiceNet.Addr == nil {
@@ -131,28 +123,26 @@ func (p *benchJson) Parse(jsonString string) error {
 
 type Base struct {
 	ProjectName        *string `json:"projectName"`        // 项目名称. [default]: xconstants.ProjectNameDefault
-	Version            *string `json:"version"`            // 版本号. [default]: 0.0.1.beta.2024.09.03.2034
+	Version            *string `json:"version"`            // 版本号. [default]: xconstants.VersionDefault
 	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]: nil 不使用
 	LogLevel           *uint32 `json:"logLevel"`           // 日志等级 [default]: xlog.LevelOn
 	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
 	GoMaxProcess       *int    `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
 	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量. [default]: xconstants.BusChannelCapacityDefault
-	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]: 8192
-	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]: 1000
-	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]: 0,release
+	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]: xconstants.PacketLengthDefault
+	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]: xconstants.SendChanCapacityDefault
+	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]: xruntime.RunModeRelease
 	AvailableLoad      *uint32 `json:"availableLoad"`      // 剩余可用负载, 可用资源数 [default]: xconstants.AvailableLoadDefault
-	CmdMin             *string `json:"cmdMin"`             // 命令最小值 [default]: "0x0"
-	CmdMax             *string `json:"cmdMax"`             // 命令最大值 [default]: "0xffffffff"
 }
 
 type Timer struct {
-	// 秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为100毫秒 [default]:100000000
+	// 秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为100毫秒 [default]:xconstants.TimerScanSecondDurationDefault
 	ScanSecondDuration *time.Duration `json:"scanSecondDuration"`
-	// 毫秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为25毫秒 [default]:25000000
+	// 毫秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为25毫秒 [default]:xconstants.TimerScanMillisecondDurationDefault
 	ScanMillisecondDuration *time.Duration `json:"scanMillisecondDuration"`
 }
 
 type ServiceNet struct {
-	Addr *string `json:"addr"` // e.g.: 127.0.0.0:8989 [default]: nil
-	Type *string `json:"type"` // [tcp, udp] [default]: tcp
+	Addr *string `json:"addr"` // e.g.: 127.0.0.0:8989 [default]: ""
+	Type *string `json:"type"` // [tcp, udp] [default]: "tcp"
 }
