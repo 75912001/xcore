@@ -41,12 +41,12 @@ func (p *DefaultService) Handle() error {
 				}
 				event.IRemote.Stop()
 			case *xtimer.EventTimerSecond:
-				if event.ISwitch.IsDisabled() {
+				if event.ISwitch.IsOff() {
 					continue
 				}
 				_ = event.ICallBack.Execute()
 			case *xtimer.EventTimerMillisecond:
-				if event.ISwitch.IsDisabled() {
+				if event.ISwitch.IsOff() {
 					continue
 				}
 				_ = event.ICallBack.Execute()

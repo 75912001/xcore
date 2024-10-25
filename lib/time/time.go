@@ -5,27 +5,27 @@ package time
 
 import (
 	"time"
-	xswitch "xcore/lib/xswitch"
+	xcontrol "xcore/lib/control"
 )
 
 // Mgr 时间管理器
 type Mgr struct {
-	timestampSecond       int64           // 上一次调用Update更新的时间戳-秒
-	timestampMillisecond  int64           // 上一次调用Update更新的时间戳-毫秒
-	time                  time.Time       // 上一次调用Update更新的时间
-	timestampSecondOffset int64           // 时间戳偏移量-秒
-	UTCSwitch             xswitch.ISwitch // UTC 时间开关
+	timestampSecond       int64                  // 上一次调用Update更新的时间戳-秒
+	timestampMillisecond  int64                  // 上一次调用Update更新的时间戳-毫秒
+	time                  time.Time              // 上一次调用Update更新的时间
+	timestampSecondOffset int64                  // 时间戳偏移量-秒
+	UTCSwitch             xcontrol.ISwitchButton // UTC 时间开关
 }
 
 func NewMgr() *Mgr {
 	return &Mgr{
-		UTCSwitch: xswitch.NewDefaultSwitch(false),
+		UTCSwitch: xcontrol.NewSwitchButton(false),
 	}
 }
 
 // NowTime 获取当前时间
 func (p *Mgr) NowTime() time.Time {
-	if p.UTCSwitch.IsEnabled() {
+	if p.UTCSwitch.IsOn() {
 		return time.Now().UTC()
 	}
 	return time.Now()

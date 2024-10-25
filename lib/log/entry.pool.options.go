@@ -2,14 +2,14 @@ package log
 
 import (
 	"sync"
-	xswitch "xcore/lib/xswitch"
+	xcontrol "xcore/lib/control"
 )
 
 // entry的内存池选项
 type entryPoolOptions struct {
-	poolSwitch   xswitch.ISwitch // 内存池开关 [default]: true
-	pool         *sync.Pool      // 内存池 [default]: &sync.Pool{New: func() interface{} { return newEntry() }}
-	newEntryFunc func() *entry   // 创建 entry 的方法 [default]: func() *entry { return p.pool.Get().(*entry) }
+	poolSwitch   xcontrol.ISwitchButton // 内存池开关 [default]: true
+	pool         *sync.Pool             // 内存池 [default]: &sync.Pool{New: func() interface{} { return newEntry() }}
+	newEntryFunc func() *entry          // 创建 entry 的方法 [default]: func() *entry { return p.pool.Get().(*entry) }
 }
 
 // newEntryPoolOptions 新的entryPoolOptions
@@ -20,7 +20,7 @@ func newEntryPoolOptions() *entryPoolOptions {
 		},
 	}
 	opt := &entryPoolOptions{
-		poolSwitch: xswitch.NewDefaultSwitch(true),
+		poolSwitch: xcontrol.NewSwitchButton(true),
 		pool:       pool,
 		newEntryFunc: func() *entry {
 			return pool.Get().(*entry)
@@ -34,10 +34,10 @@ func (p *entryPoolOptions) merge(opts ...*entryPoolOptions) *entryPoolOptions {
 		if opt == nil {
 			continue
 		}
-		if opt.poolSwitch.IsEnabled() {
-			p.poolSwitch.Enable()
+		if opt.poolSwitch.IsOn() {
+			p.poolSwitch.On()
 		} else {
-			p.poolSwitch.Disable()
+			p.poolSwitch.Off()
 		}
 		if opt.pool != nil {
 			p.pool = opt.pool
@@ -51,7 +51,7 @@ func (p *entryPoolOptions) merge(opts ...*entryPoolOptions) *entryPoolOptions {
 
 // 配置
 func (p *entryPoolOptions) configure() error {
-	if p.poolSwitch.IsEnabled() {
+	if p.poolSwitch.IsOn() {
 		p.pool = &sync.Pool{
 			New: func() interface{} {
 				return newEntry()
@@ -70,7 +70,7 @@ func (p *entryPoolOptions) configure() error {
 
 // 将内存放回池中
 func (p *entryPoolOptions) put(value *entry) {
-	if p.poolSwitch.IsEnabled() {
+	if p.poolSwitch.IsOn() {
 		value.reset()
 		p.pool.Put(value)
 	}

@@ -99,6 +99,7 @@
     - **bench**: 服务基础配置
     - **callback**: 回调
     - **constants**: 常量
+    - **control**: 控件
     - **error**: 错误码
     - **etcd**: etcd客户端 [todo menglc]
     - **event**: 事件 [todo menglc]
@@ -118,7 +119,6 @@
     - **time**: 时间管理器
     - **timer**: 定时器
     - **util**: 工具类
-    - **xswitch**: 开关
   - **scripts**: 脚本
   - **tools**: 工具
     - **client.simulator**: 客户端模拟器 [todo menglc]

@@ -3,7 +3,7 @@ package timer
 import (
 	"context"
 	xcallback "xcore/lib/callback"
-	xswitch "xcore/lib/xswitch"
+	xcontrol "xcore/lib/control"
 )
 
 type ITimerSecond interface {
@@ -24,11 +24,11 @@ type ITimer interface {
 }
 
 type EventTimerSecond struct {
-	ISwitch   xswitch.ISwitch
+	ISwitch   xcontrol.ISwitchButton
 	ICallBack xcallback.ICallBack
 }
 
 type EventTimerMillisecond struct {
-	ISwitch   xswitch.ISwitch
+	ISwitch   xcontrol.ISwitchButton
 	ICallBack xcallback.ICallBack
 }

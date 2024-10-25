@@ -11,9 +11,9 @@ import (
 	"time"
 	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
+	xcontrol "xcore/lib/control"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
-	xswitch "xcore/lib/xswitch"
 )
 
 // 定时器
@@ -170,7 +170,7 @@ func (p *defaultTimer) Stop() {
 func (p *defaultTimer) AddMillisecond(callBackFunc xcallback.ICallBack, expireMillisecond int64) *millisecond {
 	t := &millisecond{
 		ICallBack: callBackFunc,
-		ISwitch:   xswitch.NewDefaultSwitch(true),
+		ISwitch:   xcontrol.NewSwitchButton(true),
 		expire:    expireMillisecond,
 	}
 	p.milliSecondChan <- t
@@ -194,7 +194,7 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 	var next *list.Element
 	for e := p.millisecondList.Front(); e != nil; e = next {
 		t := e.Value.(*millisecond)
-		if t.ISwitch.IsDisabled() {
+		if t.ISwitch.IsOff() {
 			next = e.Next()
 			p.millisecondList.Remove(e)
 			continue
@@ -222,7 +222,7 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 func (p *defaultTimer) AddSecond(callBackFunc xcallback.ICallBack, expire int64) *second {
 	t := &second{
 		ICallBack: callBackFunc,
-		ISwitch:   xswitch.NewDefaultSwitch(true),
+		ISwitch:   xcontrol.NewSwitchButton(true),
 		expire:    expire,
 	}
 	p.secondChan <- t
@@ -275,7 +275,7 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 	cycle0 := &p.secondSlice[0]
 	for e := cycle0.Front(); nil != e; e = next {
 		t := e.Value.(*second)
-		if t.ISwitch.IsDisabled() {
+		if t.ISwitch.IsOff() {
 			next = e.Next()
 			cycle0.Remove(e)
 			continue
@@ -299,7 +299,7 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 		c := &p.secondSlice[idx]
 		for e := c.Front(); e != nil; e = next {
 			t := e.Value.(*second)
-			if t.ISwitch.IsDisabled() {
+			if t.ISwitch.IsOff() {
 				next = e.Next()
 				c.Remove(e)
 				continue

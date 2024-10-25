@@ -4,16 +4,16 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	xcallback "xcore/lib/callback"
+	xcontrol "xcore/lib/control"
 	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
-	xswitch "xcore/lib/xswitch"
 )
 
 type options struct {
-	callback          xcallback.ICallBack  // [required] 消息回调
-	newProtoMessage   func() proto.Message // [required] 创建新的 proto.options
-	stateSwitch       xswitch.ISwitch      // [optional] 状态开关-该消息是否启用 [default]:true
-	passThroughSwitch xswitch.ISwitch      // [optional] 透传开关-该消息是否透传 [default]:false
+	callback          xcallback.ICallBack    // [required] 消息回调
+	newProtoMessage   func() proto.Message   // [required] 创建新的 proto.options
+	stateSwitch       xcontrol.ISwitchButton // [optional] 状态开关-该消息是否启用 [default]:true
+	passThroughSwitch xcontrol.ISwitchButton // [optional] 透传开关-该消息是否透传 [default]:false
 }
 
 // NewOptions 创建 options
@@ -31,12 +31,12 @@ func (p *options) WithNewProtoMessage(newProtoMessage func() proto.Message) *opt
 	return p
 }
 
-func (p *options) WithStateSwitch(stateSwitch xswitch.ISwitch) *options {
+func (p *options) WithStateSwitch(stateSwitch xcontrol.ISwitchButton) *options {
 	p.stateSwitch = stateSwitch
 	return p
 }
 
-func (p *options) WithPassThroughSwitch(passThroughSwitch xswitch.ISwitch) *options {
+func (p *options) WithPassThroughSwitch(passThroughSwitch xcontrol.ISwitchButton) *options {
 	p.passThroughSwitch = passThroughSwitch
 	return p
 }
@@ -66,12 +66,12 @@ func merge(opts ...*options) *options {
 // 配置
 func configure(opts *options) error {
 	if opts.stateSwitch == nil {
-		opts.stateSwitch = xswitch.NewDefaultSwitch(true)
+		opts.stateSwitch = xcontrol.NewSwitchButton(true)
 	}
 	if opts.passThroughSwitch == nil {
-		opts.passThroughSwitch = xswitch.NewDefaultSwitch(false)
+		opts.passThroughSwitch = xcontrol.NewSwitchButton(false)
 	}
-	if opts.passThroughSwitch.IsDisabled() { // 非 透传
+	if opts.passThroughSwitch.IsOff() { // 非 透传
 		if opts.callback == nil { // 没有处理函数
 			return errors.WithMessage(xerror.Param, xruntime.Location())
 		}

@@ -5,16 +5,16 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	xcallback "xcore/lib/callback"
+	xcontrol "xcore/lib/control"
 	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
-	xswitch "xcore/lib/xswitch"
 )
 
 type defaultMessage struct {
 	xcallback.ICallBack
-	newProtoMessage   func() proto.Message // 创建新的 proto.Message
-	stateSwitch       xswitch.ISwitch      // 状态开关-该消息是否启用
-	passThroughSwitch xswitch.ISwitch      // 透传开关-该消息是否透传
+	newProtoMessage   func() proto.Message   // 创建新的 proto.Message
+	stateSwitch       xcontrol.ISwitchButton // 状态开关-该消息是否启用
+	passThroughSwitch xcontrol.ISwitchButton // 透传开关-该消息是否透传
 }
 
 func newDefaultMessage(opts *options) IMessage {
@@ -27,7 +27,7 @@ func newDefaultMessage(opts *options) IMessage {
 }
 
 func (p *defaultMessage) Execute() error {
-	if p.stateSwitch.IsDisabled() { // 消息是否禁用
+	if p.stateSwitch.IsOff() { // 消息是否禁用
 		return xerror.MessageIDDisable
 	}
 	return p.ICallBack.Execute()

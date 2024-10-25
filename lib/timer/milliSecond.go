@@ -2,18 +2,18 @@ package timer
 
 import (
 	xcallback "xcore/lib/callback"
-	xswitch "xcore/lib/xswitch"
+	xcontrol "xcore/lib/control"
 )
 
 // 毫秒级定时器
 type millisecond struct {
-	ISwitch   xswitch.ISwitch     // 有效(false:不执行,扫描时自动删除)
-	ICallBack xcallback.ICallBack // 回调
-	expire    int64               // 过期时间
+	ISwitch   xcontrol.ISwitchButton // 有效(false:不执行,扫描时自动删除)
+	ICallBack xcallback.ICallBack    // 回调
+	expire    int64                  // 过期时间
 }
 
 func (p *millisecond) reset() {
-	p.ISwitch.Disable()
+	p.ISwitch.Off()
 	p.ICallBack = nil
 	p.expire = 0
 }
