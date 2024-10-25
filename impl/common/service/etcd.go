@@ -13,7 +13,7 @@ import (
 func EtcdReportFunction(args ...interface{}) error {
 	defaultService := args[0].(*DefaultService)
 	defer func() {
-		defaultService.Timer.AddSecond(xcallback.NewDefaultCallBack(EtcdReportFunction, defaultService), defaultService.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
+		defaultService.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, defaultService), defaultService.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
 	}()
 	cmdMin, err := xutil.HexStringToUint32(*defaultService.BenchMgr.Json.Base.CmdMin)
 	if err != nil {

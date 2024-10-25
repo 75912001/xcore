@@ -11,7 +11,7 @@ import (
 )
 
 func StateTimerPrint(timer xtimer.ITimer, l xlog.ILog) {
-	defaultCallBack := xcallback.NewDefaultCallBack(timeOut, timer, l)
+	defaultCallBack := xcallback.NewCallBack(timeOut, timer, l)
 	_ = timer.AddSecond(defaultCallBack, time.Now().Unix()+xconstants.ServiceInfoTimeOutSec)
 }
 

@@ -111,7 +111,6 @@
       - **message**: 消息
       - **packet**: 数据包
       - **tcp**: tcp
-    - **parameters**: 参数
     - **pool**: 对象池
     - **pprof**: 性能分析
     - **pubsub**: 发布订阅 [todo menglc]

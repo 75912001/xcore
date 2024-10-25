@@ -19,6 +19,6 @@ func (p *defaultEvent) Trigger() error {
 func NewDefaultEvent(ID uint32, onFunction func(arg ...interface{}) error, arg ...interface{}) IEvent {
 	return &defaultEvent{
 		ID:        ID,
-		ICallBack: xcallback.NewDefaultCallBack(onFunction, arg...),
+		ICallBack: xcallback.NewCallBack(onFunction, arg...),
 	}
 }

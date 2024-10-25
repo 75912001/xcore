@@ -13,7 +13,7 @@ func init() {
 	// todo menglc [优化] 通过配置文件配置,自动生成
 	GMessage.Register(xprotobufgateway.UserOnlineMsgReq_CMD,
 		xnetmessage.NewOptions().
-			WithHandler(xcallback.NewDefaultCallBack(UserOnlineMsg)).
+			WithHandler(xcallback.NewCallBack(UserOnlineMsg)).
 			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserOnlineMsgReq) }),
 	)
 }

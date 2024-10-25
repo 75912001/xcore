@@ -360,7 +360,7 @@ func (p *defaultEtcd) GetPrefixIntoChan() (err error) {
 		if len(v.Value) != 0 {
 			valueJson = ValueString2Json(string(v.Value))
 		}
-		p.options.eventChan <- &Event{ICallBack: xcallback.NewDefaultCallBack(p.CallbackFun, string(v.Key), valueJson)}
+		p.options.eventChan <- &Event{ICallBack: xcallback.NewCallBack(p.CallbackFun, string(v.Key), valueJson)}
 	}
 	return
 }
@@ -385,7 +385,7 @@ func (p *defaultEtcd) WatchPrefixIntoChan() (err error) {
 				valueJson = ValueString2Json(Value)
 			}
 			p.options.eventChan <- &Event{
-				ICallBack: xcallback.NewDefaultCallBack(p.CallbackFun, Key, valueJson),
+				ICallBack: xcallback.NewCallBack(p.CallbackFun, Key, valueJson),
 			}
 		}
 	}()

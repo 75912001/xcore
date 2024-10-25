@@ -1,8 +1,8 @@
 package callback
 
-import "xcore/lib/parameters"
+import xcontrol "xcore/lib/control"
 
 type ICallBack interface {
-	Execute() error        // 执行回调
-	parameters.IParameters // 参数
+	Execute() error      // 执行回调
+	xcontrol.IParameters // 参数
 }

@@ -1,5 +1,5 @@
 package error
 
 type IError interface {
-	Error() string
+	Error() string // 错误信息
 }

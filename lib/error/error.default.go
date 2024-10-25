@@ -24,7 +24,6 @@ func NewError(code uint32) *Error {
 	return newObject
 }
 
-// 错误信息
 func (p *Error) Error() string {
 	if Success.code == p.code {
 		return ""
@@ -53,7 +52,6 @@ func (p *Error) WithExtraError(extraError error) *Error {
 	return p
 }
 
-// 错误信息
 // 用来确保 错误码-唯一性
 var errMap = make(map[uint32]struct{})
 

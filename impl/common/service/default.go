@@ -224,7 +224,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 	// etcd-定时上报
-	p.Timer.AddSecond(xcallback.NewDefaultCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
+	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
 
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
