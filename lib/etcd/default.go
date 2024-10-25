@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 	xbench "xcore/lib/bench"
-	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
+	xcallback "xcore/lib/control"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 )

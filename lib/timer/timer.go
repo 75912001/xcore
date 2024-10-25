@@ -9,7 +9,6 @@ import (
 	"runtime/debug"
 	"sync"
 	"time"
-	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
 	xcontrol "xcore/lib/control"
 	xlog "xcore/lib/log"
@@ -167,7 +166,7 @@ func (p *defaultTimer) Stop() {
 //		expireMillisecond: 过期毫秒数
 //	返回值:
 //		毫秒定时器
-func (p *defaultTimer) AddMillisecond(callBackFunc xcallback.ICallBack, expireMillisecond int64) *millisecond {
+func (p *defaultTimer) AddMillisecond(callBackFunc xcontrol.ICallBack, expireMillisecond int64) *millisecond {
 	t := &millisecond{
 		ICallBack: callBackFunc,
 		ISwitch:   xcontrol.NewSwitchButton(true),
@@ -219,7 +218,7 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *defaultTimer) AddSecond(callBackFunc xcallback.ICallBack, expire int64) *second {
+func (p *defaultTimer) AddSecond(callBackFunc xcontrol.ICallBack, expire int64) *second {
 	t := &second{
 		ICallBack: callBackFunc,
 		ISwitch:   xcontrol.NewSwitchButton(true),

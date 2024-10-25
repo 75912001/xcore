@@ -1,14 +1,12 @@
 package event
 
-import xcallback "xcore/lib/callback"
-
 type IEvent interface {
 	Trigger() error
 }
 
 type defaultEvent struct {
 	ID uint32
-	xcallback.ICallBack
+	callback.ICallBack
 }
 
 func (p *defaultEvent) Trigger() error {
@@ -19,6 +17,6 @@ func (p *defaultEvent) Trigger() error {
 func NewDefaultEvent(ID uint32, onFunction func(arg ...interface{}) error, arg ...interface{}) IEvent {
 	return &defaultEvent{
 		ID:        ID,
-		ICallBack: xcallback.NewCallBack(onFunction, arg...),
+		ICallBack: callback.NewCallBack(onFunction, arg...),
 	}
 }

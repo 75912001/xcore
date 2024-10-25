@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
-	xutil "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
+	xutil "xcore/lib/control"
 	xtimer "xcore/lib/timer"
 )
 

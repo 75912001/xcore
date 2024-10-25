@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/pkg/errors"
-	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
+	xcallback "xcore/lib/control"
 	xetcd "xcore/lib/etcd"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"

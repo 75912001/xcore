@@ -4,14 +4,13 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	xcallback "xcore/lib/callback"
 	xcontrol "xcore/lib/control"
 	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
 )
 
 type defaultMessage struct {
-	xcallback.ICallBack
+	xcontrol.ICallBack
 	newProtoMessage   func() proto.Message   // 创建新的 proto.Message
 	stateSwitch       xcontrol.ISwitchButton // 状态开关-该消息是否启用
 	passThroughSwitch xcontrol.ISwitchButton // 透传开关-该消息是否透传

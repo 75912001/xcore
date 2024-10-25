@@ -3,7 +3,7 @@ package etcd
 import (
 	"context"
 	etcdclientv3 "go.etcd.io/etcd/client/v3"
-	xcallback "xcore/lib/callback"
+	xcallback "xcore/lib/control"
 )
 
 type IEtcd interface {

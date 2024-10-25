@@ -4,7 +4,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	xprotobufgateway "xcore/impl/protobuf/gateway"
 	xprotobuflogin "xcore/impl/protobuf/login"
-	xcallback "xcore/lib/callback"
+	xcallback "xcore/lib/control"
 	xnetmessage "xcore/lib/net/message"
 )
 

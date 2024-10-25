@@ -4,8 +4,8 @@ import (
 	"runtime"
 	"runtime/debug"
 	"time"
-	xcallback "xcore/lib/callback"
 	xconstants "xcore/lib/constants"
+	xcallback "xcore/lib/control"
 	xlog "xcore/lib/log"
 	xtimer "xcore/lib/timer"
 )

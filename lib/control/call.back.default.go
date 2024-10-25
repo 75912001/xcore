@@ -1,16 +1,12 @@
-package callback
-
-import (
-	parameters2 "xcore/lib/control"
-)
+package control
 
 type CallBack struct {
 	onFunction func(...interface{}) error // 回调函数
-	parameters2.IParameters
+	IParameters
 }
 
 func NewCallBack(onFunction func(...interface{}) error, arg ...interface{}) ICallBack {
-	par := parameters2.NewParameters()
+	par := NewParameters()
 	par.Set(arg...)
 	return &CallBack{
 		onFunction:  onFunction,
@@ -22,5 +18,5 @@ func (p *CallBack) Execute() error {
 	if p.onFunction == nil {
 		return nil
 	}
-	return p.onFunction(p.Get()...)
+	return p.onFunction(p.IParameters.Get()...)
 }

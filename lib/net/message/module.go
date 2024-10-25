@@ -2,7 +2,7 @@ package message
 
 import (
 	"google.golang.org/protobuf/proto"
-	xcallback "xcore/lib/callback"
+	xcallback "xcore/lib/control"
 )
 
 type IMessage interface {
