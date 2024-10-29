@@ -15,6 +15,7 @@ import (
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
+	xtimer "xcore/lib/timer"
 )
 
 // 配置-主项,用户服务的基本配置
@@ -25,7 +26,7 @@ type Mgr struct {
 }
 
 type rootJson struct {
-	Etcd Etcd `json:"etcd"` // todo [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
+	Etcd Etcd `json:"etcd"`
 }
 
 func (p *rootJson) Parse(strJson string) error {
@@ -40,8 +41,8 @@ func (p *rootJson) Parse(strJson string) error {
 }
 
 type Etcd struct {
-	Addrs []string `json:"addrs"`
-	TTL   *int64   `json:"ttl"` // ttl 秒 [default]: xconstants.EtcdTtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
+	Addrs []string `json:"addrs"` // [目前无效] todo [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
+	TTL   *int64   `json:"ttl"`   // ttl 秒 [default]: xconstants.EtcdTtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
 }
 
 type benchJson struct {
@@ -100,11 +101,11 @@ func (p *benchJson) Parse(jsonString string) error {
 		p.Base.AvailableLoad = &defaultValue
 	}
 	if p.Timer.ScanSecondDuration == nil {
-		defaultValue := xconstants.TimerScanSecondDurationDefault
+		defaultValue := xtimer.ScanSecondDurationDefault
 		p.Timer.ScanSecondDuration = &defaultValue
 	}
 	if p.Timer.ScanMillisecondDuration == nil {
-		defaultValue := xconstants.TimerScanMillisecondDurationDefault
+		defaultValue := xtimer.ScanMillisecondDurationDefault
 		p.Timer.ScanMillisecondDuration = &defaultValue
 	}
 	if p.ServiceNet.Addr == nil {
@@ -136,9 +137,9 @@ type Base struct {
 }
 
 type Timer struct {
-	// 秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为100毫秒 [default]:xconstants.TimerScanSecondDurationDefault
+	// 秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为100毫秒 [default]: xtimer.ScanSecondDurationDefault
 	ScanSecondDuration *time.Duration `json:"scanSecondDuration"`
-	// 毫秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为25毫秒 [default]:xconstants.TimerScanMillisecondDurationDefault
+	// 毫秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为25毫秒 [default]: xtimer.ScanMillisecondDurationDefault
 	ScanMillisecondDuration *time.Duration `json:"scanMillisecondDuration"`
 }
 

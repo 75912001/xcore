@@ -10,7 +10,7 @@ func NewParameters() *Parameters {
 	}
 }
 
-func (p *Parameters) Set(parameters ...interface{}) {
+func (p *Parameters) Override(parameters ...interface{}) {
 	p.parameters = append([]interface{}{}, parameters...)
 }
 

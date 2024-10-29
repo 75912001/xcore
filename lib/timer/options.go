@@ -59,10 +59,10 @@ func (p *options) merge(opts ...*options) *options {
 // 配置
 func (p *options) configure() error {
 	if p.scanSecondDuration == nil {
-		p.scanSecondDuration = &scanSecondDurationDefault
+		p.scanSecondDuration = &ScanSecondDurationDefault
 	}
 	if p.scanMillisecondDuration == nil {
-		p.scanMillisecondDuration = &scanMillisecondDurationDefault
+		p.scanMillisecondDuration = &ScanMillisecondDurationDefault
 	}
 	if p.outgoingTimeoutChan == nil {
 		return errors.WithMessagef(xerror.ChannelNil, xruntime.Location())

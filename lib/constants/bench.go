@@ -1,5 +1,5 @@
 package constants
 
 const (
-	ServiceConfigFile = "bench.json" // 服务配置文件
+	ServiceConfigFileSuffix = "bench.json" // 服务配置文件-后缀
 )

@@ -8,10 +8,10 @@ import (
 )
 
 type Sub struct {
-	*Jaeger  `json:"jaeger"`
-	*MongoDB `json:"mongoDB"`
-	*Redis   `json:"redis"`
-	*NATS    `json:"nats"`
+	*Jaeger  `json:"jaeger"`  // todo
+	*MongoDB `json:"mongoDB"` // todo
+	*Redis   `json:"redis"`   // todo
+	*NATS    `json:"nats"`    // todo
 }
 
 func (p *Sub) Unmarshal(strJson string) error {

@@ -9,8 +9,10 @@
 - go get go.etcd.io/etcd/client/v3@v3.5.15
 - go get github.com/google/uuid@v1.6.0
 
-- go get google.golang.org/protobuf/proto@v1.32.0
-- go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.32.0 (生成: protoc-gen-go.exe)
+- go get google.golang.org/protobuf/proto@v1.34.2
+- go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2 (生成: protoc-gen-go.exe)
+# - go get google.golang.org/protobuf/proto@v1.32.0
+# - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.32.0 (生成: protoc-gen-go.exe)
 
 ## 代码测试工具
 - $ go get github.com/agiledragon/gomonkey@v2.0.2

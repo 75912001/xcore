@@ -94,7 +94,7 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) er
 		// todo menglc 处理 logic message
 		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	case xcommonservice.GatewayMessage:
-		defaultPacket.IMessage.Set(remote, defaultPacket)
+		defaultPacket.IMessage.Override(remote, defaultPacket)
 		return defaultPacket.IMessage.Execute()
 	default:
 		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())

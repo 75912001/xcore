@@ -86,7 +86,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	uuid.EnableRandPool()
 	// 服务配置文件
 	benchPath := path.Join(p.ExecutablePath, fmt.Sprintf("%v.%v.%v.%v",
-		p.GroupID, p.Name, p.ID, xconstants.ServiceConfigFile))
+		p.GroupID, p.Name, p.ID, xconstants.ServiceConfigFileSuffix))
 	content, err := os.ReadFile(benchPath)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())

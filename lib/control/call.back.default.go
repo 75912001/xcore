@@ -5,9 +5,9 @@ type CallBack struct {
 	IParameters
 }
 
-func NewCallBack(onFunction func(...interface{}) error, arg ...interface{}) ICallBack {
+func NewCallBack(onFunction func(...interface{}) error, arg ...interface{}) *CallBack {
 	par := NewParameters()
-	par.Set(arg...)
+	par.Override(arg...)
 	return &CallBack{
 		onFunction:  onFunction,
 		IParameters: par,

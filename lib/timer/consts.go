@@ -3,6 +3,6 @@ package timer
 import "time"
 
 var (
-	scanSecondDurationDefault      = time.Millisecond * 100
-	scanMillisecondDurationDefault = time.Millisecond * 25
+	ScanSecondDurationDefault      = time.Millisecond * 100 // 定时器扫描间隔-默认. 100ms
+	ScanMillisecondDurationDefault = time.Millisecond * 25  // 定时器扫描间隔-默认. 25ms
 )
