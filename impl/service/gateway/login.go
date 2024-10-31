@@ -41,7 +41,7 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 	case xcommonservice.GatewayMessage:
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
-			return nil, errors.WithMessage(xerror.MessageIDNonExistent, xruntime.Location())
+			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 		}
 		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
 		if err != nil {
@@ -59,7 +59,7 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 
 	packet.IMessage = GMessage.Find(header.MessageID)
 	if packet.IMessage == nil {
-		return nil, xerror.MessageIDNonExistent
+		return nil, xerror.NotExist
 	}
 	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
 	if err != nil {
@@ -72,7 +72,7 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
 	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
 	if !ok {
-		return xerror.TypeMismatch
+		return xerror.Mismatch
 	}
 	{
 		fmt.Println()

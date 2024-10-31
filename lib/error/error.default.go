@@ -37,9 +37,17 @@ func (p *Error) WithName(name string) *Error {
 	return p
 }
 
+func (p *Error) Name() string {
+	return p.name
+}
+
 func (p *Error) WithDesc(desc string) *Error {
 	p.desc = desc
 	return p
+}
+
+func (p *Error) Desc() string {
+	return p.desc
 }
 
 func (p *Error) WithExtraMessage(extraMessage string) *Error {
@@ -47,9 +55,17 @@ func (p *Error) WithExtraMessage(extraMessage string) *Error {
 	return p
 }
 
+func (p *Error) ExtraMessage() string {
+	return p.extraMessage
+}
+
 func (p *Error) WithExtraError(extraError error) *Error {
 	p.extraError = extraError
 	return p
+}
+
+func (p *Error) ExtraError() error {
+	return p.extraError
 }
 
 // 用来确保 错误码-唯一性

@@ -27,7 +27,7 @@ func newDefaultMessage(opts *options) IMessage {
 
 func (p *defaultMessage) Execute() error {
 	if p.stateSwitch.IsOff() { // 消息是否禁用
-		return xerror.MessageIDDisable
+		return xerror.Disable
 	}
 	return p.ICallBack.Execute()
 }

@@ -19,8 +19,8 @@ func (p *Mgr) Register(messageID uint32, opts ...*options) {
 		p.messageMap = make(map[uint32]IMessage)
 	}
 	if pb := p.Find(messageID); pb != nil {
-		xlog.PrintErr(xerror.MessageIDExistent, "%v messageID:%#x %v", xruntime.Location(), messageID, messageID)
-		panic(errors.WithMessagef(xerror.MessageIDExistent, "%v messageID:%#x %v",
+		xlog.PrintErr(xerror.Exist, "%v messageID:%#x %v", xruntime.Location(), messageID, messageID)
+		panic(errors.WithMessagef(xerror.Exist, "%v messageID:%#x %v",
 			xruntime.Location(), messageID, messageID))
 	}
 	opt := merge(opts...)

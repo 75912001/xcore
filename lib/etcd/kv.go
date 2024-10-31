@@ -5,8 +5,17 @@ import (
 	"fmt"
 	"path"
 	"strconv"
+	xcommon "xcore/lib/common"
 	xlog "xcore/lib/log"
 )
+
+// ValueJson etcd 通讯的数据,由服务中的数据生成,定时更新->etcd->服务
+type ValueJson struct {
+	ServiceNet    *xcommon.ServiceNet `json:"serviceNet"`    // 有:直接使用. 没有:使用 benchJson.ServiceNet
+	Version       string              `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
+	AvailableLoad uint32              `json:"availableLoad"` // 剩余可用负载, 可用资源数
+	SecondOffset  int32               `json:"secondOffset"`  // 服务 时间(秒)偏移量
+}
 
 // Parse 解析key
 func Parse(key string) (msgType string, groupID uint32, serviceName string, serviceID uint32) {

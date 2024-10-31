@@ -87,7 +87,7 @@ func RandomValueBySlice(except []interface{}, slice []interface{}, equals func(a
 		}
 	}
 	if len(newSlice) == 0 {
-		return nil, errors.WithMessage(xerror.NonExistent, xruntime.Location())
+		return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 	}
 	return newSlice[rand.Intn(len(newSlice))], nil
 }

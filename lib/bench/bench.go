@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+	xcommon "xcore/lib/common"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xetcd "xcore/lib/etcd"
@@ -47,9 +48,9 @@ type Etcd struct {
 }
 
 type benchJson struct {
-	Base       Base       `json:"base"`
-	Timer      Timer      `json:"timer"`
-	ServiceNet ServiceNet `json:"serviceNet"`
+	Base       Base               `json:"base"`
+	Timer      Timer              `json:"timer"`
+	ServiceNet xcommon.ServiceNet `json:"serviceNet"`
 }
 
 func (p *benchJson) Parse(jsonString string) error {
@@ -142,9 +143,4 @@ type Timer struct {
 	ScanSecondDuration *time.Duration `json:"scanSecondDuration"`
 	// 毫秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为25毫秒 [default]: xtimer.ScanMillisecondDurationDefault
 	ScanMillisecondDuration *time.Duration `json:"scanMillisecondDuration"`
-}
-
-type ServiceNet struct {
-	Addr *string `json:"addr"` // e.g.: 127.0.0.0:8989 [default]: ""
-	Type *string `json:"type"` // [tcp, udp] [default]: "tcp"
 }

@@ -6,14 +6,14 @@ import (
 	"os"
 	"runtime"
 	"time"
-	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
 )
 
 var stdErr = log.New(os.Stderr, "", 0)
 
 // PrintErr 输出到os.Stderr
 func PrintErr(v ...interface{}) {
-	funcName := xconstants.Unknown
+	funcName := xerror.Unknown.Name()
 	pc, _, line, ok := runtime.Caller(calldepth1)
 	if ok {
 		funcName = runtime.FuncForPC(pc).Name()
@@ -29,7 +29,7 @@ func PrintErr(v ...interface{}) {
 
 // PrintfErr 输出到os.Stderr
 func PrintfErr(format string, v ...interface{}) {
-	funcName := xconstants.Unknown
+	funcName := xerror.Unknown.Name()
 	pc, _, line, ok := runtime.Caller(calldepth1)
 	if ok {
 		funcName = runtime.FuncForPC(pc).Name()

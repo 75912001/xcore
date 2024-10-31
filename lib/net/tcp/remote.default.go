@@ -9,7 +9,6 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
-	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xnetpacket "xcore/lib/net/packet"
@@ -153,9 +152,9 @@ func (p *DefaultRemote) onSend(ctx context.Context) {
 	defer func() {
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
-			xlog.PrintErr(xconstants.GoroutinePanic, p, err, debug.Stack())
+			xlog.PrintErr(xerror.GoroutinePanic, p, err, debug.Stack())
 		}
-		xlog.PrintInfo(xconstants.GoroutineDone, p)
+		xlog.PrintInfo(xerror.GoroutineDone, p)
 	}()
 	// 上次时间
 	var lastTime time.Time
@@ -220,13 +219,13 @@ func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
-			xlog.PrintErr(xconstants.GoroutinePanic, p, err, debug.Stack())
+			xlog.PrintErr(xerror.GoroutinePanic, p, err, debug.Stack())
 		}
 		err := event.Disconnect(handler, p)
 		if err != nil {
 			xlog.PrintfErr("disconnect err:%v", err)
 		}
-		xlog.PrintInfo(xconstants.GoroutineDone, p)
+		xlog.PrintInfo(xerror.GoroutineDone, p)
 	}()
 	// 消息总长度
 	msgLengthBuf := make([]byte, MsgLengthFieldSize)

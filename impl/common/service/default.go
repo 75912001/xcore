@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 	xbench "xcore/lib/bench"
-	xconstants "xcore/lib/constants"
 	xcallback "xcore/lib/control"
 	xerror "xcore/lib/error"
 	xetcd "xcore/lib/etcd"
@@ -28,7 +27,7 @@ import (
 
 type DefaultService struct {
 	BenchMgr xbench.Mgr
-	BenchSub xbench.ISub
+	BenchSub *xbench.Sub
 
 	GroupID        uint32 // 组ID
 	Name           string // 名称
@@ -114,7 +113,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		}
 		kv := clientv3.NewKV(client)
 		key := fmt.Sprintf("/%v/%v/%v/%v/%v",
-			*p.BenchMgr.Json.Base.ProjectName, xetcd.EtcdWatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
+			*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
 		getResponse, err := kv.Get(ctx, key, clientv3.WithPrefix())
 		if err != nil {
 			return errors.WithMessage(err, xruntime.Location())
@@ -163,7 +162,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		defer func() {
 			p.BusChannelWaitGroup.Done()
 			// 主事件 channel 报错 不 recover
-			p.Log.Infof(xconstants.GoroutineDone)
+			p.Log.Infof(xerror.GoroutineDone.Error())
 		}()
 		p.BusChannelWaitGroup.Add(1)
 		_ = p.Handle()
@@ -186,15 +185,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		}
 	}
 	// etcd
-	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xetcd.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)
-	cmdMin, err := xutil.HexStringToUint32(*p.BenchMgr.Json.Base.CmdMin)
-	if err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
-	cmdMax, err := xutil.HexStringToUint32(*p.BenchMgr.Json.Base.CmdMax)
-	if err != nil {
-		return errors.WithMessage(err, xruntime.Location())
-	}
+	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeService, p.GroupID, p.Name, p.ID)
 	defaultEtcd := xetcd.NewEtcd(
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
@@ -207,8 +198,6 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 					Version:       *p.BenchMgr.Json.Base.Version,
 					AvailableLoad: *p.BenchMgr.Json.Base.AvailableLoad,
 					SecondOffset:  0,
-					CmdMin:        cmdMin,
-					CmdMax:        cmdMax,
 				},
 			).
 			WithEventChan(p.BusChannel),
@@ -224,7 +213,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 	// etcd-定时上报
-	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.EtcdReportIntervalSecondDefault)
+	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault)
 
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {

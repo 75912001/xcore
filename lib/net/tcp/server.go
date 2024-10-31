@@ -6,7 +6,7 @@ import (
 	"net"
 	"runtime/debug"
 	"time"
-	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
@@ -64,10 +64,10 @@ func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
 		defer func() {
 			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					xlog.PrintErr(xconstants.GoroutinePanic, err, debug.Stack())
+					xlog.PrintErr(xerror.GoroutinePanic, err, debug.Stack())
 				}
 			}
-			xlog.PrintInfo(xconstants.GoroutineDone)
+			xlog.PrintInfo(xerror.GoroutineDone)
 		}()
 		var tempDelay time.Duration
 		for {

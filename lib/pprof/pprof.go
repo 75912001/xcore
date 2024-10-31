@@ -4,7 +4,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"runtime/debug"
-	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 )
@@ -18,13 +18,13 @@ func StartHTTPprof(addr string) {
 		defer func() {
 			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					xlog.PrintErr(xconstants.GoroutinePanic, err, xruntime.Location(), debug.Stack())
+					xlog.PrintErr(xerror.GoroutinePanic, err, xruntime.Location(), debug.Stack())
 				}
 			}
-			xlog.PrintInfo(xconstants.GoroutineDone)
+			xlog.PrintInfo(xerror.GoroutineDone)
 		}()
 		if err := http.ListenAndServe(addr, nil); err != nil {
-			xlog.PrintErr(xconstants.Failure, addr, err)
+			xlog.PrintErr(xerror.Fail, addr, err)
 		}
 	}()
 }

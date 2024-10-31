@@ -53,6 +53,10 @@ var (
 	Frozen            = NewError(0x012f).WithName("Frozen").WithDesc("frozen-冻结")
 	Hit               = NewError(0x0130).WithName("Hit").WithDesc("hit-命中")
 	Miss              = NewError(0x0131).WithName("Miss").WithDesc("miss-未命中")
+	Length            = NewError(0x0132).WithName("Length").WithDesc("length-长度")
+	LengthExceedLimit = NewError(0x0133).WithName("LengthExceedLimit").WithDesc("length-exceed-limit-长度超出限制")
+	Quantity          = NewError(0x0134).WithName("Quantity").WithDesc("quantity-数量")
+	QuantityLimit     = NewError(0x0135).WithName("QuantityLimit").WithDesc("quantity-limit-数量限制")
 
 	//
 	Retry     = NewError(0x0901).WithName("Retry").WithDesc("retry-重试")
@@ -63,6 +67,7 @@ var (
 	Packet    = NewError(0x090b).WithName("Packet").WithDesc("packet-数据包")
 	Config    = NewError(0x090d).WithName("Config").WithDesc("config-配置")
 	Overload  = NewError(0x090f).WithName("Overload").WithDesc("overload-过载")
+	Nil       = NewError(0x0911).WithName("Nil").WithDesc("nil-空")
 
 	// 协程
 	GoroutinePanic = NewError(0x0a00).WithName("GoroutinePanic").WithDesc("goroutine-panic-协程-panic")

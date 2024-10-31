@@ -7,7 +7,6 @@ import (
 	"runtime/debug"
 	"sync"
 	"time"
-	xbench "xcore/lib/bench"
 	xcontrol "xcore/lib/control"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
@@ -40,14 +39,6 @@ func NewEtcd(opts ...*options) *Etcd {
 	return &Etcd{
 		options: opt,
 	}
-}
-
-// ValueJson etcd 通讯的数据,由服务中的数据生成,定时更新->etcd->服务
-type ValueJson struct {
-	ServiceNet    *xbench.ServiceNet `json:"serviceNet"`    // 有:直接使用. 没有:使用 benchJson.ServiceNet
-	Version       string             `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
-	AvailableLoad uint32             `json:"availableLoad"` // 剩余可用负载, 可用资源数
-	SecondOffset  int32              `json:"secondOffset"`  // 服务 时间(秒)偏移量
 }
 
 // Start 开始

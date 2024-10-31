@@ -9,8 +9,8 @@ import (
 	"runtime/debug"
 	"sync"
 	"time"
-	xconstants "xcore/lib/constants"
 	xcontrol "xcore/lib/control"
+	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 )
@@ -35,11 +35,11 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 	defer func() {
 		if xruntime.IsRelease() {
 			if err := recover(); err != nil {
-				xlog.PrintErr(xconstants.GoroutinePanic, err, string(debug.Stack()))
+				xlog.PrintErr(xerror.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
-		xlog.PrintInfo(xconstants.GoroutineDone)
+		xlog.PrintInfo(xerror.GoroutineDone)
 	}()
 	idleDelay := time.NewTimer(*p.opts.scanSecondDuration)
 	defer func() {
@@ -48,7 +48,7 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			xlog.PrintInfo(xconstants.GoroutineDone)
+			xlog.PrintInfo(xerror.GoroutineDone)
 			return
 		case v := <-p.secondChan:
 			s := v.(*second)
@@ -69,11 +69,11 @@ func (p *defaultTimer) funcMillisecond(ctx context.Context) {
 	defer func() {
 		if xruntime.IsRelease() {
 			if err := recover(); err != nil {
-				xlog.PrintErr(xconstants.GoroutinePanic, err, string(debug.Stack()))
+				xlog.PrintErr(xerror.GoroutinePanic, err, string(debug.Stack()))
 			}
 		}
 		p.waitGroup.Done()
-		xlog.PrintInfo(xconstants.GoroutineDone)
+		xlog.PrintInfo(xerror.GoroutineDone)
 	}()
 	scanMillisecondDuration := *p.opts.scanMillisecondDuration
 	scanMillisecond := scanMillisecondDuration / time.Millisecond
@@ -86,7 +86,7 @@ func (p *defaultTimer) funcMillisecond(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			xlog.PrintInfo(xconstants.GoroutineDone)
+			xlog.PrintInfo(xerror.GoroutineDone)
 			return
 		case v := <-p.milliSecondChan:
 			p.millisecondList.PushBack(v)

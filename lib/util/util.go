@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"unsafe"
-	xconstants "xcore/lib/constants"
+	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -68,7 +68,7 @@ func IsDuplicate(slice []interface{}, equals func(a, b interface{}) bool) bool {
 // GetFuncName 获取函数名称
 func GetFuncName(i interface{}, seps ...rune) string {
 	if i == nil {
-		return xconstants.Nil
+		return xerror.Nil.Name()
 	}
 	funcName := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 	fields := strings.FieldsFunc(funcName, func(sep rune) bool {
@@ -82,7 +82,7 @@ func GetFuncName(i interface{}, seps ...rune) string {
 	if size := len(fields); size > 0 {
 		return fields[size-1]
 	}
-	return xconstants.Unknown
+	return xerror.Unknown.Name()
 }
 
 // MutableCopy 深拷贝

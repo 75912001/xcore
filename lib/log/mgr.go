@@ -18,7 +18,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xruntime "xcore/lib/runtime"
 	xtime "xcore/lib/time"
@@ -74,11 +73,11 @@ func (p *mgr) start() error {
 		defer func() {
 			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					PrintErr(p, xconstants.GoroutinePanic, err, string(debug.Stack()))
+					PrintErr(p, xerror.GoroutinePanic, err, string(debug.Stack()))
 				}
 			}
 			p.waitGroupOutPut.Done()
-			PrintInfo(xconstants.GoroutineDone)
+			PrintInfo(xerror.GoroutineDone)
 		}()
 		doLog(p)
 	}()
@@ -131,7 +130,7 @@ func doLog(p *mgr) {
 // SetLevel 设置日志等级
 func (p *mgr) SetLevel(level uint32) error {
 	if level < LevelOff || LevelOn < level {
-		return errors.WithMessage(xerror.LogLevel, xruntime.Location())
+		return errors.WithMessage(xerror.Level, xruntime.Location())
 	}
 	p.options.WithLevel(level)
 	return nil
@@ -214,7 +213,7 @@ func (p *mgr) log(entry *entry, level uint32, v ...interface{}) {
 		withMessage(fmt.Sprint(v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
-		funcName := xconstants.Unknown
+		funcName := xerror.Unknown.Name()
 		if !ok {
 			line = 0
 		} else {
@@ -232,7 +231,7 @@ func (p *mgr) logf(entry *entry, level uint32, format string, v ...interface{}) 
 		withMessage(fmt.Sprintf(format, v...))
 	if *p.options.isReportCaller {
 		pc, _, line, ok := runtime.Caller(calldepth2)
-		funcName := xconstants.Unknown
+		funcName := xerror.Unknown.Name()
 		if !ok {
 			line = 0
 		} else {

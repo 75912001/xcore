@@ -26,13 +26,13 @@ func EtcdKeyValue(arg ...interface{}) error {
 		return nil
 	}
 	switch msgType {
-	case xetcd.EtcdWatchMsgTypeService:
+	case xetcd.WatchMsgTypeService:
 		switch serviceName {
 		case xcommon.ServiceNameLogin:
 			loginService := gservice.LoginServiceMgr.Get(serviceID)
 			if loginService != nil {
 				xlog.PrintfInfo("login service Existent %v", serviceID)
-				return errors.WithMessage(xerror.Existent, "login services Existent")
+				return errors.WithMessage(xerror.Exist, "login services Existent")
 			}
 			loginService = NewLoginService()
 			//address := fmt.Sprintf("%v:%v", etcdValueJson.ServiceNetTCP.IP, etcdValueJson.ServiceNetTCP.Port)

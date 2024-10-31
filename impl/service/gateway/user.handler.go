@@ -29,14 +29,14 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 
 func (p *Service) OnCheckPacketLength(length uint32) error {
 	if length < xnetpacket.DefaultHeaderSize || xconstants.PacketLengthDefault < length {
-		return xerror.PacketHeaderLength
+		return xerror.Length
 	}
 	return nil
 }
 
 func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	if false {
-		return xerror.PacketQuantityLimit
+		return xerror.QuantityLimit
 	}
 	return nil
 }
@@ -50,7 +50,7 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 	case xcommonservice.GatewayMessage:
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
-			return nil, errors.WithMessage(xerror.MessageIDNonExistent, xruntime.Location())
+			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 		}
 		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
 		if err != nil {
@@ -70,7 +70,7 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
 	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
 	if !ok {
-		return xerror.TypeMismatch
+		return xerror.Mismatch
 	}
 	defaultRemote := remote.(*xnettcp.DefaultRemote)
 	user := defaultRemote.Object.(*User)
