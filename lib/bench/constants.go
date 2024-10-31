@@ -1,4 +1,4 @@
-package constants
+package bench
 
 const (
 	ServiceConfigFileSuffix = "bench.json" // 服务配置文件-后缀

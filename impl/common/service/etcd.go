@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/pkg/errors"
-	xconstants "xcore/lib/constants"
 	xcallback "xcore/lib/control"
 	xetcd "xcore/lib/etcd"
 	xruntime "xcore/lib/runtime"
@@ -13,7 +12,7 @@ import (
 func EtcdReportFunction(args ...interface{}) error {
 	defaultService := args[0].(*DefaultService)
 	defer func() {
-		defaultService.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, defaultService), defaultService.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
+		defaultService.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, defaultService), defaultService.TimeMgr.ShadowTimestamp()+xetcd.EtcdReportIntervalSecondDefault)
 	}()
 	cmdMin, err := xutil.HexStringToUint32(*defaultService.BenchMgr.Json.Base.CmdMin)
 	if err != nil {

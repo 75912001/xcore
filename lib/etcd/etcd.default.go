@@ -2,25 +2,21 @@ package etcd
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	etcdclientv3 "go.etcd.io/etcd/client/v3"
-	"path"
 	"runtime/debug"
-	"strconv"
 	"sync"
 	"time"
 	xbench "xcore/lib/bench"
-	xconstants "xcore/lib/constants"
-	xcallback "xcore/lib/control"
+	xcontrol "xcore/lib/control"
+	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 )
 
 // e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}/
 
-type defaultEtcd struct {
+type Etcd struct {
 	client                        *etcdclientv3.Client
 	kv                            etcdclientv3.KV
 	lease                         etcdclientv3.Lease
@@ -34,14 +30,14 @@ type defaultEtcd struct {
 	CallbackFun CallbackFun
 }
 
-func NewDefaultEtcd(opts ...*options) *defaultEtcd {
+func NewEtcd(opts ...*options) *Etcd {
 	opt := mergeOptions(opts...)
 	err := configure(opt)
 	if err != nil {
 		xlog.PrintfErr("configure err:%v %v", err, xruntime.Location())
 		return nil
 	}
-	return &defaultEtcd{
+	return &Etcd{
 		options: opt,
 	}
 }
@@ -52,12 +48,10 @@ type ValueJson struct {
 	Version       string             `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
 	AvailableLoad uint32             `json:"availableLoad"` // 剩余可用负载, 可用资源数
 	SecondOffset  int32              `json:"secondOffset"`  // 服务 时间(秒)偏移量
-	CmdMin        uint32             `json:"cmdMin"`        // 命令最小值 [default]: 0
-	CmdMax        uint32             `json:"cmdMax"`        // 命令最大值 [default]: 0xFFFFFFFF
 }
 
 // Start 开始
-func (p *defaultEtcd) Start(ctx context.Context) error {
+func (p *Etcd) Start(ctx context.Context) error {
 	var err error
 	p.client, err = etcdclientv3.New(etcdclientv3.Config{
 		Endpoints:   p.options.addrs,
@@ -99,7 +93,7 @@ func (p *defaultEtcd) Start(ctx context.Context) error {
 }
 
 // Stop 停止
-func (p *defaultEtcd) Stop() error {
+func (p *Etcd) Stop() error {
 	if p.client != nil {
 		// 删除
 		if _, err := p.DelWithPrefix(*p.options.key); err != nil {
@@ -121,68 +115,9 @@ func (p *defaultEtcd) Stop() error {
 	return nil
 }
 
-// Parse 解析key
-func Parse(key string) (msgType string, groupID uint32, serviceName string, serviceID uint32) {
-	strServiceID := path.Base(key)
-	// strServiceID 转换成 serviceID
-	if serviceIDU64, err := strconv.ParseUint(strServiceID, 10, 32); err != nil {
-		xlog.PrintfErr("Parse err:%v %v %v", key, strServiceID, err)
-		return
-	} else {
-		serviceID = uint32(serviceIDU64)
-	}
-	key = path.Dir(key)
-	key = path.Dir(key)
-	serviceName = path.Base(key)
-	key = path.Dir(key)
-	strGroupID := path.Base(key)
-	// strGroupID 转换成 groupID
-	if groupIDU64, err := strconv.ParseUint(strGroupID, 10, 32); err != nil {
-		xlog.PrintfErr("Parse err:%v %v %v", key, strGroupID, err)
-		return
-	} else {
-		groupID = uint32(groupIDU64)
-	}
-	key = path.Dir(key)
-	msgType = path.Base(key)
-	return msgType, groupID, serviceName, serviceID
-}
-
-func GenKey(projectName string, etcdWatchMsgType string, groupID uint32, serviceName string, serviceID uint32) string {
-	return fmt.Sprintf("/%v/%v/%v/%v/%v/",
-		projectName,
-		etcdWatchMsgType,
-		groupID,
-		serviceName,
-		serviceID,
-	)
-}
-
-func GenPrefixKey(projectName string) string {
-	return fmt.Sprintf("/%v/", projectName)
-}
-
-func ValueJson2String(valueJson *ValueJson) string {
-	bytes, err := json.Marshal(valueJson)
-	if err != nil {
-		xlog.PrintfErr("Error marshaling ValueJson: %v", err)
-		return ""
-	}
-	return string(bytes)
-}
-
-func ValueString2Json(value string) *ValueJson {
-	var valueJson ValueJson
-	err := json.Unmarshal([]byte(value), &valueJson)
-	if err != nil {
-		xlog.PrintfErr("Error unmarshaling ValueJson: %v %v", value, err)
-		return nil
-	}
-	return &valueJson
-}
-
 // 多次重试 Start 和 KeepAlive
-func (p *defaultEtcd) retryKeepAlive(ctx context.Context) error {
+func (p *Etcd) retryKeepAlive(ctx context.Context) error {
+	const grantLeaseRetryDuration = time.Second * 3 // 授权租约 重试 间隔时长
 	xlog.PrintfErr("renewing etcd lease, reconfiguring.grantLeaseMaxRetries:%v, grantLeaseIntervalSecond:%v",
 		*p.options.grantLeaseMaxRetries, grantLeaseRetryDuration/time.Second)
 	var failedGrantLeaseAttempts = 0
@@ -215,7 +150,7 @@ func (p *defaultEtcd) retryKeepAlive(ctx context.Context) error {
 }
 
 // KeepAlive 更新租约
-func (p *defaultEtcd) KeepAlive(ctx context.Context) error {
+func (p *Etcd) KeepAlive(ctx context.Context) error {
 	var err error
 	p.leaseKeepAliveResponseChannel, err = p.lease.KeepAlive(ctx, p.leaseGrantResponse.ID)
 	if err != nil {
@@ -228,16 +163,16 @@ func (p *defaultEtcd) KeepAlive(ctx context.Context) error {
 		defer func() {
 			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					xlog.PrintErr(xconstants.GoroutinePanic, err, debug.Stack())
+					xlog.PrintErr(xerror.GoroutinePanic, err, debug.Stack())
 				}
 			}
 			p.waitGroup.Done()
-			xlog.PrintInfo(xconstants.GoroutineDone)
+			xlog.PrintInfo(xerror.GoroutineDone)
 		}()
 		for {
 			select {
 			case <-ctx.Done():
-				xlog.PrintInfo(xconstants.GoroutineDone)
+				xlog.PrintInfo(xerror.GoroutineDone)
 				return
 			case leaseKeepAliveResponse, ok := <-p.leaseKeepAliveResponseChannel:
 				xlog.PrintInfo(leaseKeepAliveResponse, ok)
@@ -253,17 +188,17 @@ func (p *defaultEtcd) KeepAlive(ctx context.Context) error {
 					defer func() {
 						if xruntime.IsRelease() {
 							if err := recover(); err != nil {
-								xlog.PrintErr(xconstants.Retry, xconstants.GoroutinePanic, err, debug.Stack())
+								xlog.PrintErr(xerror.Retry, xerror.GoroutinePanic, err, debug.Stack())
 							}
 						}
-						xlog.PrintInfo(xconstants.Retry, xconstants.GoroutineDone)
+						xlog.PrintInfo(xerror.Retry, xerror.GoroutineDone)
 					}()
 					if err := p.Stop(); err != nil {
-						xlog.PrintInfo(xconstants.Retry, xconstants.Failure, err)
+						xlog.PrintInfo(xerror.Retry, xerror.Fail, err)
 						return
 					}
 					if err := p.retryKeepAlive(ctx); err != nil {
-						xlog.PrintErr(xconstants.Retry, xconstants.Failure, err)
+						xlog.PrintErr(xerror.Retry, xerror.Fail, err)
 						return
 					}
 				}(context.TODO())
@@ -275,7 +210,7 @@ func (p *defaultEtcd) KeepAlive(ctx context.Context) error {
 }
 
 // PutWithLease 将一个键值对放入etcd中 WithLease 带ttl
-func (p *defaultEtcd) PutWithLease(key string, value string) (*etcdclientv3.PutResponse, error) {
+func (p *Etcd) PutWithLease(key string, value string) (*etcdclientv3.PutResponse, error) {
 	putResponse, err := p.kv.Put(context.TODO(), key, value, etcdclientv3.WithLease(p.leaseGrantResponse.ID))
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
@@ -284,7 +219,7 @@ func (p *defaultEtcd) PutWithLease(key string, value string) (*etcdclientv3.PutR
 }
 
 // Put 将一个键值对放入etcd中
-func (p *defaultEtcd) Put(key string, value string) (*etcdclientv3.PutResponse, error) {
+func (p *Etcd) Put(key string, value string) (*etcdclientv3.PutResponse, error) {
 	putResponse, err := p.kv.Put(context.TODO(), key, value)
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
@@ -293,7 +228,7 @@ func (p *defaultEtcd) Put(key string, value string) (*etcdclientv3.PutResponse, 
 }
 
 // DelWithPrefix 删除键值 匹配的键值
-func (p *defaultEtcd) DelWithPrefix(keyPrefix string) (*etcdclientv3.DeleteResponse, error) {
+func (p *Etcd) DelWithPrefix(keyPrefix string) (*etcdclientv3.DeleteResponse, error) {
 	deleteResponse, err := p.kv.Delete(context.TODO(), keyPrefix, etcdclientv3.WithPrefix())
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
@@ -326,7 +261,7 @@ func (p *defaultEtcd) DelWithPrefix(keyPrefix string) (*etcdclientv3.DeleteRespo
 //}
 
 // WatchPrefix 监视以key为前缀的所有 key value
-func (p *defaultEtcd) WatchPrefix(key string) etcdclientv3.WatchChan {
+func (p *Etcd) WatchPrefix(key string) etcdclientv3.WatchChan {
 	return p.client.Watch(context.TODO(), key, etcdclientv3.WithPrefix())
 }
 
@@ -341,7 +276,7 @@ func (p *defaultEtcd) WatchPrefix(key string) etcdclientv3.WatchChan {
 //}
 
 // GetPrefix 查找以key为前缀的所有 key value
-func (p *defaultEtcd) GetPrefix(key string) (*etcdclientv3.GetResponse, error) {
+func (p *Etcd) GetPrefix(key string) (*etcdclientv3.GetResponse, error) {
 	getResponse, err := p.kv.Get(context.TODO(), key, etcdclientv3.WithPrefix())
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
@@ -350,7 +285,7 @@ func (p *defaultEtcd) GetPrefix(key string) (*etcdclientv3.GetResponse, error) {
 }
 
 // GetPrefixIntoChan  取得关心的前缀,放入 chan 中
-func (p *defaultEtcd) GetPrefixIntoChan() (err error) {
+func (p *Etcd) GetPrefixIntoChan() (err error) {
 	getResponse, err := p.GetPrefix(*p.options.watchKeyPrefix)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -360,22 +295,24 @@ func (p *defaultEtcd) GetPrefixIntoChan() (err error) {
 		if len(v.Value) != 0 {
 			valueJson = ValueString2Json(string(v.Value))
 		}
-		p.options.eventChan <- &Event{ICallBack: xcallback.NewCallBack(p.CallbackFun, string(v.Key), valueJson)}
+		p.options.eventChan <- &Event{
+			ICallBack: xcontrol.NewCallBack(p.CallbackFun, string(v.Key), valueJson),
+		}
 	}
 	return
 }
 
 // WatchPrefixIntoChan 监听key变化,放入 chan 中
-func (p *defaultEtcd) WatchPrefixIntoChan() (err error) {
+func (p *Etcd) WatchPrefixIntoChan() (err error) {
 	eventChan := p.WatchPrefix(*p.options.watchKeyPrefix)
 	go func() {
 		defer func() {
 			if xruntime.IsRelease() {
 				if err := recover(); err != nil {
-					xlog.PrintErr(xconstants.GoroutinePanic, err, debug.Stack())
+					xlog.PrintErr(xerror.GoroutinePanic, err, debug.Stack())
 				}
 			}
-			xlog.PrintInfo(xconstants.GoroutineDone)
+			xlog.PrintInfo(xerror.GoroutineDone)
 		}()
 		for v := range eventChan {
 			Key := string(v.Events[0].Kv.Key)
@@ -385,7 +322,7 @@ func (p *defaultEtcd) WatchPrefixIntoChan() (err error) {
 				valueJson = ValueString2Json(Value)
 			}
 			p.options.eventChan <- &Event{
-				ICallBack: xcallback.NewCallBack(p.CallbackFun, Key, valueJson),
+				ICallBack: xcontrol.NewCallBack(p.CallbackFun, Key, valueJson),
 			}
 		}
 	}()

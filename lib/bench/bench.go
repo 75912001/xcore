@@ -13,6 +13,7 @@ import (
 	"time"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
+	xetcd "xcore/lib/etcd"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 	xtimer "xcore/lib/timer"
@@ -34,7 +35,7 @@ func (p *rootJson) Parse(strJson string) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Etcd.TTL == nil {
-		defaultValue := xconstants.EtcdTtlSecondDefault
+		defaultValue := xetcd.TtlSecondDefault
 		p.Etcd.TTL = &defaultValue
 	}
 	return nil
@@ -42,7 +43,7 @@ func (p *rootJson) Parse(strJson string) error {
 
 type Etcd struct {
 	Addrs []string `json:"addrs"` // [目前无效] todo [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
-	TTL   *int64   `json:"ttl"`   // ttl 秒 [default]: xconstants.EtcdTtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
+	TTL   *int64   `json:"ttl"`   // ttl 秒 [default]: xetcd.TtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
 }
 
 type benchJson struct {

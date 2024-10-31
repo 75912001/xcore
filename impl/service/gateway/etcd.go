@@ -3,7 +3,6 @@ package gateway
 import (
 	"github.com/pkg/errors"
 	xcommon "xcore/impl/common"
-	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xetcd "xcore/lib/etcd"
 	xlog "xcore/lib/log"
@@ -27,7 +26,7 @@ func EtcdKeyValue(arg ...interface{}) error {
 		return nil
 	}
 	switch msgType {
-	case xconstants.EtcdWatchMsgTypeService:
+	case xetcd.EtcdWatchMsgTypeService:
 		switch serviceName {
 		case xcommon.ServiceNameLogin:
 			loginService := gservice.LoginServiceMgr.Get(serviceID)

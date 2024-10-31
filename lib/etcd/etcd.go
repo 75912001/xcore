@@ -3,7 +3,7 @@ package etcd
 import (
 	"context"
 	etcdclientv3 "go.etcd.io/etcd/client/v3"
-	xcallback "xcore/lib/control"
+	xcontrol "xcore/lib/control"
 )
 
 type IEtcd interface {
@@ -14,7 +14,7 @@ type IEtcd interface {
 }
 
 type Event struct {
-	ICallBack xcallback.ICallBack
+	ICallBack xcontrol.ICallBack
 }
 
 type CallbackFun func(arg ...interface{}) error

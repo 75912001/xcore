@@ -86,7 +86,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	uuid.EnableRandPool()
 	// 服务配置文件
 	benchPath := path.Join(p.ExecutablePath, fmt.Sprintf("%v.%v.%v.%v",
-		p.GroupID, p.Name, p.ID, xconstants.ServiceConfigFileSuffix))
+		p.GroupID, p.Name, p.ID, xbench.ServiceConfigFileSuffix))
 	content, err := os.ReadFile(benchPath)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -114,7 +114,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		}
 		kv := clientv3.NewKV(client)
 		key := fmt.Sprintf("/%v/%v/%v/%v/%v",
-			*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
+			*p.BenchMgr.Json.Base.ProjectName, xetcd.EtcdWatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
 		getResponse, err := kv.Get(ctx, key, clientv3.WithPrefix())
 		if err != nil {
 			return errors.WithMessage(err, xruntime.Location())
@@ -186,7 +186,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		}
 	}
 	// etcd
-	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xconstants.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)
+	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xetcd.EtcdWatchMsgTypeService, p.GroupID, p.Name, p.ID)
 	cmdMin, err := xutil.HexStringToUint32(*p.BenchMgr.Json.Base.CmdMin)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -195,7 +195,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	defaultEtcd := xetcd.NewDefaultEtcd(
+	defaultEtcd := xetcd.NewEtcd(
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
 			WithTTL(*p.BenchMgr.RootJson.Etcd.TTL).
@@ -224,7 +224,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 	// etcd-定时上报
-	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xconstants.EtcdReportIntervalSecondDefault)
+	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.EtcdReportIntervalSecondDefault)
 
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {

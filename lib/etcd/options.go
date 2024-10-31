@@ -7,17 +7,11 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-var (
-	grantLeaseRetryDuration     = time.Second * 3 // 授权租约 重试 间隔时长
-	grantLeaseMaxRetriesDefault = 600             // 授权租约 最大 重试次数
-	dialTimeoutDefault          = time.Second * 5 // dialTimeout is the timeout for failing to establish a connection.
-)
-
 type options struct {
 	addrs                []string           // 地址
 	ttl                  *int64             // Time To Live, etcd内部会按照 ttl/3 的时间(最小1秒),保持连接
-	grantLeaseMaxRetries *int               // 授权租约 最大 重试次数 [default:600]
-	dialTimeout          *time.Duration     // dialTimeout is the timeout for failing to establish a connection. [default:time.Second*5]
+	grantLeaseMaxRetries *int               // 授权租约 最大 重试次数 [default: grantLeaseMaxRetriesDefault]
+	dialTimeout          *time.Duration     // dialTimeout is the timeout for failing to establish a connection. [default: dialTimeoutDefault]
 	eventChan            chan<- interface{} // 传出 channel
 	watchKeyPrefix       *string            // 监视的键前缀
 	key                  *string            // 本服务的 etcd key
