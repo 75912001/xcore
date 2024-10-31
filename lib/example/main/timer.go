@@ -66,9 +66,9 @@ func exampleTimer() {
 					}
 				}
 			case *xtimer.EventTimerSecond:
-				_ = t.Execute()
+				_ = t.ICallBack.Execute()
 			case *xtimer.EventTimerMillisecond:
-				_ = t.Execute()
+				_ = t.ICallBack.Execute()
 			}
 		}
 	}
