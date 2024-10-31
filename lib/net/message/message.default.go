@@ -9,15 +9,15 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-type defaultMessage struct {
+type Message struct {
 	xcontrol.ICallBack
 	newProtoMessage   func() proto.Message   // 创建新的 proto.Message
 	stateSwitch       xcontrol.ISwitchButton // 状态开关-该消息是否启用
 	passThroughSwitch xcontrol.ISwitchButton // 透传开关-该消息是否透传
 }
 
-func newDefaultMessage(opts *options) IMessage {
-	return &defaultMessage{
+func newDefaultMessage(opts *options) *Message {
+	return &Message{
 		ICallBack:         opts.callback,
 		newProtoMessage:   opts.newProtoMessage,
 		stateSwitch:       opts.stateSwitch,
@@ -25,7 +25,7 @@ func newDefaultMessage(opts *options) IMessage {
 	}
 }
 
-func (p *defaultMessage) Execute() error {
+func (p *Message) Execute() error {
 	if p.stateSwitch.IsOff() { // 消息是否禁用
 		return xerror.Disable
 	}
@@ -33,7 +33,7 @@ func (p *defaultMessage) Execute() error {
 }
 
 // Marshal 序列化
-func (p *defaultMessage) Marshal(message proto.Message) (data []byte, err error) {
+func (p *Message) Marshal(message proto.Message) (data []byte, err error) {
 	data, err = proto.Marshal(message)
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
@@ -44,7 +44,7 @@ func (p *defaultMessage) Marshal(message proto.Message) (data []byte, err error)
 // Unmarshal 反序列化
 //
 //	message: 反序列化 得到的 消息
-func (p *defaultMessage) Unmarshal(data []byte) (message proto.Message, err error) {
+func (p *Message) Unmarshal(data []byte) (message proto.Message, err error) {
 	message = p.newProtoMessage()
 	err = proto.Unmarshal(data, message)
 	if err != nil {
@@ -56,7 +56,7 @@ func (p *defaultMessage) Unmarshal(data []byte) (message proto.Message, err erro
 // JsonUnmarshal 反序列化
 //
 //	message: 反序列化 得到的 消息
-func (p *defaultMessage) JsonUnmarshal(data []byte) (message proto.Message, err error) {
+func (p *Message) JsonUnmarshal(data []byte) (message proto.Message, err error) {
 	message = p.newProtoMessage()
 	err = protojson.Unmarshal(data, message)
 	if err != nil {

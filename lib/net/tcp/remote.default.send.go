@@ -10,7 +10,7 @@ import (
 func Send(remote IRemote, pb proto.Message, messageID uint32, sessionID uint32, key uint64) error {
 	if err := remote.Send(
 		&packet.DefaultPacket{
-			DefaultHeader: &packet.DefaultHeader{
+			DefaultHeader: &packet.Header{
 				MessageID: messageID,
 				SessionID: sessionID,
 				Key:       key,
@@ -26,10 +26,10 @@ func Send(remote IRemote, pb proto.Message, messageID uint32, sessionID uint32, 
 func SendError(remote IRemote, messageID uint32, resultID uint32) error {
 	if err := remote.Send(
 		&packet.DefaultPacket{
-			DefaultHeader: &packet.DefaultHeader{
-				PacketLength: 0,
-				MessageID:    messageID,
-				ResultID:     resultID,
+			DefaultHeader: &packet.Header{
+				Length:    0,
+				MessageID: messageID,
+				ResultID:  resultID,
 			},
 		},
 	); err != nil {

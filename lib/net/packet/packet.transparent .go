@@ -7,8 +7,8 @@ import (
 
 // PacketTransparent 透传数据包
 type PacketTransparent struct {
-	DefaultHeader *DefaultHeader // 包头
-	RawData       []byte         // 原始数据(包头+包体)
+	DefaultHeader *Header // 包头
+	RawData       []byte  // 原始数据(包头+包体)
 }
 
 // NewPacketTransparent 新建-透传数据包
@@ -16,7 +16,7 @@ func NewPacketTransparent() *PacketTransparent {
 	return &PacketTransparent{}
 }
 
-func (p *PacketTransparent) WithDefaultHeader(header *DefaultHeader) *PacketTransparent {
+func (p *PacketTransparent) WithDefaultHeader(header *Header) *PacketTransparent {
 	p.DefaultHeader = header
 	return p
 }

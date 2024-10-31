@@ -86,7 +86,7 @@ func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacke
 		}
 		header := defaultPacket.DefaultHeader
 		hexHeader := &HexDefaultHeader{
-			PacketLength: header.PacketLength,
+			PacketLength: header.Length,
 			MessageID:    fmt.Sprintf("0x%x", header.MessageID),
 			SessionID:    header.SessionID,
 			ResultID:     fmt.Sprintf("0x%x", header.ResultID),

@@ -2,11 +2,11 @@ package message
 
 import (
 	"google.golang.org/protobuf/proto"
-	xcallback "xcore/lib/control"
+	xcontrol "xcore/lib/control"
 )
 
 type IMessage interface {
-	xcallback.ICallBack
+	xcontrol.ICallBack
 	Marshal(message proto.Message) (data []byte, err error)
 	Unmarshal(data []byte) (message proto.Message, err error)
 	JsonUnmarshal(data []byte) (message proto.Message, err error)

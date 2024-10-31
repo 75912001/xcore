@@ -10,7 +10,7 @@ import (
 
 // DefaultPacket 默认数据包
 type DefaultPacket struct {
-	DefaultHeader *DefaultHeader       // 包头
+	DefaultHeader *Header              // 包头
 	PBMessage     proto.Message        // 消息
 	RawData       []byte               // 原始数据
 	IMessage      xnetmessage.IMessage // 记录该包对应的处理消息
@@ -21,7 +21,7 @@ func NewDefaultPacket() *DefaultPacket {
 	return &DefaultPacket{}
 }
 
-func (p *DefaultPacket) WithDefaultHeader(header *DefaultHeader) *DefaultPacket {
+func (p *DefaultPacket) WithDefaultHeader(header *Header) *DefaultPacket {
 	p.DefaultHeader = header
 	return p
 }
@@ -44,10 +44,10 @@ func (p *DefaultPacket) Marshal() (data []byte, err error) {
 	if err != nil {
 		return nil, errors.WithMessage(err, xruntime.Location())
 	}
-	p.DefaultHeader.PacketLength = DefaultHeaderSize + uint32(len(data))
-	buf := make([]byte, p.DefaultHeader.PacketLength)
+	p.DefaultHeader.Length = DefaultHeaderSize + uint32(len(data))
+	buf := make([]byte, p.DefaultHeader.Length)
 	p.DefaultHeader.Pack(buf)
-	copy(buf[DefaultHeaderSize:p.DefaultHeader.PacketLength], data)
+	copy(buf[DefaultHeaderSize:p.DefaultHeader.Length], data)
 	return buf, nil
 }
 
