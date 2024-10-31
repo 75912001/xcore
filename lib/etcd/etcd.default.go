@@ -13,8 +13,6 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}/
-
 type Etcd struct {
 	client                        *etcdclientv3.Client
 	kv                            etcdclientv3.KV

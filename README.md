@@ -99,11 +99,11 @@
     - **main**: 服务入口
   - **lib**: 公共库
     - **bench**: 服务基础配置
+    - **common**: 公共模块
     - **constants**: 常量
     - **control**: 控件
     - **error**: 错误码
     - **etcd**: etcd客户端 [todo menglc]
-    - **event**: 事件 [todo menglc]
     - **example**: 示例
     - **exec**: 执行器 [todo menglc]
     - **file**: 文件操作

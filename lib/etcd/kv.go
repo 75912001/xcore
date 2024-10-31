@@ -9,6 +9,8 @@ import (
 	xlog "xcore/lib/log"
 )
 
+// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}/
+
 // ValueJson etcd 通讯的数据,由服务中的数据生成,定时更新->etcd->服务
 type ValueJson struct {
 	ServiceNet    *xcommon.ServiceNet `json:"serviceNet"`    // 有:直接使用. 没有:使用 benchJson.ServiceNet
