@@ -12,21 +12,19 @@ import (
 	xutil "xcore/lib/util"
 )
 
-// 己方作为服务端
-type server struct {
+// Service 服务端
+type Service struct {
 	IEvent   IEvent
 	IHandler IHandler
-	//xnetpacket.IPacket
 	listener *net.TCPListener //监听
-	options  *serverOptions
+	options  *serviceOptions
 }
 
-// NewServer 新建服务
-func NewServer(handler IHandler) *server {
-	return &server{
+// NewService 新建服务
+func NewService(handler IHandler) *Service {
+	return &Service{
 		IEvent:   nil,
 		IHandler: handler,
-		//IPacket:  packet,
 		listener: nil,
 		options:  nil,
 	}
@@ -46,12 +44,12 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
-	p.options = mergeServerOptions(opts...)
-	if err := serverConfigure(p.options); err != nil {
+func (p *Service) Start(_ context.Context, opts ...*serviceOptions) error {
+	p.options = mergeServiceOptions(opts...)
+	if err := serviceConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent = NewDefaultEvent(p.options.eventChan)
+	p.IEvent = NewEvent(p.options.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -90,7 +88,7 @@ func (p *server) Start(_ context.Context, opts ...*serverOptions) error {
 }
 
 // Stop 停止 AcceptTCP
-func (p *server) Stop() {
+func (p *Service) Stop() {
 	if p.listener != nil {
 		err := p.listener.Close()
 		if err != nil {
@@ -100,19 +98,8 @@ func (p *server) Stop() {
 	}
 }
 
-// Disconnect 逻辑层 主动 断开连接
-//func (p *server) Disconnect(remote IRemote) error {
-//	if remote == nil || !remote.IsConnect() {
-//		return errors.WithMessage(xerror.Link, xruntime.Location())
-//	}
-//	if remote.IsConnect() {
-//		remote.Stop()
-//	}
-//	return nil
-//}
-
-func (p *server) handleConn(conn *net.TCPConn) {
-	remote := NewDefaultRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
+func (p *Service) handleConn(conn *net.TCPConn) {
+	remote := NewRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
 	if err := p.IEvent.Connect(p.IHandler, remote); err != nil {
 		xlog.PrintfErr("event.Connect err:%v", err)
 		return

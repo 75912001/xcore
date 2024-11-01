@@ -23,13 +23,14 @@ func Send(remote IRemote, pb proto.Message, messageID uint32, sessionID uint32, 
 	return nil
 }
 
-func SendError(remote IRemote, messageID uint32, resultID uint32) error {
+func SendError(remote IRemote, messageID uint32, sessionID uint32, resultID uint32, key uint64) error {
 	if err := remote.Send(
 		&packet.Packet{
 			Header: &packet.Header{
-				Length:    0,
 				MessageID: messageID,
+				SessionID: sessionID,
 				ResultID:  resultID,
+				Key:       key,
 			},
 		},
 	); err != nil {

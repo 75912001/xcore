@@ -6,9 +6,9 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-// serverOptions contains options to configure a server instance. Each option can be set through setter functions. See
+// serviceOptions contains options to configure a Service instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
-type serverOptions struct {
+type serviceOptions struct {
 	listenAddress    *string            // 127.0.0.1:8787
 	eventChan        chan<- interface{} // 待处理的事件
 	sendChanCapacity *uint32            // 发送 channel 大小
@@ -16,39 +16,39 @@ type serverOptions struct {
 }
 
 // NewServerOptions 新的ServerOptions
-func NewServerOptions() *serverOptions {
-	return new(serverOptions)
+func NewServerOptions() *serviceOptions {
+	return new(serviceOptions)
 }
 
-func (p *serverOptions) SetListenAddress(listenAddress string) *serverOptions {
+func (p *serviceOptions) SetListenAddress(listenAddress string) *serviceOptions {
 	p.listenAddress = &listenAddress
 	return p
 }
 
-func (p *serverOptions) SetEventChan(eventChan chan<- interface{}) *serverOptions {
+func (p *serviceOptions) SetEventChan(eventChan chan<- interface{}) *serviceOptions {
 	p.eventChan = eventChan
 	return p
 }
 
-func (p *serverOptions) SetSendChanCapacity(sendChanCapacity uint32) *serverOptions {
+func (p *serviceOptions) SetSendChanCapacity(sendChanCapacity uint32) *serviceOptions {
 	p.sendChanCapacity = &sendChanCapacity
 	return p
 }
 
-func (p *serverOptions) SetReadBuffer(readBuffer int) *serverOptions {
+func (p *serviceOptions) SetReadBuffer(readBuffer int) *serviceOptions {
 	p.connOptions.ReadBuffer = &readBuffer
 	return p
 }
 
-func (p *serverOptions) SetWriteBuffer(writeBuffer int) *serverOptions {
+func (p *serviceOptions) SetWriteBuffer(writeBuffer int) *serviceOptions {
 	p.connOptions.WriteBuffer = &writeBuffer
 	return p
 }
 
-// mergeServerOptions combines the given *serverOptions into a single *serverOptions in a last one wins fashion.
-// The specified options are merged with the existing options on the server, with the specified options taking
+// mergeServiceOptions combines the given *serviceOptions into a single *serviceOptions in a last one wins fashion.
+// The specified options are merged with the existing options on the Service, with the specified options taking
 // precedence.
-func mergeServerOptions(opts ...*serverOptions) *serverOptions {
+func mergeServiceOptions(opts ...*serviceOptions) *serviceOptions {
 	newOptions := NewServerOptions()
 	for _, opt := range opts {
 		if opt == nil {
@@ -74,7 +74,7 @@ func mergeServerOptions(opts ...*serverOptions) *serverOptions {
 }
 
 // 配置
-func serverConfigure(opts *serverOptions) error {
+func serviceConfigure(opts *serviceOptions) error {
 	if opts.listenAddress == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}

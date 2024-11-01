@@ -6,7 +6,7 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-// clientOptions contains options to configure a server instance. Each option can be set through setter functions. See
+// clientOptions contains options to configure a Service instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type clientOptions struct {
 	serverAddress    *string            // 服务端的地址 e.g.:127.0.0.1:8787
@@ -46,7 +46,7 @@ func (p *clientOptions) WithSendChanCapacity(sendChanCapacity uint32) *clientOpt
 }
 
 // mergeClientOptions combines the given *clientOptions into a single *clientOptions in a last one wins fashion.
-// The specified options are merged with the existing options on the server, with the specified options taking
+// The specified options are merged with the existing options on the Service, with the specified options taking
 // precedence.
 func mergeClientOptions(opts ...*clientOptions) *clientOptions {
 	newOptions := NewClientOptions()

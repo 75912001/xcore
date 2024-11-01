@@ -12,7 +12,6 @@ type Client struct {
 	IEvent   IEvent
 	IHandler IHandler
 	IRemote  IRemote
-	//xnetpacket.IPacket
 }
 
 func NewClient(handler IHandler) *Client {
@@ -20,7 +19,6 @@ func NewClient(handler IHandler) *Client {
 		IEvent:   nil,
 		IHandler: handler,
 		IRemote:  nil,
-		//IPacket:  packet,
 	}
 }
 
@@ -32,7 +30,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent = NewDefaultEvent(newOpts.eventChan)
+	p.IEvent = NewEvent(newOpts.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
@@ -41,16 +39,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IRemote = NewDefaultRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
+	p.IRemote = NewRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
 	p.IRemote.Start(&newOpts.connOptions, p.IEvent, p.IHandler)
 	return nil
 }
-
-// Disconnect 主动断开连接
-//func (p *Client) Disconnect() error {
-//	if !p.IRemote.IsConnect() {
-//		return errors.WithMessage(xerror.Link, xruntime.Location())
-//	}
-//	p.IRemote.Stop()
-//	return nil
-//}

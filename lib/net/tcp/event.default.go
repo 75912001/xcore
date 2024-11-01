@@ -8,18 +8,18 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-type defaultEvent struct {
+type Event struct {
 	eventChan chan<- interface{} // 待处理的事件
 }
 
-func NewDefaultEvent(eventChan chan<- interface{}) IEvent {
-	return &defaultEvent{
+func NewEvent(eventChan chan<- interface{}) *Event {
+	return &Event{
 		eventChan: eventChan,
 	}
 }
 
 // Connect 连接
-func (p *defaultEvent) Connect(handler IHandler, remote IRemote) error {
+func (p *Event) Connect(handler IHandler, remote IRemote) error {
 	select {
 	case p.eventChan <- &Connect{
 		IHandler: handler,
@@ -33,7 +33,7 @@ func (p *defaultEvent) Connect(handler IHandler, remote IRemote) error {
 }
 
 // Disconnect 断开链接
-func (p *defaultEvent) Disconnect(handler IHandler, remote IRemote) error {
+func (p *Event) Disconnect(handler IHandler, remote IRemote) error {
 	select {
 	case p.eventChan <- &Disconnect{
 		IHandler: handler,
@@ -47,7 +47,7 @@ func (p *defaultEvent) Disconnect(handler IHandler, remote IRemote) error {
 }
 
 // Packet 数据包
-func (p *defaultEvent) Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error {
+func (p *Event) Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error {
 	select {
 	case p.eventChan <- &Packet{
 		IHandler: handler,

@@ -14,7 +14,7 @@ import (
 //	*xnettcp.DefaultHandlerServer
 //}
 //
-//func NewServer() *Server {
+//func NewService() *Server {
 //	def := &Server{
 //		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
 //	}
@@ -72,7 +72,7 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) er
 	if !ok {
 		return xerror.Mismatch
 	}
-	defaultRemote := remote.(*xnettcp.DefaultRemote)
+	defaultRemote := remote.(*xnettcp.Remote)
 	user := defaultRemote.Object.(*User)
 	switch xcommonservice.GetServiceTypeByMessageID(defaultPacket.Header.MessageID) {
 	case xcommonservice.LoginMessage:

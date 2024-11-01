@@ -13,6 +13,3 @@ type IHandler interface {
 	OnPacket(remote IRemote, packet xnetpacket.IPacket) error                  // 处理-数据包
 	OnDisconnect(remote IRemote) error                                         // 处理-断开链接
 }
-
-// HandlerFunc 处理函数
-//type HandlerFunc func(ctx context.Context, header xnetpacket.IHeader, message proto.Message, obj interface{}) error

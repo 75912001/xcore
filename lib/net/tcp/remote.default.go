@@ -17,23 +17,23 @@ import (
 	xutil "xcore/lib/util"
 )
 
-// DefaultRemote 远端
-type DefaultRemote struct {
+// Remote 远端
+type Remote struct {
 	Conn       *net.TCPConn     // 连接
 	sendChan   chan interface{} // 发送管道
 	cancelFunc context.CancelFunc
 	Object     interface{} // 保存 应用层数据
 }
 
-func NewDefaultRemote(Conn *net.TCPConn, sendChan chan interface{}) IRemote {
-	return &DefaultRemote{
+func NewRemote(Conn *net.TCPConn, sendChan chan interface{}) *Remote {
+	return &Remote{
 		Conn:     Conn,
 		sendChan: sendChan,
 	}
 }
 
 // GetIP 获取IP地址
-func (p *DefaultRemote) GetIP() string {
+func (p *Remote) GetIP() string {
 	slice := strings.Split(p.Conn.RemoteAddr().String(), ":")
 	if len(slice) < 1 {
 		return ""
@@ -41,7 +41,7 @@ func (p *DefaultRemote) GetIP() string {
 	return slice[0]
 }
 
-func (p *DefaultRemote) Start(tcpOptions *ConnOptions, event IEvent, handler IHandler) {
+func (p *Remote) Start(tcpOptions *ConnOptions, event IEvent, handler IHandler) {
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	log.Printf("SetKeepAlive war:%v", err)
 	//}
@@ -70,7 +70,7 @@ func (p *DefaultRemote) Start(tcpOptions *ConnOptions, event IEvent, handler IHa
 }
 
 // IsConnect 是否连接
-func (p *DefaultRemote) IsConnect() bool {
+func (p *Remote) IsConnect() bool {
 	return nil != p.Conn
 }
 
@@ -79,7 +79,7 @@ func (p *DefaultRemote) IsConnect() bool {
 //	[NOTE]必须在处理 EventChan 事件中调用
 //	参数:
 //		packet: 未序列化的包. [NOTE]该数据会被引用,使用层不可写
-func (p *DefaultRemote) Send(packet xnetpacket.IPacket) error {
+func (p *Remote) Send(packet xnetpacket.IPacket) error {
 	if !p.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
@@ -87,7 +87,7 @@ func (p *DefaultRemote) Send(packet xnetpacket.IPacket) error {
 	return nil
 }
 
-func (p *DefaultRemote) Stop() {
+func (p *Remote) Stop() {
 	if p.IsConnect() {
 		err := p.Conn.Close()
 		if err != nil {
@@ -108,7 +108,7 @@ func (p *DefaultRemote) Stop() {
 //		lastTime:上次时间 (可能会更新)
 //		thisTime:这次时间
 //		writeTimeOutDuration:写超时时长
-func (p *DefaultRemote) updateWriteDeadline(lastTime *time.Time, thisTime time.Time, writeTimeOutDuration time.Duration) error {
+func (p *Remote) updateWriteDeadline(lastTime *time.Time, thisTime time.Time, writeTimeOutDuration time.Duration) error {
 	if (writeTimeOutDuration >> 1) < thisTime.Sub(*lastTime) {
 		if err := p.Conn.SetWriteDeadline(thisTime.Add(writeTimeOutDuration)); err != nil {
 			return errors.WithMessage(err, xruntime.Location())
@@ -133,7 +133,7 @@ func rearrangeSendData(data []byte, cnt int, resetCnt int) []byte {
 }
 
 // 将数据放入data中
-func (p *DefaultRemote) push2Data(packet xnetpacket.IPacket, data []byte) ([]byte, error) {
+func (p *Remote) push2Data(packet xnetpacket.IPacket, data []byte) ([]byte, error) {
 	packetData, err := packet.Marshal()
 	if err != nil {
 		xlog.PrintfErr("packet marshal %v", packet)
@@ -148,7 +148,7 @@ func (p *DefaultRemote) push2Data(packet xnetpacket.IPacket, data []byte) ([]byt
 }
 
 // 处理发送
-func (p *DefaultRemote) onSend(ctx context.Context) {
+func (p *Remote) onSend(ctx context.Context) {
 	defer func() {
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
@@ -212,10 +212,8 @@ func (p *DefaultRemote) onSend(ctx context.Context) {
 	}
 }
 
-const MsgLengthFieldSize uint32 = 4 // 消息总长度字段 的 大小
-
 // 处理接收
-func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
+func (p *Remote) onRecv(event IEvent, handler IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
@@ -228,7 +226,7 @@ func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
 		xlog.PrintInfo(xerror.GoroutineDone, p)
 	}()
 	// 消息总长度
-	msgLengthBuf := make([]byte, MsgLengthFieldSize)
+	msgLengthBuf := make([]byte, xnetpacket.HeaderLengthFieldSize)
 	for {
 		if _, err := io.ReadFull(p.Conn, msgLengthBuf); err != nil {
 			if !xutil.IsNetErrClosing(err) {
@@ -243,7 +241,7 @@ func (p *DefaultRemote) onRecv(event IEvent, handler IHandler) {
 		}
 		buf := xpool.MakeByteSlice(int(packetLength))
 		copy(buf, msgLengthBuf)
-		if _, err := io.ReadFull(p.Conn, buf[MsgLengthFieldSize:]); err != nil {
+		if _, err := io.ReadFull(p.Conn, buf[xnetpacket.HeaderLengthFieldSize:]); err != nil {
 			xlog.PrintfErr("remote:%p err:%v", p, err)
 			_ = xpool.ReleaseByteSlice(buf)
 			return

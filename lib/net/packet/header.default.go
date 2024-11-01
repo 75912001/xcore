@@ -6,6 +6,7 @@ import (
 )
 
 const HeaderSize uint32 = 24
+const HeaderLengthFieldSize uint32 = 4 // 包头-总长度-字段 的 大小
 
 // Header 包头
 type Header struct {

@@ -219,7 +219,7 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
 		case "tcp": // 启动 TCP 服务
-			if err = xnettcp.NewServer(handler).Start(ctx,
+			if err = xnettcp.NewService(handler).Start(ctx,
 				xnettcp.NewServerOptions().
 					SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
 					SetEventChan(p.BusChannel).
