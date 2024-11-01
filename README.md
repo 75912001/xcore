@@ -116,6 +116,7 @@
     - **pprof**: 性能分析
     - **pubsub**: 发布订阅 [todo menglc]
     - **runtime**: 运行时
+    - **service**: 服务
     - **time**: 时间管理器
     - **timer**: 定时器
     - **util**: 工具类

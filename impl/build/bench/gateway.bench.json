@@ -3,9 +3,7 @@
         "Addrs": ["127.0.0.1:2379"]
     },
     "base": {
-        "runMode": 1,
-        "CmdMin": "0x20000",
-        "CmdMax": "0x2ffff"
+        "runMode": 1
     },
     "timer": {
     },

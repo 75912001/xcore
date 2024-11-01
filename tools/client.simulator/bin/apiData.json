@@ -8,7 +8,7 @@
     }
   },
   "UserOnlineMsg": {
-    "注释": "用户上线",
+    "注释": "user->gateway.用户上线",
     "id": "0x20000",
     "msg": {
       "token": "token-1234567890"
