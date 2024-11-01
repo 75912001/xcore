@@ -34,7 +34,7 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 	packet := xnetpacket.NewPacket().WithHeader(header)
 	packet.IMessage = GMessage.Find(header.MessageID)
 	if packet.IMessage == nil {
-		return nil, xerror.MessageIDNonExistent
+		return nil, xerror.NotExist
 	}
 	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
 	if err != nil {
@@ -47,7 +47,7 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
 	defaultPacket, ok := packet.(*xnetpacket.Packet)
 	if !ok {
-		return xerror.TypeMismatch
+		return xerror.Mismatch
 	}
 	{
 		fmt.Println()

@@ -36,9 +36,9 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 	header := xnetpacket.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
-	packet := xnetpacket.NewPacket().WithHeader(header)
 	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
 	case xcommonservice.GatewayMessage:
+		packet := xnetpacket.NewPacket().WithHeader(header)
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
 			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
@@ -50,23 +50,13 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 		packet.PBMessage = pb
 		return packet, nil
 	case xcommonservice.LoginMessage:
+		packet := xnetpacket.NewPacketTransparent().WithHeader(header)
 		packet.RawData = make([]byte, len(data))
 		copy(packet.RawData, data)
 		return packet, nil
 	default:
 		return nil, errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	}
-
-	packet.IMessage = GMessage.Find(header.MessageID)
-	if packet.IMessage == nil {
-		return nil, xerror.NotExist
-	}
-	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
-	if err != nil {
-		return nil, err
-	}
-	packet.PBMessage = pb
-	return packet, nil
 }
 
 func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {

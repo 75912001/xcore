@@ -52,13 +52,13 @@ func Handle(busChannel chan interface{}) error {
 						apiData = info
 					} else {
 						fmt.Printf("\033[31m%s\033[0m\n", "apiData not found")
-						return xerror.NonExistent
+						return xerror.NotExist
 					}
 					return nil
 				}
 				err = parseCommand(event.Command)
 				if err != nil {
-					if errors.Is(err, xerror.NonExistent) {
+					if errors.Is(err, xerror.NotExist) {
 						continue
 					}
 					panic(err)
