@@ -33,17 +33,17 @@ func (p *LoginService) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 }
 
 func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
-	header := xnetpacket.NewDefaultHeader()
+	header := xnetpacket.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
-	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
+	packet := xnetpacket.NewPacket().WithHeader(header)
 	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
 	case xcommonservice.GatewayMessage:
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
 			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 		}
-		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
+		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
 		if err != nil {
 			return nil, errors.WithMessage(err, xruntime.Location())
 		}
@@ -61,7 +61,7 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 	if packet.IMessage == nil {
 		return nil, xerror.NotExist
 	}
-	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
+	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 }
 
 func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
-	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
+	defaultPacket, ok := packet.(*xnetpacket.Packet)
 	if !ok {
 		return xerror.Mismatch
 	}
@@ -84,7 +84,7 @@ func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacke
 			ResultID     string
 			Key          uint64
 		}
-		header := defaultPacket.DefaultHeader
+		header := defaultPacket.Header
 		hexHeader := &HexDefaultHeader{
 			PacketLength: header.Length,
 			MessageID:    fmt.Sprintf("0x%x", header.MessageID),

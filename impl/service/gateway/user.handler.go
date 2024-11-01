@@ -28,7 +28,7 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 }
 
 func (p *Service) OnCheckPacketLength(length uint32) error {
-	if length < xnetpacket.DefaultHeaderSize || xconstants.PacketLengthDefault < length {
+	if length < xnetpacket.HeaderSize || xconstants.PacketLengthDefault < length {
 		return xerror.Length
 	}
 	return nil
@@ -42,17 +42,17 @@ func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 }
 
 func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
-	header := xnetpacket.NewDefaultHeader()
+	header := xnetpacket.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
-	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
+	packet := xnetpacket.NewPacket().WithHeader(header)
 	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
 	case xcommonservice.GatewayMessage:
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
 			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 		}
-		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
+		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
 		if err != nil {
 			return nil, errors.WithMessage(err, xruntime.Location())
 		}
@@ -68,13 +68,13 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 }
 
 func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
-	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
+	defaultPacket, ok := packet.(*xnetpacket.Packet)
 	if !ok {
 		return xerror.Mismatch
 	}
 	defaultRemote := remote.(*xnettcp.DefaultRemote)
 	user := defaultRemote.Object.(*User)
-	switch xcommonservice.GetServiceTypeByMessageID(defaultPacket.DefaultHeader.MessageID) {
+	switch xcommonservice.GetServiceTypeByMessageID(defaultPacket.Header.MessageID) {
 	case xcommonservice.LoginMessage:
 		if user.LoginService != nil {
 			return errors.WithMessage(xerror.Duplicate, xruntime.Location())

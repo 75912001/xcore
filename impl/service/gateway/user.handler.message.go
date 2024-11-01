@@ -17,7 +17,7 @@ import (
 
 func UserOnlineMsg(args ...interface{}) error {
 	remote := args[0].(xnettcp.IRemote)
-	defaultPacket := args[1].(*xnetpacket.DefaultPacket)
+	defaultPacket := args[1].(*xnetpacket.Packet)
 	pb := defaultPacket.PBMessage.(*xprotobufgateway.UserOnlineMsgReq)
 	fmt.Println(remote, defaultPacket, pb, xruntime.Location())
 

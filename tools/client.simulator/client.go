@@ -26,17 +26,17 @@ func (p *defaultClient) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 }
 
 func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
-	header := xnetpacket.NewDefaultHeader()
+	header := xnetpacket.NewHeader()
 	header.Unpack(data)
 
 	// todo menglc 判断消息是否禁用
 
-	packet := xnetpacket.NewDefaultPacket().WithDefaultHeader(header)
+	packet := xnetpacket.NewPacket().WithHeader(header)
 	packet.IMessage = GMessage.Find(header.MessageID)
 	if packet.IMessage == nil {
 		return nil, xerror.MessageIDNonExistent
 	}
-	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.DefaultHeaderSize:])
+	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 }
 
 func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
-	defaultPacket, ok := packet.(*xnetpacket.DefaultPacket)
+	defaultPacket, ok := packet.(*xnetpacket.Packet)
 	if !ok {
 		return xerror.TypeMismatch
 	}
@@ -59,7 +59,7 @@ func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPack
 			ResultID     string
 			Key          uint64
 		}
-		header := defaultPacket.DefaultHeader
+		header := defaultPacket.Header
 		hexHeader := &HexDefaultHeader{
 			PacketLength: header.Length,
 			MessageID:    fmt.Sprintf("0x%x", header.MessageID),
