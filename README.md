@@ -76,34 +76,27 @@
   - **bin** 执行目录
     - e.g.: 1.gateway.1.bench.json gateway 服务基础配置(group:1,name:gateway,id:1) 
     - **log** 日志目录
-  - **build**: 构建 [todo menglc]
+  - **build**: 构建
     - **bench**: 服务基础配置
       - `gateway.bench.json` gateway 服务基础配置
       - `logic.bench.json` logic 服务基础配置
   - **common**: 公共模块 [todo menglc]
     - **db_async**: 异步数据库 [todo menglc]
-    - **etcd**: etcd客户端 [todo menglc]
     - **service**: 服务 [todo menglc]
     - `common.go` 公共模块 [todo menglc]
   - **protobuf**: protobuf
-    - **proto**: proto 文件
-      - **service**: 服务
-        - `gateway.proto`
-      - `error.code.proto` 
-      - `event.proto`
-      - `struct.proto`
     - `gen.sh` 生成protobuf文件
   - **service**: 服务
-    - **gateway**: 网关服务
+    - **gateway**: 网关服务 [todo menglc]
     - **logic**: 逻辑服务 [todo menglc]
-    - **main**: 服务入口
+    - **main**: 服务入口 [todo menglc]
   - **lib**: 公共库
     - **bench**: 服务基础配置
     - **common**: 公共模块
     - **constants**: 常量
     - **control**: 控件
     - **error**: 错误码
-    - **etcd**: etcd客户端 [todo menglc]
+    - **etcd**: etcd客户端
     - **example**: 示例
     - **exec**: 执行器 [todo menglc]
     - **file**: 文件操作
