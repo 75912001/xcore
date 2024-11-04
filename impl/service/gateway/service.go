@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"runtime"
-	xcommonservice "xcore/impl/common/service"
 	xruntime "xcore/lib/runtime"
+	xcommonservice "xcore/lib/service"
 )
 
 var gservice *Service

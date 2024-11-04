@@ -14,7 +14,7 @@ func (p *DefaultService) Handle() error {
 	//在消费eventChan时可能会往eventChan中写入事件，所以关闭服务时不能close eventChan（造成写入阻塞），通过定时检查eventChan大小来关闭
 	for {
 		select {
-		//case <-GBusChannelCheckChan:
+		//case <-GBusChannelCheckChan: // todo menglc
 		//	xrlog.GetInstance().Warn("receive GBusChannelCheckChan")
 		//	if 0 == len(eventChan) && IsServerStopping() {
 		//		xrlog.GetInstance().Warn("server is stopping, stop consume GEventChan with length 0")
