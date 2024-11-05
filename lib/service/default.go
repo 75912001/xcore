@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 	"sync"
 	"time"
 	xbench "xcore/lib/bench"
@@ -25,7 +26,7 @@ import (
 	xutil "xcore/lib/util"
 )
 
-type DefaultService struct {
+type Service struct {
 	BenchMgr xbench.Mgr
 	BenchSub *xbench.Sub
 
@@ -47,8 +48,10 @@ type DefaultService struct {
 	QuitChan chan struct{} // 退出信号, 用于关闭服务
 }
 
-func NewDefaultService() *DefaultService {
-	val := &DefaultService{
+// NewService 创建服务
+// args: [组ID, 服务名, 服务ID]
+func NewService(args []string) *Service {
+	s := &Service{
 		TimeMgr:  xtime.NewMgr(),
 		QuitChan: make(chan struct{}),
 	}
@@ -57,24 +60,51 @@ func NewDefaultService() *DefaultService {
 		xlog.PrintErr(err, xruntime.Location())
 		return nil
 	} else {
-		val.ExecutablePath = executablePath
+		s.ExecutablePath = executablePath
 	}
-	return val
+	argNum := len(args)
+	const neededArgsNumber = 4
+	if argNum != neededArgsNumber {
+		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
+		return nil
+	}
+	{ // 解析启动参数
+		groupID, err := strconv.ParseUint(args[1], 10, 32)
+		if err != nil {
+			xlog.PrintErr("groupID err:", err)
+			return nil
+		}
+		s.GroupID = uint32(groupID)
+		s.Name = args[2]
+		serviceID, err := strconv.ParseUint(args[3], 10, 32)
+		if err != nil {
+			xlog.PrintErr("serviceID err", err)
+			return nil
+		}
+		s.ID = uint32(serviceID)
+		xlog.PrintfInfo("groupID:%v name:%v, serviceID:%v",
+			s.GroupID, s.Name, s.ID)
+	}
+
+	return s
 }
 
-//func (p *DefaultService) Start(ctx context.Context) (err error) {
+//func (p *Service) Start(ctx context.Context) (err error) {
 //	return xerror.NotImplemented
 //}
 //
-//func (p *DefaultService) PreStop() error {
+//func (p *Service) PreStop() error {
 //	return xerror.NotImplemented
 //}
 //
-//func (p *DefaultService) Stop() (err error) {
+//func (p *Service) Stop() (err error) {
 //	return xerror.NotImplemented
 //}
 
-func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, logCallbackFunc xlog.CallBackFunc, etcdCallbackFun xetcd.CallbackFun) (err error) {
+func (p *Service) Start(ctx context.Context,
+	handler xnettcp.IHandler,
+	logCallbackFunc xlog.CallBackFunc,
+	etcdCallbackFun xetcd.CallbackFun) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	p.TimeMgr.Update()
 	// 小端
@@ -214,7 +244,6 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	}
 	// etcd-定时上报
 	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault)
-
 	// 网络服务
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
@@ -237,6 +266,6 @@ func (p *DefaultService) Start(ctx context.Context, handler xnettcp.IHandler, lo
 	return nil
 }
 
-func (p *DefaultService) Stop() (err error) {
+func (p *Service) Stop() (err error) {
 	return nil
 }

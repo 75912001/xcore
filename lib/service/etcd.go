@@ -7,7 +7,7 @@ import (
 
 // EtcdReportFunction etcd-上报
 func EtcdReportFunction(args ...interface{}) error {
-	defaultService := args[0].(*DefaultService)
+	defaultService := args[0].(*Service)
 	defer func() {
 		defaultService.Timer.AddSecond(
 			xcallback.NewCallBack(EtcdReportFunction, defaultService),

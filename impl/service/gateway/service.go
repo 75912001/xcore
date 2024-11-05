@@ -3,7 +3,10 @@ package gateway
 import (
 	"context"
 	"github.com/pkg/errors"
+	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	xruntime "xcore/lib/runtime"
 	xcommonservice "xcore/lib/service"
 )
@@ -11,20 +14,20 @@ import (
 var gservice *Service
 
 type Service struct {
-	*xcommonservice.DefaultService
+	*xcommonservice.Service
 	LoginServiceMgr *LoginServiceMgr
 }
 
-func NewService(defaultService *xcommonservice.DefaultService) *Service {
+func NewService(defaultService *xcommonservice.Service) *Service {
 	gservice = &Service{
-		DefaultService:  defaultService,
+		Service:         defaultService,
 		LoginServiceMgr: NewLoginServiceMgr(),
 	}
 	return gservice
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {
-	if err = p.DefaultService.Start(ctx, p, logCallBackFunc, EtcdKeyValue); err != nil {
+	if err = p.Service.Start(ctx, p, logCallBackFunc, EtcdKeyValue); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 
@@ -156,8 +159,24 @@ func (p *Service) Start(ctx context.Context) (err error) {
 		//		server_del.GZoneNats.Sub, xrutil.GetCodeLocation(1).String())
 		//}
 	}
-
 	runtime.GC()
+
+	// 退出服务
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+EXIT:
+	for {
+		select {
+		case <-p.QuitChan:
+			p.Log.Warn("service will shutdown in a few seconds")
+			_ = p.PreStop()
+			_ = p.Stop()
+			break EXIT // 退出循环
+		case s := <-sigChan:
+			p.Log.Warnf("service got signal: %s, shutting down...", s)
+			close(p.QuitChan)
+		}
+	}
 	return nil
 	// 数据统计
 	//if err = server_del.GST.Start(sub_bench.GMgr.Json.STKafka.Addrs, st_mgr.GameID,
@@ -296,6 +315,6 @@ func (p *Service) PreStop() error {
 	return nil
 }
 func (p *Service) Stop() (err error) {
-	_ = p.DefaultService.Stop()
+	_ = p.Service.Stop()
 	return nil
 }

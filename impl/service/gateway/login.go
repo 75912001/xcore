@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"reflect"
-	xcommonservice "xcore/impl/common/service"
+	xcommonservice "xcore/impl/common"
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"

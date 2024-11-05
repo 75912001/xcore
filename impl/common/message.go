@@ -1,4 +1,4 @@
-package service
+package common
 
 const (
 	UnknownMessage uint32 = 0

@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"github.com/pkg/errors"
-	xcommonservice "xcore/impl/common/service"
+	xcommonservice "xcore/impl/common"
 	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
