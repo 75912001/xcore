@@ -10,24 +10,24 @@ package main
 import (
 	"context"
 	"os"
-	xcommon "xcore/impl/common"
-	xservicegateway "xcore/impl/service/gateway"
+	common "xcore/impl/common"
+	servicegateway "xcore/impl/service/gateway"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
-	service2 "xcore/lib/service"
+	xservice "xcore/lib/service"
 )
 
 func main() {
 	var err error
-	defaultService := service2.NewService(os.Args)
+	defaultService := xservice.NewService(os.Args)
 	if defaultService == nil {
 		panic("NewService failed")
 	}
-	var service service2.IService
+	var service xservice.IService
 	switch defaultService.Name {
-	case xcommon.ServiceNameGateway:
-		service = xservicegateway.NewService(defaultService)
+	case common.ServiceNameGateway:
+		service = servicegateway.NewService(defaultService)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "service name err", defaultService.Name)
 		return

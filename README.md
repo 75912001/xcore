@@ -107,7 +107,7 @@
       - **tcp**: tcp
     - **pool**: 对象池
     - **pprof**: 性能分析
-    - **pubsub**: 发布订阅 [todo menglc]
+    - **subpub**: 订阅发布
     - **runtime**: 运行时
     - **service**: 服务
     - **time**: 时间管理器

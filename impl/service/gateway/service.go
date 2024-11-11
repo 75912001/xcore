@@ -8,17 +8,17 @@ import (
 	"runtime"
 	"syscall"
 	xruntime "xcore/lib/runtime"
-	xcommonservice "xcore/lib/service"
+	xservice "xcore/lib/service"
 )
 
 var gservice *Service
 
 type Service struct {
-	*xcommonservice.Service
+	*xservice.Service
 	LoginServiceMgr *LoginServiceMgr
 }
 
-func NewService(defaultService *xcommonservice.Service) *Service {
+func NewService(defaultService *xservice.Service) *Service {
 	gservice = &Service{
 		Service:         defaultService,
 		LoginServiceMgr: NewLoginServiceMgr(),
