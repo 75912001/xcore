@@ -3,7 +3,10 @@
 - 采用csp方式构建程序
 ## 项目初始化
 - go mod init xcore
-- go mod tidy
+- 清理依赖
+  - go mod tidy
+- 检查依赖
+  - go mod verify
 ## 安装包
 - go get github.com/pkg/errors@v0.9.1
 - go get go.etcd.io/etcd/client/v3@v3.5.15
@@ -23,11 +26,6 @@
 - go get honnef.co/go/tools/cmd/staticcheck@latest (未使用)
 - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest(未使用)
 
-## 清理依赖
-- go mod tidy
-## 检查依赖
-- go mod verify
-- 
 ## git 提交标签
 - \[feat\]: 新功能（feature）
 - \[fix\]: 修复问题（bug fix）
@@ -36,23 +34,25 @@
 - \[refactor\]: 重构代码
 - \[test\]: 添加或修改测试
 - \[chore\]: 构建过程或辅助工具的变动
-## 模块 
+
+## 功能模块 
 - module
 - 数据
 - 逻辑
 - 控制块
-## 脚本
-- 路径 xcore/scripts
+
 ## 配置文件
-- 使用 ymal 文件,作为服务配置文件
+- 使用 ymal 文件,作为服务配置文件 [ todo ]
+  - 目前使用json文件
 
 ## 服务资源
 ### 服务类型
-- system 系统保留lib.error [错误码 0x0,0xffff] 
+- system 系统保留 lib/system.code.go [错误码 0x0,0xffff] 
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
-- gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff] [tcp:3${gateway.type:02}${gateway.id:01}]
+- gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
 - logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
 ### 端口占用
+- 端口计算公式: [3 * 10000 + service.type*100 + service.id]
 - login 30101
 - gateway 30201
 - logic 30301

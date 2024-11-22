@@ -7,7 +7,7 @@
       "verifyCode": "verifyCode-value"
     }
   },
-  "UserOnlineMsg": {
+  "UserOnlineMsgReq": {
     "注释": "user->gateway.用户上线",
     "id": "0x20000",
     "msg": {
