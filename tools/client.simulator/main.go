@@ -13,9 +13,6 @@ import (
 	xruntime "xcore/lib/runtime"
 )
 
-var apiDataJsonPath string
-var client *defaultClient
-
 func main() {
 	var err error
 	xruntime.SetRunMode(xruntime.RunModeDebug)
@@ -39,6 +36,11 @@ func main() {
 		panic(err)
 	}
 	apiDataJsonPath = path.Join(executablePath, "apiData.json")
+	configJsonPath = path.Join(executablePath, "config.json")
+	err = parseConfigJson(configJsonPath)
+	if err != nil {
+		panic(err)
+	}
 	{
 		busChannel := make(chan interface{}, xconstants.BusChannelCapacityDefault)
 		go func() {
@@ -47,7 +49,7 @@ func main() {
 		client = &defaultClient{}
 		client.Client = xnettcp.NewClient(client)
 		err := client.Connect(ctx, xnettcp.NewClientOptions().
-			WithAddress("127.0.0.1:30201").
+			WithAddress(configJson.Addr).
 			WithEventChan(busChannel).
 			WithSendChanCapacity(1000))
 		if err != nil {

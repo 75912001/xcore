@@ -9,6 +9,8 @@ import (
 	xnettcp "xcore/lib/net/tcp"
 )
 
+var client *defaultClient // 客户端
+
 type defaultClient struct {
 	*xnettcp.Client
 }
