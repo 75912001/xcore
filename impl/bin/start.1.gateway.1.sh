@@ -12,7 +12,7 @@ currentPath=$(realpath "$(dirname "$0")")
 projectPath=$(dirname "${currentPath}")
 echo "projectPath:${projectPath}"
 
-./${preName}.exe 1 gateway 1
+./${preName}.exe ${groupId} ${serviceName} ${serviceId}
 
 exit 0
 

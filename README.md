@@ -46,6 +46,11 @@
   - 目前使用json文件
 
 ## 服务资源
+- ${groupID}.${serviceName}.${serviceID}.${version}.exe
+  - groupID: 服务组ID
+  - serviceName: 服务名称
+  - serviceID: 服务ID
+  - version: 版本号
 ### 服务类型
 - system 系统保留 lib/system.code.go [错误码 0x0,0xffff] 
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
