@@ -68,6 +68,17 @@ func NewService(args []string) *Service {
 		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return nil
 	}
+	input := args[0]
+	var groupID, serviceName, serviceID string
+	_, err := fmt.Sscanf(input, "%[^.].%[^.].%[^.].exe", &groupID, &serviceName, &serviceID)
+	if err != nil {
+		fmt.Println("Error parsing input:", err)
+		return
+	}
+
+	fmt.Println("groupID:", groupID)
+	fmt.Println("serviceName:", serviceName)
+	fmt.Println("serviceID:", serviceID)
 	{ // 解析启动参数
 		groupID, err := strconv.ParseUint(args[1], 10, 32)
 		if err != nil {
