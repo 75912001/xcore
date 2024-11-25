@@ -50,12 +50,12 @@
 - system 系统保留 lib/system.code.go [错误码 0x0,0xffff] 
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
 - gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
-- logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
+- [todo menglc]logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
 ### 端口占用
 - 端口计算公式: [3 * 10000 + service.type*100 + service.id]
 - login 30101
 - gateway 30201
-- logic 30301
+- [todo menglc]logic 30301
 
 ## 错误码
 ### 业务错误码: [0x10000,0x1fffffff]
@@ -79,7 +79,7 @@
   - **build**: 构建
     - **bench**: 服务基础配置
       - `gateway.bench.json` gateway 服务基础配置
-      - `logic.bench.json` logic 服务基础配置
+      - `login.bench.json` login 服务基础配置
   - **common**: 公共模块 [todo menglc]
     - **db_async**: 异步数据库 [todo menglc]
     - **service**: 服务 [todo menglc]
@@ -117,6 +117,22 @@
   - **tools**: 工具
     - **client.simulator**: 客户端模拟器 [todo menglc]
 
+## 使用
+### 编译
+- 生成协议
+  - /impl/protobuf/gen.sh
+- 编译 
+  - /impl/build/build.sh
+### 部署
+- 部署 
+  - /impl/bin/deploy.1.gateway.1.sh
+  - /impl/bin/deploy.1.login.1.sh
+- 启动etcd
+- 启动gateway
+  - /impl/bin/start.1.gateway.1.sh
+- 启动login
+  - /impl/bin/start.1.login.1.sh
+- 启动tools/client.simulator/client.simulator.exe
 
 [todo menglc]
 

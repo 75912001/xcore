@@ -17,14 +17,14 @@ func main() {
 	var err error
 	xruntime.SetRunMode(xruntime.RunModeDebug)
 	// 启动日志
-	glog, err = xlog.NewMgr(xlog.NewOptions().
+	log, err = xlog.NewMgr(xlog.NewOptions().
 		WithLevelCallBack(logCallBackFunc, xlog.LevelFatal, xlog.LevelError, xlog.LevelWarn),
 	)
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		err = glog.Stop()
+		err = log.Stop()
 		if err != nil {
 			panic(err)
 		}
@@ -65,9 +65,9 @@ func main() {
 				continue
 			}
 			command = strings.TrimSpace(command)
-			for i := 0; i < 10; i++ {
-				busChannel <- &EventCommand{Command: command}
-			}
+			//for i := 0; i < 10; i++ {
+			busChannel <- &EventCommand{Command: command}
+			//}
 		}
 	}
 }
