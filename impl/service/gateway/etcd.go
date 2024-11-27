@@ -19,17 +19,17 @@ func EtcdKeyValue(arg ...interface{}) error {
 	xlog.PrintfInfo("etcd key:%v, value:%v", key, valueJson)
 	msgType, groupID, serviceName, serviceID := xetcd.Parse(key)
 	xlog.PrintfInfo("msgType:%v, groupID:%v, serviceName:%v, serviceID:%v", msgType, groupID, serviceName, serviceID)
-	if groupID != gservice.GroupID {
+	if groupID != gService.GroupID {
 		return nil
 	}
-	if serviceName == gservice.Name {
+	if serviceName == gService.Name {
 		return nil
 	}
 	switch msgType {
 	case xetcd.WatchMsgTypeService:
 		switch serviceName {
 		case xcommon.ServiceNameLogin:
-			loginService := gservice.LoginServiceMgr.Get(serviceID)
+			loginService := gService.LoginServiceMgr.Get(serviceID)
 			if loginService != nil {
 				xlog.PrintfInfo("login service Existent %v", serviceID)
 				return errors.WithMessage(xerror.Exist, "login services Existent")

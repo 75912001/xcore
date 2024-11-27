@@ -1,29 +1,53 @@
 package gateway
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	xcommonservice "xcore/impl/common"
 	xconstants "xcore/lib/constants"
+	xutil "xcore/lib/control"
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
 	xruntime "xcore/lib/runtime"
 )
 
-//type Server struct {
-//	*xnettcp.DefaultHandlerServer
-//}
-//
-//func NewService() *Server {
-//	def := &Server{
-//		DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
+//	type Server struct {
+//		*xnettcp.DefaultHandlerServer
 //	}
-//	return def
-//}
-
+//
+//	func NewService() *Server {
+//		def := &Server{
+//			DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
+//		}
+//		return def
+//	}
+func userLoginTimeout(arg ...interface{}) error {
+	fmt.Printf("cbSecond:%v\n", arg...)
+	return nil
+}
 func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnConnect: %v", remote)
-	// todo menglc 管理 user
+	u := newUser(remote)
+	gUserMgr.add(u, u.remote)
+	// 用户登录超时
+	p.Timer.AddSecond(
+		xutil.NewCallBack(
+			func(args ...interface{}) error {
+				u := args[0].(*User)
+				if !u.timeoutValid {
+					return nil
+				}
+				if u.login { // 已经登录
+					return nil
+				}
+				u.exit()
+				return nil
+			},
+			u,
+		),
+		p.TimeMgr.ShadowTimestamp()+UserLoginTimeOut,
+	)
 	return nil
 }
 
@@ -105,6 +129,6 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) er
 
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnDisconnect: %v", remote)
-	// todo menglc 管理 user
+	gUserMgr.remove(remote)
 	return nil
 }

@@ -6,8 +6,8 @@ import (
 )
 
 type ITimerSecond interface {
-	AddSecond(callBackFunc xcontrol.ICallBack, expire int64) *second
-	DelSecond(second *second)
+	AddSecond(callBackFunc xcontrol.ICallBack, expire int64) *Second
+	DelSecond(second *Second)
 }
 
 type ITimerMillisecond interface {

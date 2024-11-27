@@ -54,12 +54,10 @@
 - system 系统保留 lib/system.code.go [错误码 0x0,0xffff] 
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
 - gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
-- [todo menglc]logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
 ### 端口占用
 - 端口计算公式: [3 * 10000 + service.type*100 + service.id]
 - login 30101
 - gateway 30201
-- [todo menglc]logic 30301
 
 ## 错误码
 ### 业务错误码: [0x10000,0x1fffffff]
@@ -92,6 +90,18 @@
     - `gen.sh` 生成protobuf文件
   - **service**: 服务
     - **gateway**: 网关服务 [todo menglc]
+      - 功能
+        - 接受客户端的连接
+          - TCP
+          - 超过一定时间未登录断开连接
+          - 心跳检测 [todo menglc]
+          - 限制连接数 [todo menglc]
+            - 限制连接数：限制每个IP的连接数，防止恶意连接。
+        - 负载均衡 [todo menglc]
+          - 调度算法：根据策略（如轮询、最少连接、源地址散列等）将请求分配给后端服务器。
+        - [] 后端服务器池：包含多个后端服务器，用于处理实际请求。 [todo menglc]
+        - [] 健康检查：定期检查后端服务器的健康状态，确保只将请求分发给健康的服务器。 [todo menglc]
+        - [] 配置管理：允许管理员动态地添加、删除或修改后端服务器配置。[todo menglc]
     - **logic**: 逻辑服务 [todo menglc]
     - **main**: 服务入口 [todo menglc]
   - **lib**: 公共库
@@ -144,6 +154,8 @@
 
 [todo menglc]
 
+
+
 创建 login
 
 
@@ -153,3 +165,7 @@ gateway 将消息转发到logic,logic处理消息后,将消息返回给gateway,g
 gateway 增加心跳检测,超时未登录断开连接
 
 gateway 路由功能放在配置文件中
+
+
+
+

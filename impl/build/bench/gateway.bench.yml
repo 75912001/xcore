@@ -1,9 +1,0 @@
-etcd:
-    Addrs:
-        - "127.0.0.1:2379"
-base:
-    runMode: 1
-timer: {}
-serviceNet:
-    addr: "127.0.0.1:30201"
-

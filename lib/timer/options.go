@@ -17,7 +17,7 @@ func NewOptions() *options {
 type options struct {
 	scanSecondDuration      *time.Duration     // 扫描秒级定时器,纳秒间隔(如 100000000,则每100毫秒扫描一次秒定时器)
 	scanMillisecondDuration *time.Duration     // 扫描毫秒级定时器,纳秒间隔(如 100000000,则每100毫秒扫描一次毫秒定时器)
-	outgoingTimeoutChan     chan<- interface{} // 是超时事件放置的channel,由外部传入.超时的 second/millisecond 都会放入其中
+	outgoingTimeoutChan     chan<- interface{} // 是超时事件放置的channel,由外部传入.超时的 Second/millisecond 都会放入其中
 }
 
 func (p *options) WithScanSecondDuration(scanSecondDuration time.Duration) *options {

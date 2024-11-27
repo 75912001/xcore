@@ -11,7 +11,7 @@ import (
 	xservice "xcore/lib/service"
 )
 
-var gservice *Service
+var gService *Service
 
 type Service struct {
 	*xservice.Service
@@ -19,11 +19,11 @@ type Service struct {
 }
 
 func NewService(defaultService *xservice.Service) *Service {
-	gservice = &Service{
+	gService = &Service{
 		Service:         defaultService,
 		LoginServiceMgr: NewLoginServiceMgr(),
 	}
-	return gservice
+	return gService
 }
 
 func (p *Service) Start(ctx context.Context) (err error) {

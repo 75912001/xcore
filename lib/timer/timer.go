@@ -51,7 +51,7 @@ func (p *defaultTimer) funcSecond(ctx context.Context) {
 			xlog.PrintInfo(xerror.GoroutineDone)
 			return
 		case v := <-p.secondChan:
-			s := v.(*second)
+			s := v.(*Second)
 			duration := s.expire - ShadowTimestamp()
 			if duration < 0 {
 				duration = 0
@@ -153,7 +153,7 @@ func (p *defaultTimer) Start(ctx context.Context, opts ...*options) error {
 func (p *defaultTimer) Stop() {
 	if p.cancelFunc != nil {
 		p.cancelFunc()
-		// 等待 second, milliSecond goroutine退出.
+		// 等待 Second, milliSecond goroutine退出.
 		p.waitGroup.Wait()
 		p.cancelFunc = nil
 	}
@@ -218,8 +218,8 @@ func (p *defaultTimer) scanMillisecond(ms int64) {
 //		expire: 过期秒数
 //	返回值:
 //		秒定时器
-func (p *defaultTimer) AddSecond(callBackFunc xcontrol.ICallBack, expire int64) *second {
-	t := &second{
+func (p *defaultTimer) AddSecond(callBackFunc xcontrol.ICallBack, expire int64) *Second {
+	t := &Second{
 		ICallBack: callBackFunc,
 		ISwitch:   xcontrol.NewSwitchButton(true),
 		expire:    expire,
@@ -230,7 +230,7 @@ func (p *defaultTimer) AddSecond(callBackFunc xcontrol.ICallBack, expire int64) 
 
 // DelSecond 删除秒级定时器
 // 同 DelMillisecond
-func (p *defaultTimer) DelSecond(t *second) {
+func (p *defaultTimer) DelSecond(t *Second) {
 	t.reset()
 }
 
@@ -240,7 +240,7 @@ func (p *defaultTimer) DelSecond(t *second) {
 //			timerSecond: 秒定时器
 //			cycleIdx: 轮序号
 //	     needMove: 是否需要移动到合适的位置
-func (p *defaultTimer) pushBackCycle(timerSecond *second, cycleIdx int, needMove bool) {
+func (p *defaultTimer) pushBackCycle(timerSecond *Second, cycleIdx int, needMove bool) {
 	p.secondSlice[cycleIdx].PushBack(timerSecond)
 	if needMove {
 		moveLastElementToProperPositionSecond(&p.secondSlice[cycleIdx])
@@ -251,10 +251,10 @@ func (p *defaultTimer) pushBackCycle(timerSecond *second, cycleIdx int, needMove
 // e.g.: 1,2,2,3,4,4,3 => 1,2,2,3,3,4,4 [将最后一个元素移动到4的前面]
 func moveLastElementToProperPositionSecond(l *list.List) {
 	lastElement := l.Back() // 获取最后一个元素
-	target := lastElement.Value.(*second)
+	target := lastElement.Value.(*Second)
 	var element *list.Element
 	for element = lastElement.Prev(); element != nil; element = element.Prev() {
-		current := element.Value.(*second)
+		current := element.Value.(*Second)
 		if current.expire <= target.expire {
 			l.MoveAfter(lastElement, element)
 			return
@@ -273,7 +273,7 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 	var next *list.Element
 	cycle0 := &p.secondSlice[0]
 	for e := cycle0.Front(); nil != e; e = next {
-		t := e.Value.(*second)
+		t := e.Value.(*Second)
 		if t.ISwitch.IsOff() {
 			next = e.Next()
 			cycle0.Remove(e)
@@ -297,7 +297,7 @@ func (p *defaultTimer) scanSecond(timestamp int64) {
 	for idx := 1; idx < cycleSize; idx++ {
 		c := &p.secondSlice[idx]
 		for e := c.Front(); e != nil; e = next {
-			t := e.Value.(*second)
+			t := e.Value.(*Second)
 			if t.ISwitch.IsOff() {
 				next = e.Next()
 				c.Remove(e)
