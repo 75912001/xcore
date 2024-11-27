@@ -51,7 +51,7 @@ func Handle(busChannel chan interface{}) error {
 						//fmt.Printf("apiData: %+v\n", info)
 						apiData = info
 					} else {
-						fmt.Printf("\033[31m%s\033[0m\n", "apiData not found")
+						fmt.Printf("\033[31m%s\033[0m\n", "api not found in apiData.json")
 						return xerror.NotExist
 					}
 					return nil

@@ -125,18 +125,22 @@
 ### 编译
 - 生成协议
   - /impl/protobuf/gen.sh
-- 编译 
-  - /impl/build/build.sh
+- 编译
+  - 服务
+    - /impl/build/build.sh
+  - 客户端模拟器
+    - /tools/client.simulator/build.sh
 ### 部署
 - 部署 
   - /impl/bin/deploy.1.gateway.1.sh
   - /impl/bin/deploy.1.login.1.sh
-- 启动etcd
-- 启动gateway
+- 启动 etcd
+- 启动 gateway
   - /impl/bin/start.1.gateway.1.sh
-- 启动login
+- 启动 login
   - /impl/bin/start.1.login.1.sh
-- 启动tools/client.simulator/client.simulator.exe
+- 启动 client.simulator
+  - tools/client.simulator/client.simulator.exe
 
 [todo menglc]
 
