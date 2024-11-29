@@ -98,11 +98,11 @@ func Handle(busChannel chan interface{}) error {
 				}
 				fmt.Println()
 				fmt.Printf("\033[34mmessageID: 0x%x\033[0m\n", messageID)
-				fmt.Printf("\033[34mprotoMsg: %v\033[0m\n", protoMsg)
-
-				//fmt.Printf("sendData: %v\n", sendData)
+				fmt.Printf("\033[34mMessage: %v\033[0m\n", protoMsg)
+				log.Infof("\n======send message======\n%v\nmessageID: 0x%x\nMessage: %v", event.Command, messageID, protoMsg)
 				if err := xnettcp.Send(client.IRemote, protoMsg, messageID, 0, 0); err != nil {
 					fmt.Println("client.Send fail, err:", err)
+					log.Errorf("client.Send fail, err: %v", err)
 				}
 			default:
 			}

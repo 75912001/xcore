@@ -8,7 +8,8 @@ type User struct {
 	remote       xnettcp.IRemote // 连接
 	LoginService *LoginService
 	//LogicService *LogicService
-	timeoutValid bool // 超时是否有效
+	timeoutValid    bool   // 超时是否有效
+	heartbeatRandom uint64 // 心跳随机数
 }
 
 func newUser(remote xnettcp.IRemote) *User {

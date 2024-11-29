@@ -35,3 +35,12 @@ func (p *userMgr) remove(remote xnettcp.IRemote) {
 	delete(p.idMap, user.id)
 	delete(p.remoteMap, remote)
 }
+
+// 通过remote获取用户
+func (p *userMgr) get(remote xnettcp.IRemote) *User {
+	user, ok := p.remoteMap[remote]
+	if !ok {
+		return nil
+	}
+	return user
+}

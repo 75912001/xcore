@@ -29,6 +29,7 @@ func userLoginTimeout(arg ...interface{}) error {
 func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnConnect: %v", remote)
 	u := newUser(remote)
+	remote.(*xnettcp.Remote).Object = u
 	gUserMgr.add(u, u.remote)
 	// 用户登录超时
 	p.Timer.AddSecond(
@@ -94,34 +95,43 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 }
 
 func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
-	defaultPacket, ok := packet.(*xnetpacket.Packet)
-	if !ok {
-		return xerror.Mismatch
-	}
 	defaultRemote := remote.(*xnettcp.Remote)
 	user := defaultRemote.Object.(*User)
-	switch xcommonservice.GetServiceTypeByMessageID(defaultPacket.Header.MessageID) {
-	case xcommonservice.LoginMessage:
-		if user.LoginService != nil {
-			return errors.WithMessage(xerror.Duplicate, xruntime.Location())
+	switch packet.(type) {
+	case *xnetpacket.Packet:
+		defaultPacket, ok := packet.(*xnetpacket.Packet)
+		if !ok {
+			return xerror.Mismatch
 		}
-		loginService := p.LoginServiceMgr.GetLoginService()
-		if loginService == nil {
-			return errors.WithMessage(xerror.Unavailable, xruntime.Location())
-		}
-		user.LoginService = loginService
-		// 将消息转发到 login service
-		err := user.LoginService.IRemote.Send(defaultPacket)
-		if err != nil {
-			return errors.WithMessage(err, xruntime.Location())
-		}
-		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
-	case xcommonservice.LogicMessage:
-		// todo menglc 处理 logic message
-		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
-	case xcommonservice.GatewayMessage:
-		defaultPacket.IMessage.Override(remote, defaultPacket)
+		defaultPacket.IMessage.Override(user, defaultPacket)
 		return defaultPacket.IMessage.Execute()
+	case *xnetpacket.PacketTransparent:
+		packetTransparent, ok := packet.(*xnetpacket.PacketTransparent)
+		if !ok {
+			return xerror.Mismatch
+		}
+		switch xcommonservice.GetServiceTypeByMessageID(packetTransparent.Header.MessageID) {
+		case xcommonservice.LoginMessage:
+			if user.LoginService != nil {
+				return errors.WithMessage(xerror.Duplicate, xruntime.Location())
+			}
+			loginService := p.LoginServiceMgr.GetLoginService()
+			if loginService == nil {
+				return errors.WithMessage(xerror.Unavailable, xruntime.Location())
+			}
+			user.LoginService = loginService
+			// 将消息转发到 login service
+			err := user.LoginService.IRemote.Send(packetTransparent)
+			if err != nil {
+				return errors.WithMessage(err, xruntime.Location())
+			}
+			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+		case xcommonservice.LogicMessage:
+			// todo menglc 处理 logic message
+			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+		default:
+			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+		}
 	default:
 		return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 	}

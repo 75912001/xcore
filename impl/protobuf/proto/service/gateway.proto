@@ -12,3 +12,15 @@ message UserOnlineMsgRes//0x20001#gateway->user.用户上线-响应
 {
     uint64 uid = 1;//用户id
 }
+
+// 用户心跳包
+// 第一次发送参数为0, 之后每次发送服务端上次返回的随机数
+message UserHeartbeatMsgReq//0x20002#user->gateway.用户心跳包
+{
+    uint64 random = 1;//随机数
+}
+
+message UserHeartbeatMsgRes//0x20003#gateway->user.用户心跳包-响应
+{
+    uint64 random = 1;//随机数
+}

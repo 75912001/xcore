@@ -129,21 +129,22 @@
     - **util**: 工具类
   - **scripts**: 脚本
   - **tools**: 工具
-    - **client.simulator**: 客户端模拟器 [todo menglc]
+    - **client.simulator**: 客户端模拟器
+      - 日志记录:输入,输出[todo menglc]
 
 ## 使用
 ### 编译
 - 生成协议
-  - /impl/protobuf/gen.sh
+  - [执行脚本](/impl/protobuf/gen.sh)
 - 编译
   - 服务
-    - /impl/build/build.sh
+    - [执行脚本](/impl/build/build.sh)
   - 客户端模拟器
-    - /tools/client.simulator/build.sh
+    - [执行脚本](/tools/client.simulator/build.sh)
 ### 部署
 - 部署 
-  - /impl/bin/deploy.1.gateway.1.sh
-  - /impl/bin/deploy.1.login.1.sh
+  - [执行脚本](/impl/bin/deploy.1.gateway.1.sh)
+  - [执行脚本](/impl/bin/deploy.1.login.1.sh)
 - 启动 etcd
 - 启动 gateway
   - /impl/bin/start.1.gateway.1.sh
@@ -154,6 +155,7 @@
 
 [todo menglc]
 
+[执行脚本](/impl/build/build.sh)
 
 
 创建 login

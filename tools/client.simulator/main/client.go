@@ -7,6 +7,7 @@ import (
 	xerror "xcore/lib/error"
 	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
+	xruntime "xcore/lib/runtime"
 )
 
 var client *defaultClient // 客户端
@@ -51,9 +52,12 @@ func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPack
 	if !ok {
 		return xerror.Mismatch
 	}
+	var msgName string = reflect.TypeOf(defaultPacket.PBMessage).Elem().Name()
+	var strHeader string
+	var strPBMessage string
 	{
 		fmt.Println()
-		fmt.Printf("\033[32mMessage Name: %s\033[0m\n", reflect.TypeOf(defaultPacket.PBMessage).Elem().Name())
+		fmt.Printf("\033[32mMessage Name: %s\033[0m\n", msgName)
 		type HexDefaultHeader struct {
 			PacketLength uint32
 			MessageID    string
@@ -73,8 +77,8 @@ func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPack
 		if err != nil {
 			fmt.Printf("\033[31mJSON marshaling failed: %s\033[0m", err)
 		}
-		//fmt.Printf("\nHeader: %s\n", headerJson)
 		fmt.Printf("\033[32mHeader: %s\033[0m\n", headerJson)
+		strHeader = string(headerJson)
 	}
 	{
 		pbMessageJson, err := json.MarshalIndent(defaultPacket.PBMessage, "", "  ")
@@ -82,11 +86,13 @@ func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPack
 			fmt.Printf("\033[31mJSON marshaling failed: %s\033[0m", err)
 		}
 		fmt.Printf("\033[32mMessage: %s\033[0m\n", pbMessageJson)
+		strPBMessage = string(pbMessageJson)
 	}
+	log.Infof("\n======recv message======\n%s\nHeader: %s\nMessage: %s", msgName, strHeader, strPBMessage)
 	return nil
 }
 func (p *defaultClient) OnDisconnect(remote xnettcp.IRemote) error {
-	// todo menglc
-
+	ColorPrintf(Red, "%v\n", xruntime.Location())
+	panic(fmt.Errorf("OnDisconnect:%v", remote))
 	return nil
 }
