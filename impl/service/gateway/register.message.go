@@ -16,4 +16,9 @@ func init() {
 			WithHandler(xcallback.NewCallBack(UserOnlineMsg)).
 			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserOnlineMsgReq) }),
 	)
+	GMessage.Register(xprotobufgateway.UserHeartbeatMsgReq_CMD,
+		xnetmessage.NewOptions().
+			WithHandler(xcallback.NewCallBack(UserHeartbeatMsg)).
+			WithNewProtoMessage(func() proto.Message { return new(xprotobufgateway.UserHeartbeatMsgReq) }),
+	)
 }

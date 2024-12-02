@@ -27,7 +27,7 @@ func UserOnlineMsg(args ...interface{}) error {
 	res := &xprotobufgateway.UserOnlineMsgRes{
 		Uid: 668599,
 	}
-	if err := xnettcp.Send(user.remote, res, xprotobufgateway.UserOnlineMsgRes_CMD, 0, 0); err != nil {
+	if err := xnettcp.Send(user.connect.IRemote, res, xprotobufgateway.UserOnlineMsgRes_CMD, 0, 0); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil
@@ -39,21 +39,21 @@ func UserHeartbeatMsg(args ...interface{}) error {
 	pb := defaultPacket.PBMessage.(*xprotobufgateway.UserHeartbeatMsgReq)
 	fmt.Println(user, defaultPacket, pb, xruntime.Location())
 
-	if user.heartbeatRandom == 0 { // 第一次心跳,不验证
-		user.heartbeatRandom = rand.Uint64()
+	if user.connect.heartbeatRandom == 0 { // 第一次心跳,不验证
+		user.connect.heartbeatRandom = rand.Uint64()
 	} else { // 验证本次收到的,是否是上次发送给用户的
-		if user.heartbeatRandom != pb.Random {
+		if user.connect.heartbeatRandom != pb.Random {
 			// todo menglc 发送 错误码, 并断开连接
 			//return xxx
 		} else {
-			user.heartbeatRandom = rand.Uint64()
+			user.connect.heartbeatRandom = rand.Uint64()
 		}
 	}
 	// 返回消息
 	res := &xprotobufgateway.UserHeartbeatMsgRes{
-		Random: user.heartbeatRandom,
+		Random: user.connect.heartbeatRandom,
 	}
-	if err := xnettcp.Send(user.remote, res, xprotobufgateway.UserHeartbeatMsgRes_CMD, 0, 0); err != nil {
+	if err := xnettcp.Send(user.connect.IRemote, res, xprotobufgateway.UserHeartbeatMsgRes_CMD, 0, 0); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	return nil

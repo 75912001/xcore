@@ -30,7 +30,7 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnConnect: %v", remote)
 	u := newUser(remote)
 	remote.(*xnettcp.Remote).Object = u
-	gUserMgr.add(u, u.remote)
+	gUserMgr.add(u, u.connect.IRemote)
 	// 用户登录超时
 	p.Timer.AddSecond(
 		xutil.NewCallBack(
@@ -48,6 +48,24 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 			u,
 		),
 		p.TimeMgr.ShadowTimestamp()+UserLoginTimeOut,
+	)
+	// 用户心跳超时
+	p.Timer.AddSecond(
+		xutil.NewCallBack(
+			func(args ...interface{}) error {
+				u := args[0].(*User)
+				if !u.timeoutValid {
+					return nil
+				}
+				if u.login { // 已经登录
+					return nil
+				}
+				u.exit()
+				return nil
+			},
+			u,
+		),
+		p.TimeMgr.ShadowTimestamp()+UserHeartbeatInterval,
 	)
 	return nil
 }
