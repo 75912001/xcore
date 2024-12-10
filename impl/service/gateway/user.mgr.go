@@ -1,6 +1,9 @@
 package gateway
 
-import xnettcp "xcore/lib/net/tcp"
+import (
+	xcontrol "xcore/lib/control"
+	xnettcp "xcore/lib/net/tcp"
+)
 
 var gUserMgr *userMgr
 
@@ -34,6 +37,24 @@ func (p *userMgr) remove(remote xnettcp.IRemote) {
 	user.release()
 	delete(p.idMap, user.id)
 	delete(p.remoteMap, remote)
+}
+
+// 移除一个用户的remote数据,设置用户的数据为非活跃(通过remote)
+func (p *userMgr) removeRemoteAndSetInactive(remote xnettcp.IRemote) {
+	user, ok := p.remoteMap[remote]
+	if !ok {
+		return
+	}
+	user.connect.Status.SetInactive(UserInactiveTimeout,
+		xcontrol.NewCallBack(
+			func(args ...interface{}) error {
+				user := args[0].(*User)
+				user.release()
+				return nil
+			},
+			user,
+		))
+	user.connect.IRemote = nil
 }
 
 // 通过remote获取用户

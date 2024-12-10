@@ -19,10 +19,11 @@ import (
 
 // Remote 远端
 type Remote struct {
-	Conn       *net.TCPConn     // 连接
-	sendChan   chan interface{} // 发送管道
-	cancelFunc context.CancelFunc
-	Object     interface{} // 保存 应用层数据
+	Conn             *net.TCPConn     // 连接
+	sendChan         chan interface{} // 发送管道
+	cancelFunc       context.CancelFunc
+	Object           interface{}      // 保存 应用层数据
+	DisconnectReason DisconnectReason // 断开原因
 }
 
 func NewRemote(Conn *net.TCPConn, sendChan chan interface{}) *Remote {
@@ -30,6 +31,14 @@ func NewRemote(Conn *net.TCPConn, sendChan chan interface{}) *Remote {
 		Conn:     Conn,
 		sendChan: sendChan,
 	}
+}
+
+func (p *Remote) GetDisconnectReason() DisconnectReason {
+	return p.DisconnectReason
+}
+
+func (p *Remote) SetDisconnectReason(reason DisconnectReason) {
+	p.DisconnectReason = reason
 }
 
 // GetIP 获取IP地址
@@ -232,11 +241,16 @@ func (p *Remote) onRecv(event IEvent, handler IHandler) {
 			if !xutil.IsNetErrClosing(err) {
 				xlog.PrintfInfo("remote:%p err:%v", p, err)
 			}
+			if p.GetDisconnectReason() != DisconnectReasonUnknown { // 未设置,就设置为客户端主动断开
+				p.SetDisconnectReason(DisconnectReasonClientShutdown)
+			} else { // 已设置,就不再设置
+			}
 			return
 		}
 		packetLength := binary.LittleEndian.Uint32(msgLengthBuf)
 		if err := handler.OnCheckPacketLength(packetLength); err != nil {
 			xlog.PrintfErr("remote:%p OnCheckPacketLength err:%v", p, err)
+			p.SetDisconnectReason(DisconnectReasonClientLogic)
 			return
 		}
 		buf := xpool.MakeByteSlice(int(packetLength))
@@ -244,6 +258,7 @@ func (p *Remote) onRecv(event IEvent, handler IHandler) {
 		if _, err := io.ReadFull(p.Conn, buf[xnetpacket.HeaderLengthFieldSize:]); err != nil {
 			xlog.PrintfErr("remote:%p err:%v", p, err)
 			_ = xpool.ReleaseByteSlice(buf)
+			p.SetDisconnectReason(DisconnectReasonClientLogic)
 			return
 		}
 		if err := handler.OnCheckPacketLimit(p); err != nil {
