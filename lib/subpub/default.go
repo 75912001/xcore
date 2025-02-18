@@ -33,5 +33,5 @@ func (p *SubPub) Publish(key uint64, parameters ...interface{}) error {
 			}
 		}
 	}
-	return nil
+	return err
 }
