@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"math/rand"
 	"os"
 	"path"
@@ -68,10 +67,6 @@ func NewService(args []string) *Service {
 		xlog.PrintfErr("the number of parameters is incorrect, needed %v, but %v.", neededArgsNumber, argNum)
 		return nil
 	}
-	var groupID, serviceName, serviceID string
-	fmt.Println("groupID:", groupID)
-	fmt.Println("serviceName:", serviceName)
-	fmt.Println("serviceID:", serviceID)
 	{ // 解析启动参数
 		groupID, err := strconv.ParseUint(args[1], 10, 32)
 		if err != nil {
@@ -89,19 +84,10 @@ func NewService(args []string) *Service {
 		xlog.PrintfInfo("groupID:%v name:%v, serviceID:%v",
 			s.GroupID, s.Name, s.ID)
 	}
-
 	return s
 }
 
-//func (p *Service) Start(ctx context.Context) (err error) {
-//	return xerror.NotImplemented
-//}
-//
 //func (p *Service) PreStop() error {
-//	return xerror.NotImplemented
-//}
-//
-//func (p *Service) Stop() (err error) {
 //	return xerror.NotImplemented
 //}
 
@@ -136,27 +122,27 @@ func (p *Service) Start(ctx context.Context,
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	if false { // 从etcd获取配置项 todo menglc
-		client, err := clientv3.New(
-			clientv3.Config{
-				Endpoints:   p.BenchMgr.RootJson.Etcd.Addrs,
-				DialTimeout: 5 * time.Second, // todo menglc 确定用途?
-			},
-		)
-		if err != nil {
-			return errors.WithMessage(err, xruntime.Location())
-		}
-		kv := clientv3.NewKV(client)
-		key := fmt.Sprintf("/%v/%v/%v/%v/%v",
-			*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
-		getResponse, err := kv.Get(ctx, key, clientv3.WithPrefix())
-		if err != nil {
-			return errors.WithMessage(err, xruntime.Location())
-		}
-		if len(getResponse.Kvs) != 1 {
-			return errors.WithMessagef(xerror.Config, "%v %v %v", key, getResponse.Kvs, xruntime.Location())
-		}
-		benchJson = string(getResponse.Kvs[0].Value)
-		xlog.PrintfInfo(benchJson)
+		//client, err := clientv3.New(
+		//	clientv3.Config{
+		//		Endpoints:   p.BenchMgr.RootJson.Etcd.Addrs,
+		//		DialTimeout: 5 * time.Second, // todo menglc 确定用途?
+		//	},
+		//)
+		//if err != nil {
+		//	return errors.WithMessage(err, xruntime.Location())
+		//}
+		//kv := clientv3.NewKV(client)
+		//key := fmt.Sprintf("/%v/%v/%v/%v/%v",
+		//	*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeServiceBench, p.GroupID, p.Name, p.ID)
+		//getResponse, err := kv.Get(ctx, key, clientv3.WithPrefix())
+		//if err != nil {
+		//	return errors.WithMessage(err, xruntime.Location())
+		//}
+		//if len(getResponse.Kvs) != 1 {
+		//	return errors.WithMessagef(xerror.Config, "%v %v %v", key, getResponse.Kvs, xruntime.Location())
+		//}
+		//benchJson = string(getResponse.Kvs[0].Value)
+		//xlog.PrintfInfo(benchJson)
 	}
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
