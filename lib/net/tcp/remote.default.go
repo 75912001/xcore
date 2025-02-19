@@ -11,7 +11,7 @@ import (
 	"time"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetpacket "xcore/lib/net/packet"
+	"xcore/lib/packet"
 	xpool "xcore/lib/pool"
 	xruntime "xcore/lib/runtime"
 	xutil "xcore/lib/util"
@@ -42,14 +42,15 @@ func (p *Remote) GetIP() string {
 }
 
 func (p *Remote) Start(tcpOptions *ConnOptions, event IEvent, handler IHandler) {
+	//var err error
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
-	//	log.Printf("SetKeepAlive war:%v", err)
+	//	xlog.PrintfErr("SetKeepAlive err:%v", err)
 	//}
-	//if err = p.Conn.SetKeepAlivePeriod(time.Second * 10); err != nil {
-	//	log.Printf("SetKeepAlivePeriod war:%v", err)
+	//if err = p.Conn.SetKeepAlivePeriod(time.Second * 600); err != nil {
+	//	xlog.PrintfErr("SetKeepAlivePeriod err:%v", err)
 	//}
 	//if err := p.Conn.SetNoDelay(true); err != nil {
-	//	xrlog.PrintfErr("SetNoDelay war:%v", err)
+	//	xlog.PrintfErr("SetNoDelay err:%v", err)
 	//}
 	if tcpOptions.ReadBuffer != nil {
 		if err := p.Conn.SetReadBuffer(*tcpOptions.ReadBuffer); err != nil {
@@ -79,7 +80,7 @@ func (p *Remote) IsConnect() bool {
 //	[NOTE]必须在处理 EventChan 事件中调用
 //	参数:
 //		packet: 未序列化的包. [NOTE]该数据会被引用,使用层不可写
-func (p *Remote) Send(packet xnetpacket.IPacket) error {
+func (p *Remote) Send(packet packet.IPacket) error {
 	if !p.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
@@ -133,7 +134,7 @@ func rearrangeSendData(data []byte, cnt int, resetCnt int) []byte {
 }
 
 // 将数据放入data中
-func (p *Remote) push2Data(packet xnetpacket.IPacket, data []byte) ([]byte, error) {
+func (p *Remote) push2Data(packet packet.IPacket, data []byte) ([]byte, error) {
 	packetData, err := packet.Marshal()
 	if err != nil {
 		xlog.PrintfErr("packet marshal %v", packet)
@@ -170,7 +171,7 @@ func (p *Remote) onSend(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case t := <-p.sendChan:
-			data, err = p.push2Data(t.(xnetpacket.IPacket), data)
+			data, err = p.push2Data(t.(packet.IPacket), data)
 			if err != nil {
 				xlog.PrintfErr("push2Data err:%v", err)
 				continue
@@ -192,7 +193,7 @@ func (p *Remote) onSend(ctx context.Context) {
 				}
 				for 0 < len(p.sendChan) { // 尽量取出待发送数据
 					t := <-p.sendChan
-					data, err = p.push2Data(t.(xnetpacket.IPacket), data)
+					data, err = p.push2Data(t.(packet.IPacket), data)
 					if err != nil {
 						xlog.PrintfErr("push2Data err:%v", err)
 						continue
@@ -226,7 +227,7 @@ func (p *Remote) onRecv(event IEvent, handler IHandler) {
 		xlog.PrintInfo(xerror.GoroutineDone, p)
 	}()
 	// 消息总长度
-	msgLengthBuf := make([]byte, xnetpacket.HeaderLengthFieldSize)
+	msgLengthBuf := make([]byte, packet.HeaderLengthFieldSize)
 	for {
 		if _, err := io.ReadFull(p.Conn, msgLengthBuf); err != nil {
 			if !xutil.IsNetErrClosing(err) {
@@ -241,7 +242,7 @@ func (p *Remote) onRecv(event IEvent, handler IHandler) {
 		}
 		buf := xpool.MakeByteSlice(int(packetLength))
 		copy(buf, msgLengthBuf)
-		if _, err := io.ReadFull(p.Conn, buf[xnetpacket.HeaderLengthFieldSize:]); err != nil {
+		if _, err := io.ReadFull(p.Conn, buf[packet.HeaderLengthFieldSize:]); err != nil {
 			xlog.PrintfErr("remote:%p err:%v", p, err)
 			_ = xpool.ReleaseByteSlice(buf)
 			return

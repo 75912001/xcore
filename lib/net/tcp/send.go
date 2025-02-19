@@ -1,9 +1,9 @@
 package tcp
 
 import (
-	xnetpacket "xcore/lib/net/packet"
+	xpacket "xcore/lib/packet"
 )
 
 type ISend interface {
-	Send(packet xnetpacket.IPacket) error
+	Send(packet xpacket.IPacket) error
 }

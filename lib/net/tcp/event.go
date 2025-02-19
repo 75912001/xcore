@@ -1,13 +1,13 @@
 package tcp
 
 import (
-	xnetpacket "xcore/lib/net/packet"
+	xpacket "xcore/lib/packet"
 )
 
 type IEvent interface {
-	Connect(handler IHandler, remote IRemote) error                           // 链接 放入 事件中
-	Disconnect(handler IHandler, remote IRemote) error                        // 断开链接 放入 事件中
-	Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error // 数据包 放入 事件中
+	Connect(handler IHandler, remote IRemote) error                        // 链接 放入 事件中
+	Disconnect(handler IHandler, remote IRemote) error                     // 断开链接 放入 事件中
+	Packet(handler IHandler, remote IRemote, packet xpacket.IPacket) error // 数据包 放入 事件中
 }
 
 // Disconnect 事件数据-断开链接
@@ -26,5 +26,5 @@ type Connect struct {
 type Packet struct {
 	IHandler IHandler
 	IRemote  IRemote
-	IPacket  xnetpacket.IPacket
+	IPacket  xpacket.IPacket
 }
