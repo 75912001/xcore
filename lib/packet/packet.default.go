@@ -3,16 +3,15 @@ package packet
 import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	xnetmessage "xcore/lib/net/message"
+	xmessage "xcore/lib/message"
 	xruntime "xcore/lib/runtime"
 )
 
 // Packet 数据包
 type Packet struct {
-	Header    *Header       // 包头
-	PBMessage proto.Message // 消息
-	//RawData   []byte               // 原始数据
-	IMessage xnetmessage.IMessage // 记录该包对应的处理消息
+	Header    *Header           // 包头
+	PBMessage proto.Message     // 消息
+	IMessage  xmessage.IMessage // 记录该包对应的处理消息
 }
 
 // NewPacket 新建数据包
@@ -30,7 +29,7 @@ func (p *Packet) WithPBMessage(pb proto.Message) *Packet {
 	return p
 }
 
-func (p *Packet) WithIMessage(iMessage xnetmessage.IMessage) *Packet {
+func (p *Packet) WithIMessage(iMessage xmessage.IMessage) *Packet {
 	p.IMessage = iMessage
 	return p
 }
