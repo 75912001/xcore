@@ -17,7 +17,7 @@ import (
 	xerror "xcore/lib/error"
 	xetcd "xcore/lib/etcd"
 	xlog "xcore/lib/log"
-	xnettcp "xcore/lib/net/tcp"
+	xtcp "xcore/lib/net/tcp"
 	xpprof "xcore/lib/pprof"
 	xruntime "xcore/lib/runtime"
 	xtime "xcore/lib/time"
@@ -45,6 +45,8 @@ type Service struct {
 	BusChannelWaitGroup sync.WaitGroup   // 总线等待
 
 	QuitChan chan struct{} // 退出信号, 用于关闭服务
+
+	TCPService *xtcp.Service
 }
 
 // NewService 创建服务
@@ -92,7 +94,7 @@ func NewService(args []string) *Service {
 //}
 
 func (p *Service) Start(ctx context.Context,
-	handler xnettcp.IHandler,
+	handler xtcp.IHandler,
 	logCallbackFunc xlog.CallBackFunc,
 	etcdCallbackFun xetcd.CallbackFun) (err error) {
 	rand.Seed(time.Now().UnixNano())
@@ -238,8 +240,9 @@ func (p *Service) Start(ctx context.Context,
 	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
 		switch *p.BenchMgr.Json.ServiceNet.Type {
 		case "tcp": // 启动 TCP 服务
-			if err = xnettcp.NewService(handler).Start(ctx,
-				xnettcp.NewServerOptions().
+			p.TCPService = xtcp.NewService(handler)
+			if err = p.TCPService.Start(ctx,
+				xtcp.NewServerOptions().
 					SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
 					SetEventChan(p.BusChannel).
 					SetSendChanCapacity(*p.BenchMgr.Json.Base.SendChanCapacity),
@@ -257,5 +260,8 @@ func (p *Service) Start(ctx context.Context,
 }
 
 func (p *Service) Stop() (err error) {
+	if p.TCPService != nil {
+		p.TCPService.Stop()
+	}
 	return nil
 }
