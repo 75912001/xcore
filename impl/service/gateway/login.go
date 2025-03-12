@@ -7,8 +7,8 @@ import (
 	"reflect"
 	xcommonservice "xcore/impl/common"
 	xerror "xcore/lib/error"
-	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
+	packet2 "xcore/lib/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -32,25 +32,25 @@ func (p *LoginService) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	return nil
 }
 
-func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
-	header := xnetpacket.NewHeader()
+func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
+	header := packet2.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
 	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
 	case xcommonservice.GatewayMessage:
-		packet := xnetpacket.NewPacket().WithHeader(header)
+		packet := packet2.NewPacket().WithHeader(header)
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
 			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 		}
-		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
+		pb, err := packet.IMessage.Unmarshal(data[packet2.HeaderSize:])
 		if err != nil {
 			return nil, errors.WithMessage(err, xruntime.Location())
 		}
 		packet.PBMessage = pb
 		return packet, nil
 	case xcommonservice.LoginMessage:
-		packet := xnetpacket.NewPacketTransparent().WithHeader(header)
+		packet := packet2.NewPacketPassThrough().WithHeader(header)
 		packet.RawData = make([]byte, len(data))
 		copy(packet.RawData, data)
 		return packet, nil
@@ -59,8 +59,8 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (x
 	}
 }
 
-func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
-	defaultPacket, ok := packet.(*xnetpacket.Packet)
+func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
+	defaultPacket, ok := packet.(*packet2.Packet)
 	if !ok {
 		return xerror.Mismatch
 	}

@@ -6,6 +6,9 @@ serviceNameLogic="logic"
 serviceNameGateway="gateway"
 serviceNameLogin="login"
 
+#服务名数组
+serviceArr=(${serviceNameLogic} ${serviceNameGateway} ${serviceNameLogin})
+
 #开启服务顺序
 startServiceArr=(${serviceNameLogic} ${serviceNameGateway} ${serviceNameLogin})
 

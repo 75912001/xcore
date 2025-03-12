@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	xcommonservice "xcore/impl/common"
-	xconstants "xcore/lib/constants"
 	xutil "xcore/lib/control"
 	xerror "xcore/lib/error"
-	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
+	packet2 "xcore/lib/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -71,7 +70,7 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 }
 
 func (p *Service) OnCheckPacketLength(length uint32) error {
-	if length < xnetpacket.HeaderSize || xconstants.PacketLengthDefault < length {
+	if length < packet2.HeaderSize || *p.BenchMgr.Json.Base.PacketLengthMax < length {
 		return xerror.Length
 	}
 	return nil
@@ -79,31 +78,31 @@ func (p *Service) OnCheckPacketLength(length uint32) error {
 
 func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	if false {
-		return xerror.QuantityLimit
+		return xerror.Quantity
 	}
 	return nil
 }
 
-func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
-	header := xnetpacket.NewHeader()
+func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
+	header := packet2.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
 
 	switch xcommonservice.GetServiceTypeByMessageID(header.MessageID) {
 	case xcommonservice.GatewayMessage:
-		packet := xnetpacket.NewPacket().WithHeader(header)
+		packet := packet2.NewPacket().WithHeader(header)
 		packet.IMessage = GMessage.Find(header.MessageID)
 		if packet.IMessage == nil {
 			return nil, errors.WithMessage(xerror.NotExist, xruntime.Location())
 		}
-		pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
+		pb, err := packet.IMessage.Unmarshal(data[packet2.HeaderSize:])
 		if err != nil {
 			return nil, errors.WithMessage(err, xruntime.Location())
 		}
 		packet.PBMessage = pb
 		return packet, nil
 	case xcommonservice.LoginMessage, xcommonservice.LogicMessage:
-		packet := xnetpacket.NewPacketTransparent().WithHeader(header)
+		packet := packet2.NewPacketPassThrough().WithHeader(header)
 		packet.RawData = make([]byte, len(data))
 		copy(packet.RawData, data)
 		return packet, nil
@@ -112,19 +111,19 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpa
 	}
 }
 
-func (p *Service) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
+func (p *Service) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
 	defaultRemote := remote.(*xnettcp.Remote)
 	user := defaultRemote.Object.(*User)
 	switch packet.(type) {
-	case *xnetpacket.Packet:
-		defaultPacket, ok := packet.(*xnetpacket.Packet)
+	case *packet2.Packet:
+		defaultPacket, ok := packet.(*packet2.Packet)
 		if !ok {
 			return xerror.Mismatch
 		}
 		defaultPacket.IMessage.Override(user, defaultPacket)
 		return defaultPacket.IMessage.Execute()
-	case *xnetpacket.PacketTransparent:
-		packetTransparent, ok := packet.(*xnetpacket.PacketTransparent)
+	case *packet2.PacketPassThrough:
+		packetTransparent, ok := packet.(*packet2.PacketPassThrough)
 		if !ok {
 			return xerror.Mismatch
 		}

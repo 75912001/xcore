@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 	xerror "xcore/lib/error"
-	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
+	packet2 "xcore/lib/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -28,18 +28,18 @@ func (p *defaultClient) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	return nil
 }
 
-func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xnetpacket.IPacket, error) {
-	header := xnetpacket.NewHeader()
+func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
+	header := packet2.NewHeader()
 	header.Unpack(data)
 
 	// todo menglc 判断消息是否禁用
 
-	packet := xnetpacket.NewPacket().WithHeader(header)
+	packet := packet2.NewPacket().WithHeader(header)
 	packet.IMessage = GMessage.Find(header.MessageID)
 	if packet.IMessage == nil {
 		return nil, xerror.NotExist
 	}
-	pb, err := packet.IMessage.Unmarshal(data[xnetpacket.HeaderSize:])
+	pb, err := packet.IMessage.Unmarshal(data[packet2.HeaderSize:])
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +47,8 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 	return packet, nil
 }
 
-func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xnetpacket.IPacket) error {
-	defaultPacket, ok := packet.(*xnetpacket.Packet)
+func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
+	defaultPacket, ok := packet.(*packet2.Packet)
 	if !ok {
 		return xerror.Mismatch
 	}

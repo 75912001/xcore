@@ -12,10 +12,8 @@ import (
 	"runtime"
 	"time"
 	xcommon "xcore/lib/common"
-	xconstants "xcore/lib/constants"
 	xerror "xcore/lib/error"
 	xetcd "xcore/lib/etcd"
-	xlog "xcore/lib/log"
 	xruntime "xcore/lib/runtime"
 	xtimer "xcore/lib/timer"
 )
@@ -43,7 +41,7 @@ func (p *rootJson) Parse(strJson string) error {
 }
 
 type Etcd struct {
-	Addrs []string `json:"addrs"` // [目前无效] todo [优化] 该配置,后期可改为从etcd中获取剩余配置,并覆盖本地配置.
+	Addrs []string `json:"addrs"` // etcd地址
 	TTL   *int64   `json:"ttl"`   // ttl 秒 [default]: xetcd.TtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
 }
 
@@ -59,16 +57,13 @@ func (p *benchJson) Parse(jsonString string) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.ProjectName == nil {
-		defaultValue := xconstants.ProjectNameDefault
-		p.Base.ProjectName = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.Version == nil {
-		defaultValue := xconstants.VersionDefault
-		p.Base.Version = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.LogLevel == nil {
-		defaultValue := xlog.LevelOn
-		p.Base.LogLevel = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.LogAbsPath == nil {
 		executablePath, err := xruntime.GetExecutablePath()
@@ -83,24 +78,19 @@ func (p *benchJson) Parse(jsonString string) error {
 		p.Base.GoMaxProcess = &defaultValue
 	}
 	if p.Base.BusChannelCapacity == nil {
-		defaultValue := xconstants.BusChannelCapacityDefault
-		p.Base.BusChannelCapacity = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.PacketLengthMax == nil {
-		defaultValue := xconstants.PacketLengthDefault
-		p.Base.PacketLengthMax = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.SendChanCapacity == nil {
-		defaultValue := xconstants.SendChanCapacityDefault
-		p.Base.SendChanCapacity = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.RunMode == nil {
-		defaultValue := uint32(xruntime.RunModeRelease)
-		p.Base.RunMode = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.AvailableLoad == nil {
-		defaultValue := xconstants.AvailableLoadDefault
-		p.Base.AvailableLoad = &defaultValue
+		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Timer.ScanSecondDuration == nil {
 		defaultValue := xtimer.ScanSecondDurationDefault
@@ -125,17 +115,17 @@ func (p *benchJson) Parse(jsonString string) error {
 }
 
 type Base struct {
-	ProjectName        *string `json:"projectName"`        // 项目名称. [default]: xconstants.ProjectNameDefault
-	Version            *string `json:"version"`            // 版本号. [default]: xconstants.VersionDefault
+	ProjectName        *string `json:"projectName"`        // 项目名称
+	Version            *string `json:"version"`            // 版本号
 	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]: nil 不使用
-	LogLevel           *uint32 `json:"logLevel"`           // 日志等级 [default]: xlog.LevelOn
+	LogLevel           *uint32 `json:"logLevel"`           // 日志等级
 	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
 	GoMaxProcess       *int    `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
-	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量. [default]: xconstants.BusChannelCapacityDefault
-	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度. [default]: xconstants.PacketLengthDefault
-	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小. [default]: xconstants.SendChanCapacityDefault
-	RunMode            *uint32 `json:"runMode"`            // 运行模式 [default]: xruntime.RunModeRelease
-	AvailableLoad      *uint32 `json:"availableLoad"`      // 剩余可用负载, 可用资源数 [default]: xconstants.AvailableLoadDefault
+	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量
+	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度
+	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小
+	RunMode            *uint32 `json:"runMode"`            // 运行模式 [0:release 1:debug]
+	AvailableLoad      *uint32 `json:"availableLoad"`      // 剩余可用负载, 可用资源数
 }
 
 type Timer struct {

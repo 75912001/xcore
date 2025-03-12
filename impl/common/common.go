@@ -52,7 +52,7 @@ var MongodbMaxConnectingDefault uint64 = 4 // 设置为 P/2
 //}
 
 // GenUID 生成UID
-// zid: zone id
+// zid: group id
 // uidIdx: uid 在 redis 中的序号
 func GenUID(zid uint32, uidIdx uint64) uint64 {
 	return uint64(zid)*uint64(1000000000) + uidIdx
