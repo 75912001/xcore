@@ -1,8 +1,8 @@
 package log
 
 import (
+	xcontrol "github.com/75912001/xcore/lib/control"
 	"sync"
-	xcontrol "xcore/lib/control"
 )
 
 // entry的内存池选项

@@ -3,9 +3,9 @@ package gateway
 import (
 	"encoding/json"
 	"fmt"
+	xcommonservice "github.com/75912001/xcore/impl/common"
 	"github.com/pkg/errors"
 	"reflect"
-	xcommonservice "xcore/impl/common"
 	xerror "xcore/lib/error"
 	xnettcp "xcore/lib/net/tcp"
 	packet2 "xcore/lib/packet"
