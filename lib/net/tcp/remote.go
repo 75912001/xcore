@@ -6,4 +6,6 @@ type IRemote interface {
 	Start(tcpOptions *ConnOptions, event IEvent, handler IHandler)
 	Stop()
 	GetIP() string
+	GetDisconnectReason() DisconnectReason
+	SetDisconnectReason(reason DisconnectReason)
 }
