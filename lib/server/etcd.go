@@ -1,28 +1,28 @@
 package server
 
 import (
-	xcallback "github.com/75912001/xcore/lib/control"
+	xcontrol "github.com/75912001/xcore/lib/control"
 	xetcd "github.com/75912001/xcore/lib/etcd"
 )
 
-// EtcdReportFunction etcd-上报
-func EtcdReportFunction(args ...interface{}) error {
-	defaultService := args[0].(*Service)
+// etcdReportFunction etcd-上报
+func etcdReportFunction(args ...interface{}) error {
+	defaultServer := args[0].(*Server)
 	defer func() {
-		defaultService.Timer.AddSecond(
-			xcallback.NewCallBack(EtcdReportFunction, defaultService),
-			defaultService.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault,
+		defaultServer.Timer.AddSecond(
+			xcontrol.NewCallBack(etcdReportFunction, defaultServer),
+			defaultServer.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault,
 		)
 	}()
 	valueJson := &xetcd.ValueJson{
-		ServiceNet:    &defaultService.BenchMgr.Json.ServiceNet,
-		Version:       *defaultService.BenchMgr.Json.Base.Version,
-		AvailableLoad: *defaultService.BenchMgr.Json.Base.AvailableLoad,
+		ServerNet:     &defaultServer.BenchMgr.Json.ServerNet,
+		Version:       *defaultServer.BenchMgr.Json.Base.Version,
+		AvailableLoad: *defaultServer.BenchMgr.Json.Base.AvailableLoad,
 		SecondOffset:  0,
 	}
 	value := xetcd.ValueJson2String(valueJson)
-	if _, err := defaultService.Etcd.Put(defaultService.EtcdKey, value); err != nil {
-		defaultService.Log.Errorf("EtcdReportFunction Put key:%v val:%v err:%v", defaultService.EtcdKey, value, err)
+	if _, err := defaultServer.Etcd.Put(defaultServer.EtcdKey, value); err != nil {
+		defaultServer.Log.Errorf("etcdReportFunction Put key:%v val:%v err:%v", defaultServer.EtcdKey, value, err)
 	}
 	return nil
 }

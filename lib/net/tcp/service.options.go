@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// serviceOptions contains options to configure a Service instance. Each option can be set through setter functions. See
+// serviceOptions contains options to configure a Server instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
 type serviceOptions struct {
 	listenAddress    *string            // 127.0.0.1:8787
@@ -46,7 +46,7 @@ func (p *serviceOptions) SetWriteBuffer(writeBuffer int) *serviceOptions {
 }
 
 // mergeServiceOptions combines the given *serviceOptions into a single *serviceOptions in a last one wins fashion.
-// The specified options are merged with the existing options on the Service, with the specified options taking
+// The specified options are merged with the existing options on the Server, with the specified options taking
 // precedence.
 func mergeServiceOptions(opts ...*serviceOptions) *serviceOptions {
 	newOptions := NewServerOptions()

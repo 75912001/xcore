@@ -15,7 +15,7 @@ type UserConnect struct {
 func newUserConnect(remote xnettcp.IRemote) *UserConnect {
 	return &UserConnect{
 		IRemote:          remote,
-		heartbeatTimeout: gService.TimeMgr.ShadowTimestamp() + UserHeartbeatIntervalMax,
+		heartbeatTimeout: gServer.TimeMgr.ShadowTimestamp() + UserHeartbeatIntervalMax,
 		Status:           xnetconnect.NewStatus(),
 	}
 }

@@ -28,7 +28,7 @@ func main() {
 	var server xserver.IServer
 	switch defaultServer.Name {
 	case common.ServerNameGateway:
-		server = servergateway.NewService(defaultServer)
+		server = servergateway.NewSerer(defaultServer)
 	default:
 		xlog.PrintErr(xerror.NotImplemented, "server name err", defaultServer.Name)
 		return

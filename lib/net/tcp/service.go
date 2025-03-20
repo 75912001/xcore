@@ -12,17 +12,17 @@ import (
 	"time"
 )
 
-// Service 服务端
-type Service struct {
+// Server 服务端
+type Server struct {
 	IEvent   IEvent
 	IHandler IHandler
 	listener *net.TCPListener //监听
 	options  *serviceOptions
 }
 
-// NewService 新建服务
-func NewService(handler IHandler) *Service {
-	return &Service{
+// NewServer 新建服务
+func NewServer(handler IHandler) *Server {
+	return &Server{
 		IEvent:   nil,
 		IHandler: handler,
 		listener: nil,
@@ -44,7 +44,7 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *Service) Start(_ context.Context, opts ...*serviceOptions) error {
+func (p *Server) Start(_ context.Context, opts ...*serviceOptions) error {
 	p.options = mergeServiceOptions(opts...)
 	if err := serviceConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
@@ -88,7 +88,7 @@ func (p *Service) Start(_ context.Context, opts ...*serviceOptions) error {
 }
 
 // Stop 停止 AcceptTCP
-func (p *Service) Stop() {
+func (p *Server) Stop() {
 	if p.listener != nil {
 		err := p.listener.Close()
 		if err != nil {
@@ -98,7 +98,7 @@ func (p *Service) Stop() {
 	}
 }
 
-func (p *Service) handleConn(conn *net.TCPConn) {
+func (p *Server) handleConn(conn *net.TCPConn) {
 	remote := NewRemote(conn, make(chan interface{}, *p.options.sendChanCapacity))
 	if err := p.IEvent.Connect(p.IHandler, remote); err != nil {
 		xlog.PrintfErr("event.Connect err:%v", err)

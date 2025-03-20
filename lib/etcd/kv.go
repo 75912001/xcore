@@ -9,11 +9,11 @@ import (
 	"strconv"
 )
 
-// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}/
+// e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serverName}/${serverID}/
 
 // ValueJson etcd 通讯的数据,由服务中的数据生成,定时更新->etcd->服务
 type ValueJson struct {
-	ServiceNet    *xcommon.ServiceNet `json:"serviceNet"`    // 有:直接使用. 没有:使用 benchJson.ServiceNet
+	ServerNet     *xcommon.ServiceNet `json:"serverNet"`     // 有:直接使用. 没有:使用 benchJson.ServerNet
 	Version       string              `json:"version"`       // 有:直接使用. 没有:使用 base.version 生成
 	AvailableLoad uint32              `json:"availableLoad"` // 剩余可用负载, 可用资源数
 	SecondOffset  int32               `json:"secondOffset"`  // 服务 时间(秒)偏移量

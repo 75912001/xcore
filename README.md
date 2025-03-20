@@ -21,7 +21,6 @@
 - go install honnef.co/go/tools/cmd/staticcheck@v0.4.7 (未使用)
 - go get honnef.co/go/tools/cmd/staticcheck@latest (未使用)
 - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest(未使用)
-
 ## git 提交标签
 - \[feat\]: 新功能（feature）
 - \[fix\]: 修复问题（bug fix）
@@ -30,16 +29,13 @@
 - \[refactor\]: 重构代码
 - \[test\]: 添加或修改测试
 - \[chore\]: 构建过程或辅助工具的变动
-
 ## 功能模块 
 - module
   - moduleData 数据
   - moduleLogic 逻辑
   - moduleControl 控制块
-
 ## 配置文件
 - 使用 yaml 文件,作为服务配置文件 [todo menglc]
-
 ## 服务资源
 - ${groupID}.${serverName}.${serverID}.exe
   - groupID: 服务组ID
@@ -57,25 +53,20 @@
 - gateway 30201
 - logic 30301
 - room 30401
-
 ## 错误码
 ### 业务错误码: [0x10000,0x1fffffff]
-
 ## 消息码
 ### 业务消息码: [0x10000,0x1fffffff]
-
 ## google protobuf gen:
 ### protoc-gen-go.v1.34.2.windows.amd64.zip
 ###  https://github.com/protocolbuffers/protobuf-go/releases
-
 ## ETCD
 ### etcd-v3.5.15-windows-amd64.zip
 ### 下载地址: https://github.com/etcd-io/etcd/releases
-
-## 目录结构 [todo menglc]
-- **impl**
+## 目录结构 
+- **impl**[todo menglc]
   - **bin** 执行目录 [todo menglc]
-    - e.g.: 1.gateway.1.bench.json gateway 服务基础配置(group:1,name:gateway,id:1) 
+    - e.g.: 1.gateway.1.bench.yaml gateway 服务基础配置(group:1,name:gateway,id:1) 
     - **log** 日志目录
   - **build**: 构建 [todo menglc]
     - groupID: 组ID [ todo 测试脚本的可用性, windows下的脚本是否可用, linux下的脚本是否可用]
@@ -119,30 +110,29 @@
     - **logic**: 逻辑服务 [todo menglc]
     - **main**: 服务入口 [todo menglc]
 - **lib**: 公共库
-  - **bench**: 服务基础配置
+  - **bench**: 服务基础配置[todo menglc]
   - **common**: 公共模块[todo menglc]
   - **constants**: 常量[todo menglc]
-  - **control**: 控件[todo menglc]
+  - **control**: 控件
   - **error**: 错误码[todo menglc]
   - **etcd**: etcd客户端[todo menglc]
   - **example**: 示例[todo menglc]
   - **exec**: 执行器 [todo menglc]
   - **file**: 文件操作[todo menglc]
   - **log**: 日志[todo menglc]
-  - **message**: 消息
-  - **net**: 网络
-    - **tcp**: tcp
-  - **packet**: 数据包
-  - **pool**: 对象池
-  - **pprof**: 性能分析
-  - **runtime**: 运行时
-  - **service**: 服务
-  - **subpub**: 订阅发布
-  - **time**: 时间管理器
-  - **timer**: 定时器
-  - **util**: 工具类
+  - **message**: 消息[todo menglc]
+  - **net**: 网络[todo menglc]
+  - **packet**: 数据包[todo menglc]
+  - **pool**: 对象池[todo menglc]
+  - **pprof**: 性能分析[todo menglc]
+  - **runtime**: 运行时[todo menglc]
+  - **server**: 服务[todo menglc]
+  - **subpub**: 订阅发布[todo menglc]
+  - **time**: 时间管理器[todo menglc]
+  - **timer**: 定时器[todo menglc]
+  - **util**: 工具类[todo menglc]
 - **scripts**: 脚本[todo menglc]
-- **temp**: 临时文件[todo menglc]
+- **temp**: 临时文件
 - **tools**: 工具[todo menglc]
   - **client.simulator**: 客户端模拟器
     - 日志记录:输入,输出

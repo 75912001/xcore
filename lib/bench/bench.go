@@ -46,9 +46,9 @@ type Etcd struct {
 }
 
 type benchJson struct {
-	Base       Base               `json:"base"`
-	Timer      Timer              `json:"timer"`
-	ServiceNet xcommon.ServiceNet `json:"serviceNet"`
+	Base      Base               `json:"base"`
+	Timer     Timer              `json:"timer"`
+	ServerNet xcommon.ServiceNet `json:"serverNet"`
 }
 
 func (p *benchJson) Parse(jsonString string) error {
@@ -100,15 +100,15 @@ func (p *benchJson) Parse(jsonString string) error {
 		defaultValue := xtimer.ScanMillisecondDurationDefault
 		p.Timer.ScanMillisecondDuration = &defaultValue
 	}
-	if p.ServiceNet.Addr == nil {
+	if p.ServerNet.Addr == nil {
 		defaultValue := ""
-		p.ServiceNet.Addr = &defaultValue
+		p.ServerNet.Addr = &defaultValue
 	}
-	if p.ServiceNet.Type == nil {
+	if p.ServerNet.Type == nil {
 		defaultValue := "tcp"
-		p.ServiceNet.Type = &defaultValue
+		p.ServerNet.Type = &defaultValue
 	}
-	if *p.ServiceNet.Type != "tcp" && *p.ServiceNet.Type != "udp" {
+	if *p.ServerNet.Type != "tcp" && *p.ServerNet.Type != "udp" {
 		return xerror.NotImplemented.WithExtraMessage(fmt.Sprintf("serviceNet.type must be tcp or udp. %x", xruntime.Location()))
 	}
 	return nil
