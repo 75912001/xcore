@@ -52,7 +52,7 @@
 - gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
 - logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
 ### 端口占用
-- 端口计算公式: [3 * 10000 + service.type*100 + service.id]
+- 端口计算公式: [3 * 10000 + ${service.type}*100 + ${service.id}]
 - login 30101
 - gateway 30201
 - logic 30301
@@ -195,6 +195,9 @@
   - gateway 将消息转发到 logic, logic 处理消息后,将消息返回给 gateway, gateway 将消息返回给客户端 [todo menglc]
 ### login: 登录 [todo menglc]
 ### logic: 逻辑 [todo menglc]
+
+gateway 将消息转发到logic,logic处理消息后,将消息返回给gateway,gateway将消息返回给客户端 
+  gateway 与 logic 之间通过tcp连接
 
 gateway 增加心跳检测,超时未登录断开连接
 

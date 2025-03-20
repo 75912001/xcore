@@ -46,7 +46,7 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 			},
 			u,
 		),
-		p.TimeMgr.ShadowTimestamp()+UserLoginTimeOut,
+		p.TimeMgr.ShadowTimestamp()+UserLoginTimeout,
 	)
 	// 用户心跳超时
 	p.Timer.AddSecond(

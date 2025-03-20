@@ -2,21 +2,6 @@ package gateway
 
 import xnettcp "xcore/lib/net/tcp"
 
-// UserConnect 用户-链接
-type UserConnect struct {
-	IRemote          xnettcp.IRemote
-	ExpireTimestamp  int64  // 到期时间戳-灰度
-	heartbeatRandom  uint64 // 心跳随机数
-	heartbeatTimeout int64  // 心跳超时时间
-}
-
-func newUserConnect(remote xnettcp.IRemote) *UserConnect {
-	return &UserConnect{
-		IRemote:          remote,
-		heartbeatTimeout: gService.TimeMgr.ShadowTimestamp() + UserHeartbeatIntervalMax,
-	}
-}
-
 type User struct {
 	id           uint64       // 用户id
 	login        bool         // 是否登录

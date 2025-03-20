@@ -1,6 +1,9 @@
 package gateway
 
-import xnettcp "xcore/lib/net/tcp"
+import (
+	xcontrol "xcore/lib/control"
+	xnettcp "xcore/lib/net/tcp"
+)
 
 var gUserMgr *userMgr
 
