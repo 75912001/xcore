@@ -7,15 +7,15 @@ package bench
 import (
 	"encoding/json"
 	"fmt"
+	xcommon "github.com/75912001/xcore/lib/common"
+	xerror "github.com/75912001/xcore/lib/error"
+	xetcd "github.com/75912001/xcore/lib/etcd"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xtimer "github.com/75912001/xcore/lib/timer"
 	"github.com/pkg/errors"
 	"path/filepath"
 	"runtime"
 	"time"
-	xcommon "xcore/lib/common"
-	xerror "xcore/lib/error"
-	xetcd "xcore/lib/etcd"
-	xruntime "xcore/lib/runtime"
-	xtimer "xcore/lib/timer"
 )
 
 // 配置-主项,用户服务的基本配置

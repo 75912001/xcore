@@ -1,9 +1,9 @@
 package tcp
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
 )
 
 // clientOptions contains options to configure a Service instance. Each option can be set through setter functions. See

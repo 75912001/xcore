@@ -3,18 +3,18 @@ package tcp
 import (
 	"context"
 	"encoding/binary"
+	xerror "github.com/75912001/xcore/lib/error"
+	xlog "github.com/75912001/xcore/lib/log"
+	"github.com/75912001/xcore/lib/packet"
+	xpool "github.com/75912001/xcore/lib/pool"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xutil "github.com/75912001/xcore/lib/util"
 	"github.com/pkg/errors"
 	"io"
 	"net"
 	"runtime/debug"
 	"strings"
 	"time"
-	xerror "xcore/lib/error"
-	xlog "xcore/lib/log"
-	"xcore/lib/packet"
-	xpool "xcore/lib/pool"
-	xruntime "xcore/lib/runtime"
-	xutil "xcore/lib/util"
 )
 
 // Remote 远端

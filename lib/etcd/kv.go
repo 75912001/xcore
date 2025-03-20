@@ -3,10 +3,10 @@ package etcd
 import (
 	"encoding/json"
 	"fmt"
+	xcommon "github.com/75912001/xcore/lib/common"
+	xlog "github.com/75912001/xcore/lib/log"
 	"path"
 	"strconv"
-	xcommon "xcore/lib/common"
-	xlog "xcore/lib/log"
 )
 
 // e.g.:/${projectName}/${EtcdWatchMsgType}/${groupID}/${serviceName}/${serviceID}/

@@ -12,7 +12,7 @@
 currPath=$(cd $(dirname ${BASH_SOURCE[0]}); pwd)
 source ${currPath}/base.sh
 
-#echo "deploy ${name} service ..."
+#echo "deploy ${name} server ..."
 
 CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o ${exeName} ${7}
 

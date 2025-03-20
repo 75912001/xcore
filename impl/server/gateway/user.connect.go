@@ -1,7 +1,7 @@
 package gateway
 
-import xnettcp "xcore/lib/net/tcp"
-import xnetconnect "xcore/lib/net/connect"
+import xnettcp "github.com/75912001/xcore/lib/net/tcp"
+import xnetconnect "github.com/75912001/xcore/lib/net/connect"
 
 // UserConnect 用户-链接
 type UserConnect struct {

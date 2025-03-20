@@ -1,8 +1,8 @@
-package service
+package server
 
 import (
-	xcallback "xcore/lib/control"
-	xetcd "xcore/lib/etcd"
+	xcallback "github.com/75912001/xcore/lib/control"
+	xetcd "github.com/75912001/xcore/lib/etcd"
 )
 
 // EtcdReportFunction etcd-上报

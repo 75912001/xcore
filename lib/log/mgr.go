@@ -9,6 +9,9 @@ package log
 import (
 	"context"
 	"fmt"
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xtime "github.com/75912001/xcore/lib/time"
 	"github.com/pkg/errors"
 	"io"
 	"log"
@@ -18,9 +21,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
-	xtime "xcore/lib/time"
 )
 
 // NewMgr 创建日志管理器

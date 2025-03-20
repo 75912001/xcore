@@ -4,8 +4,8 @@
 package time
 
 import (
+	xcontrol "github.com/75912001/xcore/lib/control"
 	"time"
-	xcontrol "xcore/lib/control"
 )
 
 // Mgr 时间管理器

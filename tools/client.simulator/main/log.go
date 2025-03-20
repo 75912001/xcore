@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	xlog "xcore/lib/log"
-	xruntime "xcore/lib/runtime"
+	xlog "github.com/75912001/xcore/lib/log"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 )
 
 var log xlog.ILog

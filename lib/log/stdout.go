@@ -2,11 +2,11 @@ package log
 
 import (
 	"fmt"
+	xerror "github.com/75912001/xcore/lib/error"
 	"log"
 	"os"
 	"runtime"
 	"time"
-	xerror "xcore/lib/error"
 )
 
 var stdOut = log.New(os.Stdout, "", 0)

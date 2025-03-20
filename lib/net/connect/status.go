@@ -1,8 +1,8 @@
 package connect
 
 import (
+	xcontrol "github.com/75912001/xcore/lib/control"
 	"time"
-	xcontrol "xcore/lib/control"
 )
 
 type Status struct {

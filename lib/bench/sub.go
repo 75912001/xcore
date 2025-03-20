@@ -2,9 +2,9 @@ package bench
 
 import (
 	"encoding/json"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"time"
-	xruntime "xcore/lib/runtime"
 )
 
 type Sub struct {

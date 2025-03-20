@@ -4,13 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	xconstants "github.com/75912001/xcore/lib/constants"
+	xlog "github.com/75912001/xcore/lib/log"
+	xnettcp "github.com/75912001/xcore/lib/net/tcp"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"os"
 	"path"
 	"strings"
-	xconstants "xcore/lib/constants"
-	xlog "xcore/lib/log"
-	xnettcp "xcore/lib/net/tcp"
-	xruntime "xcore/lib/runtime"
 )
 
 func main() {

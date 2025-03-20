@@ -1,10 +1,10 @@
 package timer
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"time"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
 )
 
 // NewOptions 新的Options

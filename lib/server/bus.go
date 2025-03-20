@@ -1,12 +1,12 @@
-package service
+package server
 
 import (
+	xetcd "github.com/75912001/xcore/lib/etcd"
+	xlog "github.com/75912001/xcore/lib/log"
+	xnettcp "github.com/75912001/xcore/lib/net/tcp"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xtimer "github.com/75912001/xcore/lib/timer"
 	"time"
-	xetcd "xcore/lib/etcd"
-	xlog "xcore/lib/log"
-	xnettcp "xcore/lib/net/tcp"
-	xruntime "xcore/lib/runtime"
-	xtimer "xcore/lib/timer"
 )
 
 // Handle todo [重要] issue 在处理 event 时候, 向 eventChan 中插入 事件，注意超出eventChan的上限会阻塞.

@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"fmt"
-	xruntime "xcore/lib/runtime"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 )
 
 func logCallBackFunc(level uint32, outString string) {

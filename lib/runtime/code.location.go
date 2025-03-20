@@ -2,10 +2,10 @@ package runtime
 
 import (
 	"fmt"
+	xerror "github.com/75912001/xcore/lib/error"
 	"os"
 	"path/filepath"
 	"runtime"
-	xerror "xcore/lib/error"
 )
 
 // 代码位置

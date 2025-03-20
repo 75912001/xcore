@@ -6,11 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-const ServiceNameGateway string = "gateway" // 网关服
-const ServiceNameLogin string = "login"     // 登录服
-const ServiceNameLogic string = "logic"     // 逻辑服
-const ServiceNameRoom string = "room"       // 房间服
-const ServiceNameGM string = "gm"           // GM服务
+const ServerNameGateway string = "gateway" // 网关服
+const ServerNameLogin string = "login"     // 登录服
+const ServerNameLogic string = "logic"     // 逻辑服
+const ServerNameRoom string = "room"       // 房间服
+const ServerNameGM string = "gm"           // GM服务
 
 var TCPHeartBeatTimeOutSec int64 = 30 // 心跳时间-秒 // todo menglc 可配置...
 var KCPHeartBeatTimeOutSec int64 = 30 // 心跳时间-秒 // todo menglc 可配置...

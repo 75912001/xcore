@@ -1,12 +1,12 @@
 package pprof
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xlog "github.com/75912001/xcore/lib/log"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"net/http"
 	_ "net/http/pprof"
 	"runtime/debug"
-	xerror "xcore/lib/error"
-	xlog "xcore/lib/log"
-	xruntime "xcore/lib/runtime"
 )
 
 // StartHTTPprof 开启http采集分析

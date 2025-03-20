@@ -1,10 +1,10 @@
 package packet
 
 import (
+	xmessage "github.com/75912001/xcore/lib/message"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	xmessage "xcore/lib/message"
-	xruntime "xcore/lib/runtime"
 )
 
 // Packet 数据包

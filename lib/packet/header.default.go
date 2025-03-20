@@ -2,7 +2,7 @@ package packet
 
 import (
 	"encoding/binary"
-	xutil "xcore/lib/util"
+	xutil "github.com/75912001/xcore/lib/util"
 )
 
 const HeaderSize uint32 = 24

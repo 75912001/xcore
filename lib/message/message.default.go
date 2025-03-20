@@ -1,12 +1,12 @@
 package message
 
 import (
+	xcontrol "github.com/75912001/xcore/lib/control"
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	xcontrol "xcore/lib/control"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
 )
 
 type Message struct {

@@ -7,7 +7,7 @@
 #${5} ${PORT}
 #${6} ${USER}
 
-#echo "stop ${name} service ..."
+#echo "stop ${name} server ..."
 
 ssh ${6}@${4} -p ${5} "
 cd /data/yoozoogame/admin

@@ -2,8 +2,8 @@ package etcd
 
 import (
 	"context"
+	xcontrol "github.com/75912001/xcore/lib/control"
 	etcdclientv3 "go.etcd.io/etcd/client/v3"
-	xcontrol "xcore/lib/control"
 )
 
 type IEtcd interface {

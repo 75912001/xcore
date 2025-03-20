@@ -7,7 +7,7 @@
 #${5} ${PORT}
 #${6} ${USER}
 
-#echo "start ${name} service ..."
+#echo "start ${name} server ..."
 
 output=$(ssh ${6}@${4} -p ${5} "
 cd /data/yoozoogame/admin

@@ -2,13 +2,13 @@ package gateway
 
 import (
 	"fmt"
+	xcommonservice "github.com/75912001/xcore/impl/common"
+	xutil "github.com/75912001/xcore/lib/control"
+	xerror "github.com/75912001/xcore/lib/error"
+	xnettcp "github.com/75912001/xcore/lib/net/tcp"
+	packet2 "github.com/75912001/xcore/lib/packet"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
-	xcommonservice "xcore/impl/common"
-	xutil "xcore/lib/control"
-	xerror "xcore/lib/error"
-	xnettcp "xcore/lib/net/tcp"
-	packet2 "xcore/lib/packet"
-	xruntime "xcore/lib/runtime"
 )
 
 //	type Server struct {
@@ -137,7 +137,7 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error
 				return errors.WithMessage(xerror.Unavailable, xruntime.Location())
 			}
 			user.LoginService = loginService
-			// 将消息转发到 login service
+			// 将消息转发到 login server
 			err := user.LoginService.IRemote.Send(packetTransparent)
 			if err != nil {
 				return errors.WithMessage(err, xruntime.Location())

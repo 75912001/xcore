@@ -1,8 +1,8 @@
 package message
 
 import (
+	xcontrol "github.com/75912001/xcore/lib/control"
 	"google.golang.org/protobuf/proto"
-	xcontrol "xcore/lib/control"
 )
 
 type IMessage interface {

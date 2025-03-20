@@ -10,7 +10,7 @@ groupID=$(basename "$PWD")
 
 echo "deploy groupID:${groupID} service ..."
 
-CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o ${exeName} ../../service/main/main.go
+CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o ${exeName} ../../server/main/main.go
 
 echo "build is complete"
 

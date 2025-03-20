@@ -1,6 +1,6 @@
 package gateway
 
-import xtime "xcore/lib/time"
+import xtime "github.com/75912001/xcore/lib/time"
 
 const UserInactiveTimeout int64 = xtime.OneDaySecond // 用户非活跃时间-秒
 const UserLoginTimeout int64 = xtime.OneDaySecond    // 用户登录超时时间-秒

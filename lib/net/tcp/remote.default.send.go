@@ -1,10 +1,10 @@
 package tcp
 
 import (
+	xpacket "github.com/75912001/xcore/lib/packet"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	xpacket "xcore/lib/packet"
-	xruntime "xcore/lib/runtime"
 )
 
 func Send(remote IRemote, pb proto.Message, messageID uint32, sessionID uint32, key uint64) error {

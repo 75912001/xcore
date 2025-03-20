@@ -2,14 +2,14 @@ package tcp
 
 import (
 	"context"
+	xerror "github.com/75912001/xcore/lib/error"
+	xlog "github.com/75912001/xcore/lib/log"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xutil "github.com/75912001/xcore/lib/util"
 	"github.com/pkg/errors"
 	"net"
 	"runtime/debug"
 	"time"
-	xerror "xcore/lib/error"
-	xlog "xcore/lib/log"
-	xruntime "xcore/lib/runtime"
-	xutil "xcore/lib/util"
 )
 
 // Service 服务端

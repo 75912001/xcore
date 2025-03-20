@@ -1,11 +1,11 @@
 package gateway
 
 import (
+	xcommon "github.com/75912001/xcore/impl/common"
+	xerror "github.com/75912001/xcore/lib/error"
+	xetcd "github.com/75912001/xcore/lib/etcd"
+	xlog "github.com/75912001/xcore/lib/log"
 	"github.com/pkg/errors"
-	xcommon "xcore/impl/common"
-	xerror "xcore/lib/error"
-	xetcd "xcore/lib/etcd"
-	xlog "xcore/lib/log"
 )
 
 // EtcdKeyValue etcd 刷新 key value
@@ -26,12 +26,12 @@ func EtcdKeyValue(arg ...interface{}) error {
 		return nil
 	}
 	switch msgType {
-	case xetcd.WatchMsgTypeService:
+	case xetcd.WatchMsgTypeServer:
 		switch serviceName {
-		case xcommon.ServiceNameLogin:
+		case xcommon.ServerNameLogin:
 			loginService := gService.LoginServiceMgr.Get(serviceID)
 			if loginService != nil {
-				xlog.PrintfInfo("login service Existent %v", serviceID)
+				xlog.PrintfInfo("login server Existent %v", serviceID)
 				return errors.WithMessage(xerror.Exist, "login services Existent")
 			}
 			loginService = NewLoginService()
@@ -47,10 +47,10 @@ func EtcdKeyValue(arg ...interface{}) error {
 			//		SetOnPacket(OnPacketFromRoom).
 			//		SetOnDisconnect(OnDisconnectFromRoom),
 			//); err != nil {
-			//	xrlog.GetInstance().Fatalf("%v zoneID:%v, serviceName:%v, serviceID:%v, ip:%v, port:%v connect service err:%v",
+			//	xrlog.GetInstance().Fatalf("%v zoneID:%v, serverName:%v, serverID:%v, ip:%v, port:%v connect server err:%v",
 			//		xrconstant.Etcd, zoneIDU32, serviceName, serviceIDU32, etcdValueJson.ServiceNetTCP.IP,
 			//		etcdValueJson.ServiceNetTCP.Port, err)
-			//	return errors.WithMessage(err, "connect room service err")
+			//	return errors.WithMessage(err, "connect room server err")
 			//}
 			//xrlog.GetInstance().Debug(address, zoneIDU32, serviceName, serviceIDU32, &room.Client.Remote)
 			//room.ID = serviceIDU32
@@ -69,10 +69,10 @@ func EtcdKeyValue(arg ...interface{}) error {
 			//	},
 			//)
 			//if err != nil {
-			//	xrlog.GetInstance().Warnf("%v zoneID:%v, serviceName:%v, serviceID:%v, ip:%v, port:%v connect service err:%v",
+			//	xrlog.GetInstance().Warnf("%v zoneID:%v, serviceName:%v, serviceID:%v, ip:%v, port:%v connect server err:%v",
 			//		xrconstant.Etcd, zoneIDU32, serviceName, serviceIDU32, etcdValueJson.ServiceNetTCP.IP,
 			//		etcdValueJson.ServiceNetTCP.Port, err)
-			//	return errors.WithMessage(err, "register room service err")
+			//	return errors.WithMessage(err, "register room server err")
 			//}
 		default:
 		}

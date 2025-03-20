@@ -3,11 +3,11 @@ package util
 import (
 	"bytes"
 	cryptorand "crypto/rand"
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"math/big"
 	"math/rand"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
 )
 
 // RandomInt 生成范围内的随机值

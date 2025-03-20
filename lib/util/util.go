@@ -1,6 +1,8 @@
 package util
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	"net"
@@ -9,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"unsafe"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
 )
 
 // IsLittleEndian 是否小端

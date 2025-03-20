@@ -1,10 +1,10 @@
 package gateway
 
 import (
+	xprotobufgateway "github.com/75912001/xcore/impl/protobuf/gateway"
+	xcallback "github.com/75912001/xcore/lib/control"
+	"github.com/75912001/xcore/lib/message"
 	"google.golang.org/protobuf/proto"
-	xprotobufgateway "xcore/impl/protobuf/gateway"
-	xcallback "xcore/lib/control"
-	"xcore/lib/message"
 )
 
 var GMessage message.Mgr

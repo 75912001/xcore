@@ -2,15 +2,15 @@ package etcd
 
 import (
 	"context"
+	xcontrol "github.com/75912001/xcore/lib/control"
+	xerror "github.com/75912001/xcore/lib/error"
+	xlog "github.com/75912001/xcore/lib/log"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	etcdclientv3 "go.etcd.io/etcd/client/v3"
 	"runtime/debug"
 	"sync"
 	"time"
-	xcontrol "xcore/lib/control"
-	xerror "xcore/lib/error"
-	xlog "xcore/lib/log"
-	xruntime "xcore/lib/runtime"
 )
 
 type Etcd struct {

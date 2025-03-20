@@ -2,7 +2,7 @@ package timer
 
 import (
 	"context"
-	xcontrol "xcore/lib/control"
+	xcontrol "github.com/75912001/xcore/lib/control"
 )
 
 type ITimerSecond interface {

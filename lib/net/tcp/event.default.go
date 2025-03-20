@@ -1,11 +1,11 @@
 package tcp
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xlog "github.com/75912001/xcore/lib/log"
+	xpacket "github.com/75912001/xcore/lib/packet"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
-	xerror "xcore/lib/error"
-	xlog "xcore/lib/log"
-	xpacket "xcore/lib/packet"
-	xruntime "xcore/lib/runtime"
 )
 
 type Event struct {

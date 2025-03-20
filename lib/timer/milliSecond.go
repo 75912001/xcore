@@ -1,7 +1,7 @@
 package timer
 
 import (
-	xcontrol "xcore/lib/control"
+	xcontrol "github.com/75912001/xcore/lib/control"
 )
 
 // 毫秒级定时器

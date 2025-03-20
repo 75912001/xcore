@@ -1,11 +1,11 @@
 package main
 
 import (
+	xprotobufgateway "github.com/75912001/xcore/impl/protobuf/gateway"
+	xprotobuflogin "github.com/75912001/xcore/impl/protobuf/login"
+	xcallback "github.com/75912001/xcore/lib/control"
+	xmessage "github.com/75912001/xcore/lib/message"
 	"google.golang.org/protobuf/proto"
-	xprotobufgateway "xcore/impl/protobuf/gateway"
-	xprotobuflogin "xcore/impl/protobuf/login"
-	xcallback "xcore/lib/control"
-	xmessage "xcore/lib/message"
 )
 
 var GMessage xmessage.Mgr

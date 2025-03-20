@@ -1,7 +1,7 @@
 package tcp
 
 import (
-	xpacket "xcore/lib/packet"
+	xpacket "github.com/75912001/xcore/lib/packet"
 )
 
 type ISend interface {

@@ -1,10 +1,10 @@
 package message
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xlog "github.com/75912001/xcore/lib/log"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
-	xerror "xcore/lib/error"
-	xlog "xcore/lib/log"
-	xruntime "xcore/lib/runtime"
 )
 
 // Mgr 管理器

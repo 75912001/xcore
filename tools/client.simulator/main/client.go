@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	xerror "github.com/75912001/xcore/lib/error"
+	xnettcp "github.com/75912001/xcore/lib/net/tcp"
+	xpacket "github.com/75912001/xcore/lib/packet"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"reflect"
-	xerror "xcore/lib/error"
-	xnettcp "xcore/lib/net/tcp"
-	xpacket "xcore/lib/packet"
-	xruntime "xcore/lib/runtime"
 )
 
 var client *defaultClient // 客户端

@@ -5,11 +5,12 @@ go 1.23.2
 require (
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
-	go.etcd.io/etcd/client/v3 v3.5.19
-	google.golang.org/protobuf v1.36.5
+	go.etcd.io/etcd/client/v3 v3.5.15
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
+	github.com/agiledragon/gomonkey v2.0.2+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

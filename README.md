@@ -38,8 +38,7 @@
   - moduleControl 控制块
 
 ## 配置文件
-- 使用 yaml 文件,作为服务配置文件 [ todo ]
-  - 目前使用json文件
+- 使用 yaml 文件,作为服务配置文件 [todo menglc]
 
 ## 服务资源
 - ${groupID}.${serverName}.${serverID}.exe
@@ -51,11 +50,13 @@
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
 - gateway 2 [错误码 0x20000,0x2ffff] [消息码 0x20000,0x2ffff]
 - logic 3 [错误码 0x30000,0x3ffff] [消息码 0x30000,0x3ffff]
+- room 4 [错误码 0x40000,0x4ffff] [消息码 0x40000,0x4ffff]
 ### 端口占用
 - 端口计算公式: [3 * 10000 + ${service.type}*100 + ${service.id}]
 - login 30101
 - gateway 30201
 - logic 30301
+- room 30401
 
 ## 错误码
 ### 业务错误码: [0x10000,0x1fffffff]
@@ -71,7 +72,7 @@
 ### etcd-v3.5.15-windows-amd64.zip
 ### 下载地址: https://github.com/etcd-io/etcd/releases
 
-## 目录结构
+## 目录结构 [todo menglc]
 - **impl**
   - **bin** 执行目录 [todo menglc]
     - e.g.: 1.gateway.1.bench.json gateway 服务基础配置(group:1,name:gateway,id:1) 
@@ -155,7 +156,7 @@
     - [执行脚本](/impl/build/build.sh)
   - 客户端模拟器
     - [执行脚本](/tools/client.simulator/build.sh)
-### 部署
+### 部署 [todo menglc]
 - 部署 
   - [执行脚本](/impl/bin/deploy.1.gateway.1.sh)
   - [执行脚本](/impl/bin/deploy.1.login.1.sh)
@@ -169,8 +170,6 @@
 
 [todo menglc]
 
-
-将 程序命名为 server, 之中的服务 命名为 service, 其中的模块命名为 module, 其中的数据模块命名为 moduleData, 逻辑模块命名为 moduleLogic, 控制块命名为 moduleControl
 [执行脚本](/impl/build/build.sh)
 
 

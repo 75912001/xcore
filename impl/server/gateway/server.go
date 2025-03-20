@@ -2,23 +2,23 @@ package gateway
 
 import (
 	"context"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xserver "github.com/75912001/xcore/lib/server"
 	"github.com/pkg/errors"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
-	xruntime "xcore/lib/runtime"
-	xservice "xcore/lib/service"
 )
 
 var gService *Service
 
 type Service struct {
-	*xservice.Service
+	*xserver.Service
 	LoginServiceMgr *LoginServiceMgr
 }
 
-func NewService(defaultService *xservice.Service) *Service {
+func NewService(defaultService *xserver.Service) *Service {
 	gService = &Service{
 		Service:         defaultService,
 		LoginServiceMgr: NewLoginServiceMgr(),
@@ -168,12 +168,12 @@ EXIT:
 	for {
 		select {
 		case <-p.QuitChan:
-			p.Log.Warn("service will shutdown in a few seconds")
+			p.Log.Warn("server will shutdown in a few seconds")
 			_ = p.PreStop() // [ todo menglc ] 调试 gateway
 			_ = p.Stop()    // [ todo menglc ] 调试 gateway
 			break EXIT      // 退出循环
 		case s := <-sigChan:
-			p.Log.Warnf("service got signal: %s, shutting down...", s)
+			p.Log.Warnf("server got signal: %s, shutting down...", s)
 			close(p.QuitChan)
 		}
 	}

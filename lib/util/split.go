@@ -1,11 +1,11 @@
 package util
 
 import (
+	xerror "github.com/75912001/xcore/lib/error"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"strconv"
 	"strings"
-	xerror "xcore/lib/error"
-	xruntime "xcore/lib/runtime"
 )
 
 // Split2SliceU32 拆分字符串, 返回 uint32 类型的 slice

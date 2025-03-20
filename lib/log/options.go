@@ -1,10 +1,10 @@
 package log
 
 import (
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
-	xruntime "xcore/lib/runtime"
 )
 
 // options contains options to configure a server mgrInstance. Each option can be set through setter functions. See

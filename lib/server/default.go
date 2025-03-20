@@ -1,8 +1,19 @@
-package service
+package server
 
 import (
 	"context"
 	"fmt"
+	xbench "github.com/75912001/xcore/lib/bench"
+	xcallback "github.com/75912001/xcore/lib/control"
+	xerror "github.com/75912001/xcore/lib/error"
+	xetcd "github.com/75912001/xcore/lib/etcd"
+	xlog "github.com/75912001/xcore/lib/log"
+	xtcp "github.com/75912001/xcore/lib/net/tcp"
+	xpprof "github.com/75912001/xcore/lib/pprof"
+	xruntime "github.com/75912001/xcore/lib/runtime"
+	xtime "github.com/75912001/xcore/lib/time"
+	xtimer "github.com/75912001/xcore/lib/timer"
+	xutil "github.com/75912001/xcore/lib/util"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"math/rand"
@@ -12,17 +23,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	xbench "xcore/lib/bench"
-	xcallback "xcore/lib/control"
-	xerror "xcore/lib/error"
-	xetcd "xcore/lib/etcd"
-	xlog "xcore/lib/log"
-	xtcp "xcore/lib/net/tcp"
-	xpprof "xcore/lib/pprof"
-	xruntime "xcore/lib/runtime"
-	xtime "xcore/lib/time"
-	xtimer "xcore/lib/timer"
-	xutil "xcore/lib/util"
 )
 
 type Service struct {
@@ -49,9 +49,9 @@ type Service struct {
 	TCPService *xtcp.Service
 }
 
-// NewService 创建服务
+// NewServer 创建服务
 // args: [组ID, 服务名, 服务ID]
-func NewService(args []string) *Service {
+func NewServer(args []string) *Service {
 	s := &Service{
 		TimeMgr:  xtime.NewMgr(),
 		QuitChan: make(chan struct{}),
@@ -207,7 +207,7 @@ func (p *Service) Start(ctx context.Context,
 		}
 	}
 	// etcd
-	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeService, p.GroupID, p.Name, p.ID)
+	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeServer, p.GroupID, p.Name, p.ID)
 	defaultEtcd := xetcd.NewEtcd(
 		xetcd.NewOptions().
 			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).

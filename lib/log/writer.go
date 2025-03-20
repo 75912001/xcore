@@ -2,9 +2,9 @@ package log
 
 import (
 	"fmt"
+	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"os"
-	xruntime "xcore/lib/runtime"
 )
 
 // 生成 normal log Writer
