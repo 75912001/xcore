@@ -10,7 +10,7 @@ import (
 
 type options struct {
 	callback          xcontrol.ICallBack     // [required] 消息回调
-	newProtoMessage   func() proto.Message   // [required] 创建新的 proto.options
+	newProtoMessage   func() proto.Message   // [required] 创建新的 proto.Message
 	stateSwitch       xcontrol.ISwitchButton // [optional] 状态开关-该消息是否启用 [default]:true
 	passThroughSwitch xcontrol.ISwitchButton // [optional] 透传开关-该消息是否透传 [default]:false
 }

@@ -169,9 +169,9 @@ EXIT:
 		select {
 		case <-p.QuitChan:
 			p.Log.Warn("service will shutdown in a few seconds")
-			_ = p.PreStop()
-			_ = p.Stop()
-			break EXIT // 退出循环
+			_ = p.PreStop() // [ todo menglc ] 调试 gateway
+			_ = p.Stop()    // [ todo menglc ] 调试 gateway
+			break EXIT      // 退出循环
 		case s := <-sigChan:
 			p.Log.Warnf("service got signal: %s, shutting down...", s)
 			close(p.QuitChan)

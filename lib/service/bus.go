@@ -9,7 +9,7 @@ import (
 	xtimer "xcore/lib/timer"
 )
 
-// HandleEvent todo [重要] issue 在处理 event 时候, 向 eventChan 中插入 事件，注意超出eventChan的上限会阻塞.
+// Handle todo [重要] issue 在处理 event 时候, 向 eventChan 中插入 事件，注意超出eventChan的上限会阻塞.
 func (p *Service) Handle() error {
 	//在消费eventChan时可能会往eventChan中写入事件，所以关闭服务时不能close eventChan（造成写入阻塞），通过定时检查eventChan大小来关闭
 	for {
@@ -83,5 +83,4 @@ func (p *Service) Handle() error {
 			}
 		}
 	}
-	return nil
 }

@@ -23,7 +23,7 @@ func NewHeader() *Header {
 }
 
 func (p *Header) Pack() []byte {
-	data := make([]byte, p.Length)
+	data := make([]byte, p.Length) // [todo menglc] 这里可以使用内存池,记得回收
 	xutil.PackUint32(p.Length, data[0:])
 	xutil.PackUint32(p.MessageID, data[4:])
 	xutil.PackUint32(p.SessionID, data[8:])

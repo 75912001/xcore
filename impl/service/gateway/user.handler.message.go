@@ -5,8 +5,8 @@ import (
 	"github.com/pkg/errors"
 	"math/rand"
 	xprotobufgateway "xcore/impl/protobuf/gateway"
-	xnetpacket "xcore/lib/net/packet"
 	xnettcp "xcore/lib/net/tcp"
+	xnetpacket "xcore/lib/packet"
 	xruntime "xcore/lib/runtime"
 )
 

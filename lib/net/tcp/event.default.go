@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 	xerror "xcore/lib/error"
 	xlog "xcore/lib/log"
-	xnetpacket "xcore/lib/net/packet"
+	xpacket "xcore/lib/packet"
 	xruntime "xcore/lib/runtime"
 )
 
@@ -47,7 +47,7 @@ func (p *Event) Disconnect(handler IHandler, remote IRemote) error {
 }
 
 // Packet 数据包
-func (p *Event) Packet(handler IHandler, remote IRemote, packet xnetpacket.IPacket) error {
+func (p *Event) Packet(handler IHandler, remote IRemote, packet xpacket.IPacket) error {
 	select {
 	case p.eventChan <- &Packet{
 		IHandler: handler,
