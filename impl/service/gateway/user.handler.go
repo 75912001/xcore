@@ -156,6 +156,14 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error
 
 func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnDisconnect: %v", remote)
-	gUserMgr.remove(remote)
+	switch remote.GetDisconnectReason() {
+	case xnettcp.DisconnectReasonClientShutdown:
+		// 只移除 remote,不移除数据,数据设置为-非活跃状态.
+		gUserMgr.removeRemoteAndSetInactive(remote)
+	default:
+		// 正常关闭
+		gUserMgr.remove(remote)
+	}
+
 	return nil
 }

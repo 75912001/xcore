@@ -10,6 +10,13 @@ echo "projectPath:${projectPath}"
 cd "${projectPath}"/client.simulator/main || exit
 # 编译 main.go
 go build
+
+# 获取 返回值
+if [ $? -ne 0 ]; then
+    echo -e "\e[91mbuild client.simulator failed.\e[0m"
+    exit 1
+fi
+
 cd - || exit
 
 # 将 client.simulator.exe 移动到 bin 目录

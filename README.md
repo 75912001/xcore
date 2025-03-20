@@ -1,14 +1,12 @@
 # xcore
 - 游戏服务器引擎
 - 采用csp方式构建程序
-
 ## 项目初始化
 - go mod init xcore
 - 清理依赖
   - go mod tidy
 - 检查依赖
   - go mod verify
-
 ## 安装包
 - go get github.com/pkg/errors@v0.9.1
 - go get go.etcd.io/etcd/client/v3@v3.5.15
@@ -35,19 +33,19 @@
 
 ## 功能模块 
 - module
-- 数据
-- 逻辑
-- 控制块
+  - moduleData 数据
+  - moduleLogic 逻辑
+  - moduleControl 控制块
 
 ## 配置文件
-- 使用 yml 文件,作为服务配置文件 [ todo ]
+- 使用 ymal 文件,作为服务配置文件 [ todo ]
   - 目前使用json文件
 
 ## 服务资源
-- ${groupID}.${serviceName}.${serviceID}.exe
+- ${groupID}.${serverName}.${serverID}.exe
   - groupID: 服务组ID
-  - serviceName: 服务名称
-  - serviceID: 服务ID
+  - serverName: 服务名称
+  - serverID: 服务ID
 ### 服务类型
 - system 系统保留 lib/error/system.code.go [错误码 0x0,0xffff] 
 - login 1 [错误码 0x10000,0x1ffff] [消息码 0x10000,0x1ffff]
@@ -171,7 +169,9 @@
 
 [todo menglc]
 
-[执行脚本](/impl/build/build.sh)[todo menglc]
+
+将 程序命名为 server, 之中的服务 命名为 service, 其中的模块命名为 module, 其中的数据模块命名为 moduleData, 逻辑模块命名为 moduleLogic, 控制块命名为 moduleControl
+[执行脚本](/impl/build/build.sh)
 
 
 创建 login
@@ -196,10 +196,9 @@
 ### login: 登录 [todo menglc]
 ### logic: 逻辑 [todo menglc]
 
+gateway 增加心跳检测,超时未登录断开连接
 
-
-
-
+gateway 路由功能放在配置文件中
 
 
 

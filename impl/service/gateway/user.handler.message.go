@@ -22,6 +22,8 @@ func UserOnlineMsg(args ...interface{}) error {
 	pb := defaultPacket.PBMessage.(*xprotobufgateway.UserOnlineMsgReq)
 	fmt.Println(user, defaultPacket, pb, xruntime.Location())
 	// todo menglc 处理用户上线
+	// 在用户数据中寻找,是否有该用户,处于非活跃状态,则激活
+	// 在用户数据中寻找,是否有该用户,处于活跃状态,则断开连接
 
 	// 返回消息
 	res := &xprotobufgateway.UserOnlineMsgRes{
