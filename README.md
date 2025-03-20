@@ -1,6 +1,6 @@
 # xcore
 - 游戏服务器引擎
-- 采用csp方式构建程序
+- 分布式事件队列模型(Event Queue Model)
 ## 项目初始化
 - go mod init xcore
 - 清理依赖
@@ -38,7 +38,7 @@
   - moduleControl 控制块
 
 ## 配置文件
-- 使用 ymal 文件,作为服务配置文件 [ todo ]
+- 使用 yaml 文件,作为服务配置文件 [ todo ]
   - 目前使用json文件
 
 ## 服务资源

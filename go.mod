@@ -1,4 +1,4 @@
-module xcore
+module github.com/75912001/xcore
 
 go 1.22.2
 
