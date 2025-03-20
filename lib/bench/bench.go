@@ -46,9 +46,9 @@ type Etcd struct {
 }
 
 type benchJson struct {
-	Base       Base               `json:"base"`
-	Timer      Timer              `json:"timer"`
-	ServiceNet xcommon.ServiceNet `json:"serviceNet"`
+	Base      Base               `json:"base"`
+	Timer     Timer              `json:"timer"`
+	ServerNet xcommon.ServiceNet `json:"serverNet"`
 }
 
 func (p *benchJson) Parse(jsonString string) error {

@@ -11,23 +11,23 @@ import (
 	"syscall"
 )
 
-var gService *Service
+var gServer *Server
 
-type Service struct {
-	*xserver.Service
+type Server struct {
+	*xserver.Server
 	LoginServiceMgr *LoginServiceMgr
 }
 
-func NewService(defaultService *xserver.Service) *Service {
-	gService = &Service{
-		Service:         defaultService,
+func NewSerer(defaultServer *xserver.Server) *Server {
+	gServer = &Server{
+		Server:          defaultServer,
 		LoginServiceMgr: NewLoginServiceMgr(),
 	}
-	return gService
+	return gServer
 }
 
-func (p *Service) Start(ctx context.Context) (err error) {
-	if err = p.Service.Start(ctx, p, logCallBackFunc, EtcdKeyValue); err != nil {
+func (p *Server) Start(ctx context.Context) (err error) {
+	if err = p.Server.Start(ctx, p, logCallBackFunc, EtcdKeyValue); err != nil {
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 
@@ -270,7 +270,7 @@ EXIT:
 	//return err
 }
 
-//func (p *Service) Stop() (err error) {
+//func (p *Server) Stop() (err error) {
 //	server_del.GDBRetryMgr.Stop()
 //	xrlog.GetInstance().Warn("GDBRetryMgr stop")
 //
@@ -310,11 +310,11 @@ EXIT:
 //	return nil
 //}
 
-func (p *Service) PreStop() error {
+func (p *Server) PreStop() error {
 	_ = p.Etcd.Stop()
 	return nil
 }
-func (p *Service) Stop() (err error) {
-	_ = p.Service.Stop()
+func (p *Server) Stop() (err error) {
+	_ = p.Server.Stop()
 	return nil
 }

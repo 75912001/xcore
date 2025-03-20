@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	xbench "github.com/75912001/xcore/lib/bench"
-	xcallback "github.com/75912001/xcore/lib/control"
+	xcontrol "github.com/75912001/xcore/lib/control"
 	xerror "github.com/75912001/xcore/lib/error"
 	xetcd "github.com/75912001/xcore/lib/etcd"
 	xlog "github.com/75912001/xcore/lib/log"
@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-type Service struct {
+type Server struct {
 	BenchMgr xbench.Mgr
 	BenchSub *xbench.Sub
 
@@ -46,13 +46,13 @@ type Service struct {
 
 	QuitChan chan struct{} // 退出信号, 用于关闭服务
 
-	TCPService *xtcp.Service
+	TCPServer *xtcp.Server
 }
 
 // NewServer 创建服务
-// args: [组ID, 服务名, 服务ID]
-func NewServer(args []string) *Service {
-	s := &Service{
+// args: [进程名称, 组ID, 服务名, 服务ID]
+func NewServer(args []string) *Server {
+	s := &Server{
 		TimeMgr:  xtime.NewMgr(),
 		QuitChan: make(chan struct{}),
 	}
@@ -89,11 +89,11 @@ func NewServer(args []string) *Service {
 	return s
 }
 
-//func (p *Service) PreStop() error {
-//	return xerror.NotImplemented
-//}
+func (p *Server) PreStop() error {
+	return xerror.NotImplemented
+}
 
-func (p *Service) Start(ctx context.Context,
+func (p *Server) Start(ctx context.Context,
 	handler xtcp.IHandler,
 	logCallbackFunc xlog.CallBackFunc,
 	etcdCallbackFun xetcd.CallbackFun) (err error) {
@@ -216,7 +216,7 @@ func (p *Service) Start(ctx context.Context,
 			WithKey(p.EtcdKey).
 			WithValue(
 				&xetcd.ValueJson{
-					ServiceNet:    &p.BenchMgr.Json.ServiceNet,
+					ServerNet:     &p.BenchMgr.Json.ServerNet,
 					Version:       *p.BenchMgr.Json.Base.Version,
 					AvailableLoad: *p.BenchMgr.Json.Base.AvailableLoad,
 					SecondOffset:  0,
@@ -235,15 +235,15 @@ func (p *Service) Start(ctx context.Context,
 		return errors.WithMessagef(err, xruntime.Location())
 	}
 	// etcd-定时上报
-	p.Timer.AddSecond(xcallback.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault)
+	p.Timer.AddSecond(xcontrol.NewCallBack(EtcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault)
 	// 网络服务
-	if len(*p.BenchMgr.Json.ServiceNet.Addr) != 0 {
-		switch *p.BenchMgr.Json.ServiceNet.Type {
+	if len(*p.BenchMgr.Json.ServerNet.Addr) != 0 {
+		switch *p.BenchMgr.Json.ServerNet.Type {
 		case "tcp": // 启动 TCP 服务
-			p.TCPService = xtcp.NewService(handler)
-			if err = p.TCPService.Start(ctx,
+			p.TCPServer = xtcp.NewServer(handler)
+			if err = p.TCPServer.Start(ctx,
 				xtcp.NewServerOptions().
-					SetListenAddress(*p.BenchMgr.Json.ServiceNet.Addr).
+					SetListenAddress(*p.BenchMgr.Json.ServerNet.Addr).
 					SetEventChan(p.BusChannel).
 					SetSendChanCapacity(*p.BenchMgr.Json.Base.SendChanCapacity),
 			); err != nil {
@@ -259,9 +259,9 @@ func (p *Service) Start(ctx context.Context,
 	return nil
 }
 
-func (p *Service) Stop() (err error) {
-	if p.TCPService != nil {
-		p.TCPService.Stop()
+func (p *Server) Stop() (err error) {
+	if p.TCPServer != nil {
+		p.TCPServer.Stop()
 	}
 	return nil
 }

@@ -15,7 +15,7 @@ import (
 //		*xnettcp.DefaultHandlerServer
 //	}
 //
-//	func NewService() *Server {
+//	func NewSerer() *Server {
 //		def := &Server{
 //			DefaultHandlerServer: xnettcp.NewDefaultHandlerServer(),
 //		}
@@ -25,7 +25,7 @@ func userLoginTimeout(arg ...interface{}) error {
 	fmt.Printf("cbSecond:%v\n", arg...)
 	return nil
 }
-func (p *Service) OnConnect(remote xnettcp.IRemote) error {
+func (p *Server) OnConnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnConnect: %v", remote)
 	u := newUser(remote)
 	remote.(*xnettcp.Remote).Object = u
@@ -69,21 +69,21 @@ func (p *Service) OnConnect(remote xnettcp.IRemote) error {
 	return nil
 }
 
-func (p *Service) OnCheckPacketLength(length uint32) error {
+func (p *Server) OnCheckPacketLength(length uint32) error {
 	if length < packet2.HeaderSize || *p.BenchMgr.Json.Base.PacketLengthMax < length {
 		return xerror.Length
 	}
 	return nil
 }
 
-func (p *Service) OnCheckPacketLimit(remote xnettcp.IRemote) error {
+func (p *Server) OnCheckPacketLimit(remote xnettcp.IRemote) error {
 	if false {
 		return xerror.Quantity
 	}
 	return nil
 }
 
-func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
+func (p *Server) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
 	header := packet2.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
@@ -111,7 +111,7 @@ func (p *Service) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet
 	}
 }
 
-func (p *Service) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
+func (p *Server) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
 	defaultRemote := remote.(*xnettcp.Remote)
 	user := defaultRemote.Object.(*User)
 	switch packet.(type) {
@@ -154,7 +154,7 @@ func (p *Service) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error
 	}
 }
 
-func (p *Service) OnDisconnect(remote xnettcp.IRemote) error {
+func (p *Server) OnDisconnect(remote xnettcp.IRemote) error {
 	p.Log.Tracef("OnDisconnect: %v", remote)
 	switch remote.GetDisconnectReason() {
 	case xnettcp.DisconnectReasonClientShutdown:
