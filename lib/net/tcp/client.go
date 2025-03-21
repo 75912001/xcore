@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"context"
+	xcommon "github.com/75912001/xcore/lib/net/common"
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 	"net"
@@ -9,12 +10,12 @@ import (
 
 // Client 客户端
 type Client struct {
-	IEvent   IEvent
-	IHandler IHandler
-	IRemote  IRemote
+	IEvent   xcommon.IEvent
+	IHandler xcommon.IHandler
+	IRemote  xcommon.IRemote
 }
 
-func NewClient(handler IHandler) *Client {
+func NewClient(handler xcommon.IHandler) *Client {
 	return &Client{
 		IEvent:   nil,
 		IHandler: handler,
@@ -40,6 +41,6 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.IRemote = NewRemote(conn, make(chan interface{}, *newOpts.sendChanCapacity))
-	p.IRemote.Start(&newOpts.connOptions, p.IEvent, p.IHandler)
+	p.IRemote.Start(newOpts.connOptions, p.IEvent, p.IHandler)
 	return nil
 }
