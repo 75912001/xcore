@@ -5,7 +5,8 @@ import (
 	"encoding/binary"
 	xerror "github.com/75912001/xcore/lib/error"
 	xlog "github.com/75912001/xcore/lib/log"
-	"github.com/75912001/xcore/lib/packet"
+	xcommon "github.com/75912001/xcore/lib/net/common"
+	xpacket "github.com/75912001/xcore/lib/packet"
 	xpool "github.com/75912001/xcore/lib/pool"
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	xutil "github.com/75912001/xcore/lib/util"
@@ -22,8 +23,8 @@ type Remote struct {
 	Conn             *net.TCPConn     // 连接
 	sendChan         chan interface{} // 发送管道
 	cancelFunc       context.CancelFunc
-	Object           interface{}      // 保存 应用层数据
-	DisconnectReason DisconnectReason // 断开原因
+	Object           interface{}              // 保存 应用层数据
+	DisconnectReason xcommon.DisconnectReason // 断开原因
 }
 
 func NewRemote(Conn *net.TCPConn, sendChan chan interface{}) *Remote {
@@ -33,11 +34,11 @@ func NewRemote(Conn *net.TCPConn, sendChan chan interface{}) *Remote {
 	}
 }
 
-func (p *Remote) GetDisconnectReason() DisconnectReason {
+func (p *Remote) GetDisconnectReason() xcommon.DisconnectReason {
 	return p.DisconnectReason
 }
 
-func (p *Remote) SetDisconnectReason(reason DisconnectReason) {
+func (p *Remote) SetDisconnectReason(reason xcommon.DisconnectReason) {
 	p.DisconnectReason = reason
 }
 
@@ -50,7 +51,7 @@ func (p *Remote) GetIP() string {
 	return slice[0]
 }
 
-func (p *Remote) Start(tcpOptions *ConnOptions, event IEvent, handler IHandler) {
+func (p *Remote) Start(tcpOptions *xcommon.ConnOptions, event xcommon.IEvent, handler xcommon.IHandler) {
 	//var err error
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	xlog.PrintfErr("SetKeepAlive err:%v", err)
@@ -86,14 +87,18 @@ func (p *Remote) IsConnect() bool {
 
 // Send 发送数据
 //
-//	[NOTE]必须在处理 EventChan 事件中调用
+//	[NOTE]必须在 总线 中调用
 //	参数:
 //		packet: 未序列化的包. [NOTE]该数据会被引用,使用层不可写
-func (p *Remote) Send(packet packet.IPacket) error {
+func (p *Remote) Send(packet xpacket.IPacket) error {
 	if !p.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
-	p.sendChan <- packet
+	err := xutil.PushEventWithTimeout(p.sendChan, packet, time.Second*3)
+	if err != nil {
+		xlog.PrintfErr("Send packet, PushEventWithTimeout err:%v", err)
+		return errors.WithMessage(err, xruntime.Location())
+	}
 	return nil
 }
 
@@ -101,7 +106,7 @@ func (p *Remote) Stop() {
 	if p.IsConnect() {
 		err := p.Conn.Close()
 		if err != nil {
-			xlog.PrintfErr("connect close err:%v", err)
+			xlog.PrintfErr("common close err:%v", err)
 		}
 	}
 	if p.cancelFunc != nil {
@@ -143,7 +148,7 @@ func rearrangeSendData(data []byte, cnt int, resetCnt int) []byte {
 }
 
 // 将数据放入data中
-func (p *Remote) push2Data(packet packet.IPacket, data []byte) ([]byte, error) {
+func (p *Remote) push2Data(data []byte, packet xpacket.IPacket) ([]byte, error) {
 	packetData, err := packet.Marshal()
 	if err != nil {
 		xlog.PrintfErr("packet marshal %v", packet)
@@ -180,7 +185,7 @@ func (p *Remote) onSend(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case t := <-p.sendChan:
-			data, err = p.push2Data(t.(packet.IPacket), data)
+			data, err = p.push2Data(data, t.(xpacket.IPacket))
 			if err != nil {
 				xlog.PrintfErr("push2Data err:%v", err)
 				continue
@@ -202,7 +207,7 @@ func (p *Remote) onSend(ctx context.Context) {
 				}
 				for 0 < len(p.sendChan) { // 尽量取出待发送数据
 					t := <-p.sendChan
-					data, err = p.push2Data(t.(packet.IPacket), data)
+					data, err = p.push2Data(data, t.(xpacket.IPacket))
 					if err != nil {
 						xlog.PrintfErr("push2Data err:%v", err)
 						continue
@@ -223,7 +228,7 @@ func (p *Remote) onSend(ctx context.Context) {
 }
 
 // 处理接收
-func (p *Remote) onRecv(event IEvent, handler IHandler) {
+func (p *Remote) onRecv(event xcommon.IEvent, handler xcommon.IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
 		if err := recover(); err != nil {
@@ -236,14 +241,14 @@ func (p *Remote) onRecv(event IEvent, handler IHandler) {
 		xlog.PrintInfo(xerror.GoroutineDone, p)
 	}()
 	// 消息总长度
-	msgLengthBuf := make([]byte, packet.HeaderLengthFieldSize)
+	msgLengthBuf := make([]byte, xpacket.HeaderLengthFieldSize)
 	for {
 		if _, err := io.ReadFull(p.Conn, msgLengthBuf); err != nil {
 			if !xutil.IsNetErrClosing(err) {
-				xlog.PrintfInfo("remote:%p err:%v", p, err)
+				xlog.PrintfErr("remote:%p err:%v", p, err)
 			}
-			if p.GetDisconnectReason() != DisconnectReasonUnknown { // 未设置,就设置为客户端主动断开
-				p.SetDisconnectReason(DisconnectReasonClientShutdown)
+			if p.GetDisconnectReason() != xcommon.DisconnectReasonUnknown { // 未设置,就设置为客户端主动断开
+				p.SetDisconnectReason(xcommon.DisconnectReasonClientShutdown)
 			} else { // 已设置,就不再设置
 			}
 			return
@@ -251,15 +256,15 @@ func (p *Remote) onRecv(event IEvent, handler IHandler) {
 		packetLength := binary.LittleEndian.Uint32(msgLengthBuf)
 		if err := handler.OnCheckPacketLength(packetLength); err != nil {
 			xlog.PrintfErr("remote:%p OnCheckPacketLength err:%v", p, err)
-			p.SetDisconnectReason(DisconnectReasonClientLogic)
+			p.SetDisconnectReason(xcommon.DisconnectReasonClientLogic)
 			return
 		}
 		buf := xpool.MakeByteSlice(int(packetLength))
 		copy(buf, msgLengthBuf)
-		if _, err := io.ReadFull(p.Conn, buf[packet.HeaderLengthFieldSize:]); err != nil {
+		if _, err := io.ReadFull(p.Conn, buf[xpacket.HeaderLengthFieldSize:]); err != nil {
 			xlog.PrintfErr("remote:%p err:%v", p, err)
 			_ = xpool.ReleaseByteSlice(buf)
-			p.SetDisconnectReason(DisconnectReasonClientLogic)
+			p.SetDisconnectReason(xcommon.DisconnectReasonClientLogic)
 			return
 		}
 		if err := handler.OnCheckPacketLimit(p); err != nil {
