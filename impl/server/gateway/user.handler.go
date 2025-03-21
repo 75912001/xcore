@@ -70,7 +70,7 @@ func (p *Server) OnConnect(remote xnettcp.IRemote) error {
 }
 
 func (p *Server) OnCheckPacketLength(length uint32) error {
-	if length < packet2.HeaderSize || *p.BenchMgr.Json.Base.PacketLengthMax < length {
+	if length < packet2.HeaderSize || *p.BenchMgr.Cfg.Base.PacketLengthMax < length {
 		return xerror.Length
 	}
 	return nil

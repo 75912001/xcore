@@ -34,8 +34,6 @@
   - moduleData 数据
   - moduleLogic 逻辑
   - moduleControl 控制块
-## 配置文件
-- 使用 yaml 文件,作为服务配置文件 [todo menglc]
 ## 服务资源
 - ${groupID}.${serverName}.${serverID}.exe
   - groupID: 服务组ID

@@ -15,9 +15,9 @@ func etcdReportFunction(args ...interface{}) error {
 		)
 	}()
 	valueJson := &xetcd.ValueJson{
-		ServerNet:     &defaultServer.BenchMgr.Json.ServerNet,
-		Version:       *defaultServer.BenchMgr.Json.Base.Version,
-		AvailableLoad: *defaultServer.BenchMgr.Json.Base.AvailableLoad,
+		ServerNet:     &defaultServer.BenchMgr.Cfg.ServerNet,
+		Version:       *defaultServer.BenchMgr.Cfg.Base.Version,
+		AvailableLoad: *defaultServer.BenchMgr.Cfg.Base.AvailableLoad,
 		SecondOffset:  0,
 	}
 	value := xetcd.ValueJson2String(valueJson)

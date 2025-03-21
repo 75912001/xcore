@@ -107,19 +107,19 @@ func (p *Server) Start(ctx context.Context,
 	uuid.EnableRandPool()
 	// 服务配置文件
 	benchPath := path.Join(p.ExecutablePath, fmt.Sprintf("%v.%v.%v.%v",
-		p.GroupID, p.Name, p.ID, xbench.ServiceConfigFileSuffix))
+		p.GroupID, p.Name, p.ID, xbench.ServerConfigFileSuffix))
 	content, err := os.ReadFile(benchPath)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	benchJson := string(content)
+	benchString := string(content)
 	// 加载服务配置文件-root部分
-	err = p.BenchMgr.RootJson.Parse(benchJson)
+	err = p.BenchMgr.RootCfg.Parse(benchString)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	// 加载服务配置文件-公共部分
-	err = p.BenchMgr.Json.Parse(benchJson)
+	err = p.BenchMgr.Cfg.Parse(benchString)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
@@ -143,28 +143,28 @@ func (p *Server) Start(ctx context.Context,
 		//if len(getResponse.Kvs) != 1 {
 		//	return errors.WithMessagef(xerror.Config, "%v %v %v", key, getResponse.Kvs, xruntime.Location())
 		//}
-		//benchJson = string(getResponse.Kvs[0].Value)
-		//xlog.PrintfInfo(benchJson)
+		//benchString = string(getResponse.Kvs[0].Value)
+		//xlog.PrintfInfo(benchString)
 	}
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	switch *p.BenchMgr.Json.Base.RunMode {
+	switch *p.BenchMgr.Cfg.Base.RunMode {
 	case 0:
 		xruntime.SetRunMode(xruntime.RunModeRelease)
 	case 1:
 		xruntime.SetRunMode(xruntime.RunModeDebug)
 	default:
-		return errors.Errorf("runMode err:%v %v", *p.BenchMgr.Json.Base.RunMode, xruntime.Location())
+		return errors.Errorf("runMode err:%v %v", *p.BenchMgr.Cfg.Base.RunMode, xruntime.Location())
 	}
 	// GoMaxProcess
-	previous := runtime.GOMAXPROCS(*p.BenchMgr.Json.Base.GoMaxProcess)
+	previous := runtime.GOMAXPROCS(*p.BenchMgr.Cfg.Base.GoMaxProcess)
 	xlog.PrintfInfo("go max process new:%v, previous setting:%v",
-		*p.BenchMgr.Json.Base.GoMaxProcess, previous)
+		*p.BenchMgr.Cfg.Base.GoMaxProcess, previous)
 	// 日志
 	p.Log, err = xlog.NewMgr(xlog.NewOptions().
-		WithLevel(*p.BenchMgr.Json.Base.LogLevel).
-		WithAbsPath(*p.BenchMgr.Json.Base.LogAbsPath).
+		WithLevel(*p.BenchMgr.Cfg.Base.LogLevel).
+		WithAbsPath(*p.BenchMgr.Cfg.Base.LogAbsPath).
 		WithNamePrefix(fmt.Sprintf("%v.%v.%v", p.GroupID, p.Name, p.ID)).
 		WithLevelCallBack(logCallbackFunc, xlog.LevelFatal, xlog.LevelError, xlog.LevelWarn),
 	)
@@ -173,13 +173,13 @@ func (p *Server) Start(ctx context.Context,
 	}
 	// 加载服务配置文件-子项部分
 	if p.BenchSub != nil {
-		err = p.BenchSub.Unmarshal(benchJson)
+		err = p.BenchSub.Unmarshal(benchString)
 		if err != nil {
 			return errors.WithMessage(err, xruntime.Location())
 		}
 	}
 	// eventChan
-	p.BusChannel = make(chan interface{}, *p.BenchMgr.Json.Base.BusChannelCapacity)
+	p.BusChannel = make(chan interface{}, *p.BenchMgr.Cfg.Base.BusChannelCapacity)
 	go func() {
 		defer func() {
 			p.BusChannelWaitGroup.Done()
@@ -190,16 +190,16 @@ func (p *Server) Start(ctx context.Context,
 		_ = p.Handle()
 	}()
 	// 是否开启http采集分析
-	if p.BenchMgr.Json.Base.PprofHttpPort != nil {
-		xpprof.StartHTTPprof(fmt.Sprintf("0.0.0.0:%d", *p.BenchMgr.Json.Base.PprofHttpPort))
+	if p.BenchMgr.Cfg.Base.PprofHttpPort != nil {
+		xpprof.StartHTTPprof(fmt.Sprintf("0.0.0.0:%d", *p.BenchMgr.Cfg.Base.PprofHttpPort))
 	}
 	// 全局定时器
-	if p.BenchMgr.Json.Timer.ScanSecondDuration != nil || p.BenchMgr.Json.Timer.ScanMillisecondDuration != nil {
+	if p.BenchMgr.Cfg.Timer.ScanSecondDuration != nil || p.BenchMgr.Cfg.Timer.ScanMillisecondDuration != nil {
 		p.Timer = xtimer.NewTimer()
 		err = p.Timer.Start(ctx,
 			xtimer.NewOptions().
-				WithScanSecondDuration(*p.BenchMgr.Json.Timer.ScanSecondDuration).
-				WithScanMillisecondDuration(*p.BenchMgr.Json.Timer.ScanMillisecondDuration).
+				WithScanSecondDuration(*p.BenchMgr.Cfg.Timer.ScanSecondDuration).
+				WithScanMillisecondDuration(*p.BenchMgr.Cfg.Timer.ScanMillisecondDuration).
 				WithOutgoingTimerOutChan(p.BusChannel),
 		)
 		if err != nil {
@@ -207,18 +207,18 @@ func (p *Server) Start(ctx context.Context,
 		}
 	}
 	// etcd
-	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Json.Base.ProjectName, xetcd.WatchMsgTypeServer, p.GroupID, p.Name, p.ID)
+	p.EtcdKey = xetcd.GenKey(*p.BenchMgr.Cfg.Base.ProjectName, xetcd.WatchMsgTypeServer, p.GroupID, p.Name, p.ID)
 	defaultEtcd := xetcd.NewEtcd(
 		xetcd.NewOptions().
-			WithAddrs(p.BenchMgr.RootJson.Etcd.Addrs).
-			WithTTL(*p.BenchMgr.RootJson.Etcd.TTL).
-			WithWatchKeyPrefix(xetcd.GenPrefixKey(*p.BenchMgr.Json.Base.ProjectName)).
+			WithAddrs(p.BenchMgr.RootCfg.Etcd.Addrs).
+			WithTTL(*p.BenchMgr.RootCfg.Etcd.TTL).
+			WithWatchKeyPrefix(xetcd.GenPrefixKey(*p.BenchMgr.Cfg.Base.ProjectName)).
 			WithKey(p.EtcdKey).
 			WithValue(
 				&xetcd.ValueJson{
-					ServerNet:     &p.BenchMgr.Json.ServerNet,
-					Version:       *p.BenchMgr.Json.Base.Version,
-					AvailableLoad: *p.BenchMgr.Json.Base.AvailableLoad,
+					ServerNet:     &p.BenchMgr.Cfg.ServerNet,
+					Version:       *p.BenchMgr.Cfg.Base.Version,
+					AvailableLoad: *p.BenchMgr.Cfg.Base.AvailableLoad,
 					SecondOffset:  0,
 				},
 			).
@@ -237,15 +237,15 @@ func (p *Server) Start(ctx context.Context,
 	// etcd-定时上报
 	p.Timer.AddSecond(xcontrol.NewCallBack(etcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault)
 	// 网络服务
-	if len(*p.BenchMgr.Json.ServerNet.Addr) != 0 {
-		switch *p.BenchMgr.Json.ServerNet.Type {
+	if len(*p.BenchMgr.Cfg.ServerNet.Addr) != 0 {
+		switch *p.BenchMgr.Cfg.ServerNet.Type {
 		case "tcp": // 启动 TCP 服务
 			p.TCPServer = xtcp.NewServer(handler)
 			if err = p.TCPServer.Start(ctx,
 				xtcp.NewServerOptions().
-					SetListenAddress(*p.BenchMgr.Json.ServerNet.Addr).
+					SetListenAddress(*p.BenchMgr.Cfg.ServerNet.Addr).
 					SetEventChan(p.BusChannel).
-					SetSendChanCapacity(*p.BenchMgr.Json.Base.SendChanCapacity),
+					SetSendChanCapacity(*p.BenchMgr.Cfg.Base.SendChanCapacity),
 			); err != nil {
 				return errors.WithMessage(err, xruntime.Location())
 			}

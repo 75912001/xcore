@@ -5,7 +5,6 @@
 package bench
 
 import (
-	"encoding/json"
 	"fmt"
 	xcommon "github.com/75912001/xcore/lib/common"
 	xerror "github.com/75912001/xcore/lib/error"
@@ -13,6 +12,7 @@ import (
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	xtimer "github.com/75912001/xcore/lib/timer"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -21,16 +21,16 @@ import (
 // 配置-主项,用户服务的基本配置
 
 type Mgr struct {
-	RootJson rootJson
-	Json     benchJson
+	RootCfg rootYaml
+	Cfg     benchYaml
 }
 
-type rootJson struct {
-	Etcd Etcd `json:"etcd"`
+type rootYaml struct {
+	Etcd Etcd `yaml:"etcd"`
 }
 
-func (p *rootJson) Parse(strJson string) error {
-	if err := json.Unmarshal([]byte(strJson), &p); err != nil {
+func (p *rootYaml) Parse(strYaml string) error {
+	if err := yaml.Unmarshal([]byte(strYaml), &p); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Etcd.TTL == nil {
@@ -41,18 +41,18 @@ func (p *rootJson) Parse(strJson string) error {
 }
 
 type Etcd struct {
-	Addrs []string `json:"addrs"` // etcd地址
-	TTL   *int64   `json:"ttl"`   // ttl 秒 [default]: xetcd.TtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
+	Addrs []string `yaml:"addrs"` // etcd地址
+	TTL   *int64   `yaml:"ttl"`   // ttl 秒 [default]: xetcd.TtlSecondDefault 秒, e.g.:系统每10秒续约一次,该参数至少为11秒
 }
 
-type benchJson struct {
-	Base      Base               `json:"base"`
-	Timer     Timer              `json:"timer"`
-	ServerNet xcommon.ServiceNet `json:"serverNet"`
+type benchYaml struct {
+	Base      Base               `yaml:"base"`
+	Timer     Timer              `yaml:"timer"`
+	ServerNet xcommon.ServiceNet `yaml:"serverNet"`
 }
 
-func (p *benchJson) Parse(jsonString string) error {
-	err := json.Unmarshal([]byte(jsonString), p)
+func (p *benchYaml) Parse(yamlString string) error {
+	err := yaml.Unmarshal([]byte(yamlString), p)
 	if err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
@@ -115,22 +115,22 @@ func (p *benchJson) Parse(jsonString string) error {
 }
 
 type Base struct {
-	ProjectName        *string `json:"projectName"`        // 项目名称
-	Version            *string `json:"version"`            // 版本号
-	PprofHttpPort      *uint16 `json:"pprofHttpPort"`      // pprof性能分析 http端口 [default]: nil 不使用
-	LogLevel           *uint32 `json:"logLevel"`           // 日志等级
-	LogAbsPath         *string `json:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
-	GoMaxProcess       *int    `json:"goMaxProcess"`       // [default]: runtime.NumCPU()
-	BusChannelCapacity *uint32 `json:"busChannelCapacity"` // 总线chan容量
-	PacketLengthMax    *uint32 `json:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度
-	SendChanCapacity   *uint32 `json:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小
-	RunMode            *uint32 `json:"runMode"`            // 运行模式 [0:release 1:debug]
-	AvailableLoad      *uint32 `json:"availableLoad"`      // 剩余可用负载, 可用资源数
+	ProjectName        *string `yaml:"projectName"`        // 项目名称
+	Version            *string `yaml:"version"`            // 版本号
+	PprofHttpPort      *uint16 `yaml:"pprofHttpPort"`      // pprof性能分析 http端口 [default]: nil 不使用
+	LogLevel           *uint32 `yaml:"logLevel"`           // 日志等级
+	LogAbsPath         *string `yaml:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
+	GoMaxProcess       *int    `yaml:"goMaxProcess"`       // [default]: runtime.NumCPU()
+	BusChannelCapacity *uint32 `yaml:"busChannelCapacity"` // 总线chan容量
+	PacketLengthMax    *uint32 `yaml:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度
+	SendChanCapacity   *uint32 `yaml:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小
+	RunMode            *uint32 `yaml:"runMode"`            // 运行模式 [0:release 1:debug]
+	AvailableLoad      *uint32 `yaml:"availableLoad"`      // 剩余可用负载, 可用资源数
 }
 
 type Timer struct {
 	// 秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为100毫秒 [default]: xtimer.ScanSecondDurationDefault
-	ScanSecondDuration *time.Duration `json:"scanSecondDuration"`
+	ScanSecondDuration *time.Duration `yaml:"scanSecondDuration"`
 	// 毫秒级定时器 扫描间隔(纳秒) 1000*1000*100=100000000 为25毫秒 [default]: xtimer.ScanMillisecondDurationDefault
-	ScanMillisecondDuration *time.Duration `json:"scanMillisecondDuration"`
+	ScanMillisecondDuration *time.Duration `yaml:"scanMillisecondDuration"`
 }
