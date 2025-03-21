@@ -1,9 +1,11 @@
-package connect
+package common
 
 import (
 	xcontrol "github.com/75912001/xcore/lib/control"
 	"time"
 )
+
+// 链接状态
 
 type Status struct {
 	Inactive       bool               // 非活跃状态

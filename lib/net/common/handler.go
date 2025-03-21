@@ -1,4 +1,4 @@
-package tcp
+package common
 
 import (
 	xpacket "github.com/75912001/xcore/lib/packet"
