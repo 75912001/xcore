@@ -46,9 +46,9 @@ type Etcd struct {
 }
 
 type benchYaml struct {
-	Base      Base               `yaml:"base"`
-	Timer     Timer              `yaml:"timer"`
-	ServerNet xcommon.ServiceNet `yaml:"serverNet"`
+	Base      Base                 `yaml:"base"`
+	Timer     Timer                `yaml:"timer"`
+	ServerNet []*xcommon.ServerNet `yaml:"serverNet"`
 }
 
 func (p *benchYaml) Parse(yamlString string) error {
@@ -83,7 +83,7 @@ func (p *benchYaml) Parse(yamlString string) error {
 	if p.Base.PacketLengthMax == nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	if p.Base.SendChanCapacity == nil {
+	if p.Base.SendChannelCapacity == nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	if p.Base.RunMode == nil {
@@ -100,32 +100,34 @@ func (p *benchYaml) Parse(yamlString string) error {
 		defaultValue := xtimer.ScanMillisecondDurationDefault
 		p.Timer.ScanMillisecondDuration = &defaultValue
 	}
-	if p.ServerNet.Addr == nil {
-		defaultValue := ""
-		p.ServerNet.Addr = &defaultValue
-	}
-	if p.ServerNet.Type == nil {
-		defaultValue := "tcp"
-		p.ServerNet.Type = &defaultValue
-	}
-	if *p.ServerNet.Type != "tcp" && *p.ServerNet.Type != "udp" {
-		return xerror.NotImplemented.WithExtraMessage(fmt.Sprintf("serviceNet.type must be tcp or udp. %x", xruntime.Location()))
+	for _, v := range p.ServerNet {
+		if v.Addr == nil {
+			defaultValue := ""
+			v.Addr = &defaultValue
+		}
+		if v.Type == nil {
+			defaultValue := "tcp"
+			v.Type = &defaultValue
+		}
+		if *v.Type != "tcp" && *v.Type != "kcp" {
+			return xerror.NotImplemented.WithExtraMessage(fmt.Sprintf("serviceNet.type must be tcp or kcp. %x", xruntime.Location()))
+		}
 	}
 	return nil
 }
 
 type Base struct {
-	ProjectName        *string `yaml:"projectName"`        // 项目名称
-	Version            *string `yaml:"version"`            // 版本号
-	PprofHttpPort      *uint16 `yaml:"pprofHttpPort"`      // pprof性能分析 http端口 [default]: nil 不使用
-	LogLevel           *uint32 `yaml:"logLevel"`           // 日志等级
-	LogAbsPath         *string `yaml:"logAbsPath"`         // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
-	GoMaxProcess       *int    `yaml:"goMaxProcess"`       // [default]: runtime.NumCPU()
-	BusChannelCapacity *uint32 `yaml:"busChannelCapacity"` // 总线chan容量
-	PacketLengthMax    *uint32 `yaml:"packetLengthMax"`    // bytes,用户 上行 每个包的最大长度
-	SendChanCapacity   *uint32 `yaml:"sendChanCapacity"`   // bytes,每个TCP链接的发送chan大小
-	RunMode            *uint32 `yaml:"runMode"`            // 运行模式 [0:release 1:debug]
-	AvailableLoad      *uint32 `yaml:"availableLoad"`      // 剩余可用负载, 可用资源数
+	ProjectName         *string `yaml:"projectName"`         // 项目名称
+	Version             *string `yaml:"version"`             // 版本号
+	PprofHttpPort       *uint16 `yaml:"pprofHttpPort"`       // pprof性能分析 http端口 [default]: nil 不使用
+	LogLevel            *uint32 `yaml:"logLevel"`            // 日志等级
+	LogAbsPath          *string `yaml:"logAbsPath"`          // 日志绝对路径 [default]: 当前执行的程序-绝对路径,指向启动当前进程的可执行文件-目录路径. e.g.:absPath/log
+	GoMaxProcess        *int    `yaml:"goMaxProcess"`        // [default]: runtime.NumCPU()
+	BusChannelCapacity  *uint32 `yaml:"busChannelCapacity"`  // 总线chan容量
+	PacketLengthMax     *uint32 `yaml:"packetLengthMax"`     // bytes,用户 上行 每个包的最大长度
+	SendChannelCapacity *uint32 `yaml:"sendChannelCapacity"` // bytes,每个TCP链接的发送chan大小
+	RunMode             *uint32 `yaml:"runMode"`             // 运行模式 [0:release 1:debug]
+	AvailableLoad       *uint32 `yaml:"availableLoad"`       // 剩余可用负载, 可用资源数
 }
 
 type Timer struct {

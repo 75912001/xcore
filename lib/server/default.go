@@ -216,7 +216,7 @@ func (p *Server) Start(ctx context.Context,
 			WithKey(p.EtcdKey).
 			WithValue(
 				&xetcd.ValueJson{
-					ServerNet:     &p.BenchMgr.Cfg.ServerNet,
+					ServerNet:     p.BenchMgr.Cfg.ServerNet,
 					Version:       *p.BenchMgr.Cfg.Base.Version,
 					AvailableLoad: *p.BenchMgr.Cfg.Base.AvailableLoad,
 					SecondOffset:  0,
@@ -237,24 +237,27 @@ func (p *Server) Start(ctx context.Context,
 	// etcd-定时上报
 	p.Timer.AddSecond(xcontrol.NewCallBack(etcdReportFunction, p), p.TimeMgr.ShadowTimestamp()+xetcd.ReportIntervalSecondDefault)
 	// 网络服务
-	if len(*p.BenchMgr.Cfg.ServerNet.Addr) != 0 {
-		switch *p.BenchMgr.Cfg.ServerNet.Type {
-		case "tcp": // 启动 TCP 服务
-			p.TCPServer = xtcp.NewServer(handler)
-			if err = p.TCPServer.Start(ctx,
-				xtcp.NewServerOptions().
-					SetListenAddress(*p.BenchMgr.Cfg.ServerNet.Addr).
-					SetEventChan(p.BusChannel).
-					SetSendChanCapacity(*p.BenchMgr.Cfg.Base.SendChanCapacity),
-			); err != nil {
-				return errors.WithMessage(err, xruntime.Location())
+	for _, element := range p.BenchMgr.Cfg.ServerNet {
+		if len(*element.Addr) != 0 {
+			switch *element.Type {
+			case "tcp": // 启动 TCP 服务
+				p.TCPServer = xtcp.NewServer(handler)
+				if err = p.TCPServer.Start(ctx,
+					xtcp.NewServerOptions().
+						SetListenAddress(*element.Addr).
+						SetEventChan(p.BusChannel).
+						SetSendChanCapacity(*p.BenchMgr.Cfg.Base.SendChannelCapacity),
+				); err != nil {
+					return errors.WithMessage(err, xruntime.Location())
+				}
+			case "kcp":
+				return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
+			default:
+				return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 			}
-		case "udp":
-			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
-		default:
-			return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 		}
 	}
+
 	stateTimerPrint(p.Timer, p.Log)
 	return nil
 }

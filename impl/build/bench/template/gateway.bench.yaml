@@ -1,0 +1,19 @@
+# ETCD 配置
+etcd:
+  addrs: [__ETCD_ADDRS__]  # ETCD 地址列表 e.g.: 127.0.0.x:1234,127.0.0.y:1234
+# 基础配置
+base:
+  projectName: __BASE_PROJECT_NAME__  # 项目名称
+  version: __BASE_VERSION__          # 项目版本
+  logLevel: __BASE_LOG_LEVEL__        # 日志级别
+  busChannelCapacity: __BASE_BUS_CHANNEL_CAPACITY__  # 总线通道容量
+  packetLengthMax: __BASE_PACKET_LENGTH_MAX__        # 数据包最大长度
+  sendChannelCapacity: __BASE_SEND_CHANNEL_CAPACITY__      # 发送通道容量
+  runMode: __BASE_RUN_MODE__                        # 运行模式 [0:release, 1:debug]
+  availableLoad: __BASE_AVAILABLE_LOAD__            # 可用负载
+# 服务网络配置
+serverNet:
+  - addr: __SERVER_NET_ADDR_TCP__ # TCP 地址 e.g.:127.0.0.x:1234
+    type: tcp
+  - addr: __SERVER_NET_ADDR_KCP__ # KCP 地址 e.g.:127.0.0.x:1234
+    type: kcp

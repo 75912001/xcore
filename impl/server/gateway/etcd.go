@@ -41,7 +41,7 @@ func EtcdKeyValue(arg ...interface{}) error {
 			//	xrtcp.NewClientOptions().
 			//		SetAddress(address).
 			//		SetEventChan(server.GMgr.BusChannel).
-			//		SetSendChanCapacity(server.GMgr.Bench.Json.Base.SendChanCapacity*100). // bench里的SendChanCapacity是单个用户的消息容量 此处乘以100
+			//		SetSendChanCapacity(server.GMgr.Bench.Json.Base.SendChannelCapacity*100). // bench里的SendChanCapacity是单个用户的消息容量 此处乘以100
 			//		SetPacket(&msg.SSPacket{}).
 			//		SetOnUnmarshalPacket(OnUnmarshalPacketFromRoom).
 			//		SetOnPacket(OnPacketFromRoom).
