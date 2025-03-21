@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 	"unsafe"
 )
 
@@ -109,4 +110,15 @@ func HexStringToUint32(hexStr string) (uint32, error) {
 		return 0, err
 	}
 	return uint32(value), nil
+}
+
+func PushEventWithTimeout(eventChan chan<- interface{}, event interface{}, timeout time.Duration) error {
+	select {
+	case eventChan <- event:
+	case <-time.After(timeout):
+		return xerror.ChannelFull
+	default:
+		return xerror.ChannelFull
+	}
+	return nil
 }
