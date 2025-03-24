@@ -147,21 +147,6 @@ func rearrangeSendData(data []byte, cnt int, resetCnt int) []byte {
 	return data
 }
 
-// 将数据放入data中
-func (p *Remote) push2Data(data []byte, packet xpacket.IPacket) ([]byte, error) {
-	packetData, err := packet.Marshal()
-	if err != nil {
-		xlog.PrintfErr("packet marshal %v", packet)
-		return nil, errors.WithMessage(err, xruntime.Location())
-	}
-	if len(data) == 0 { //当 data len == 0 时候, 直接发送 v.data 数据...
-		data = packetData
-	} else {
-		data = append(data, packetData...)
-	}
-	return data, nil
-}
-
 // 处理发送
 func (p *Remote) onSend(ctx context.Context) {
 	defer func() {
@@ -185,7 +170,7 @@ func (p *Remote) onSend(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case t := <-p.sendChan:
-			data, err = p.push2Data(data, t.(xpacket.IPacket))
+			data, err = xcommon.PushPacket2Data(data, t.(xpacket.IPacket))
 			if err != nil {
 				xlog.PrintfErr("push2Data err:%v", err)
 				continue
@@ -207,7 +192,7 @@ func (p *Remote) onSend(ctx context.Context) {
 				}
 				for 0 < len(p.sendChan) { // 尽量取出待发送数据
 					t := <-p.sendChan
-					data, err = p.push2Data(data, t.(xpacket.IPacket))
+					data, err = xcommon.PushPacket2Data(data, t.(xpacket.IPacket))
 					if err != nil {
 						xlog.PrintfErr("push2Data err:%v", err)
 						continue
