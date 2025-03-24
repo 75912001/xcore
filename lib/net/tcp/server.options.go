@@ -2,79 +2,80 @@ package tcp
 
 import (
 	xerror "github.com/75912001/xcore/lib/error"
+	xcommon "github.com/75912001/xcore/lib/net/common"
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	"github.com/pkg/errors"
 )
 
-// serviceOptions contains options to configure a Server instance. Each option can be set through setter functions. See
+// serverOptions contains options to configure a Server instance. Each option can be set through setter functions. See
 // documentation for each setter function for an explanation of the option.
-type serviceOptions struct {
+type serverOptions struct {
 	listenAddress    *string            // 127.0.0.1:8787
 	eventChan        chan<- interface{} // 待处理的事件
 	sendChanCapacity *uint32            // 发送 channel 大小
-	connOptions      ConnOptions
+	connOptions      xcommon.ConnOptions
 }
 
 // NewServerOptions 新的ServerOptions
-func NewServerOptions() *serviceOptions {
-	return new(serviceOptions)
+func NewServerOptions() *serverOptions {
+	return new(serverOptions)
 }
 
-func (p *serviceOptions) SetListenAddress(listenAddress string) *serviceOptions {
+func (p *serverOptions) WithListenAddress(listenAddress string) *serverOptions {
 	p.listenAddress = &listenAddress
 	return p
 }
 
-func (p *serviceOptions) SetEventChan(eventChan chan<- interface{}) *serviceOptions {
+func (p *serverOptions) WithEventChan(eventChan chan<- interface{}) *serverOptions {
 	p.eventChan = eventChan
 	return p
 }
 
-func (p *serviceOptions) SetSendChanCapacity(sendChanCapacity uint32) *serviceOptions {
+func (p *serverOptions) WithSendChanCapacity(sendChanCapacity uint32) *serverOptions {
 	p.sendChanCapacity = &sendChanCapacity
 	return p
 }
 
-func (p *serviceOptions) SetReadBuffer(readBuffer int) *serviceOptions {
+func (p *serverOptions) WithReadBuffer(readBuffer int) *serverOptions {
 	p.connOptions.ReadBuffer = &readBuffer
 	return p
 }
 
-func (p *serviceOptions) SetWriteBuffer(writeBuffer int) *serviceOptions {
+func (p *serverOptions) WithWriteBuffer(writeBuffer int) *serverOptions {
 	p.connOptions.WriteBuffer = &writeBuffer
 	return p
 }
 
-// mergeServiceOptions combines the given *serviceOptions into a single *serviceOptions in a last one wins fashion.
+// mergeServerOptions combines the given *serverOptions into a single *serverOptions in a last one wins fashion.
 // The specified options are merged with the existing options on the Server, with the specified options taking
 // precedence.
-func mergeServiceOptions(opts ...*serviceOptions) *serviceOptions {
+func mergeServerOptions(opts ...*serverOptions) *serverOptions {
 	newOptions := NewServerOptions()
 	for _, opt := range opts {
 		if opt == nil {
 			continue
 		}
 		if opt.listenAddress != nil {
-			newOptions.SetListenAddress(*opt.listenAddress)
+			newOptions.WithListenAddress(*opt.listenAddress)
 		}
 		if opt.eventChan != nil {
-			newOptions.SetEventChan(opt.eventChan)
+			newOptions.WithEventChan(opt.eventChan)
 		}
 		if opt.sendChanCapacity != nil {
-			newOptions.SetSendChanCapacity(*opt.sendChanCapacity)
+			newOptions.WithSendChanCapacity(*opt.sendChanCapacity)
 		}
 		if opt.connOptions.ReadBuffer != nil {
-			newOptions.SetReadBuffer(*opt.connOptions.ReadBuffer)
+			newOptions.WithReadBuffer(*opt.connOptions.ReadBuffer)
 		}
 		if opt.connOptions.WriteBuffer != nil {
-			newOptions.SetWriteBuffer(*opt.connOptions.WriteBuffer)
+			newOptions.WithWriteBuffer(*opt.connOptions.WriteBuffer)
 		}
 	}
 	return newOptions
 }
 
 // 配置
-func serviceConfigure(opts *serviceOptions) error {
+func serverConfigure(opts *serverOptions) error {
 	if opts.listenAddress == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
