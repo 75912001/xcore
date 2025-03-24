@@ -21,3 +21,19 @@ func PushPacket2Data(data []byte, packet xpacket.IPacket) ([]byte, error) {
 	}
 	return data, nil
 }
+
+// RearRangeData 重新整理-数据
+// removeLen: 移除长度
+// resetCnt: 重置长度, 大于该长度则重新创建新的数据单元
+func RearRangeData(dataSlice []byte, removeLen int, resetCnt int) []byte {
+	if len(dataSlice) == removeLen {
+		if resetCnt <= cap(dataSlice) { // 占用空间过大,重新创建新的数据单元
+			dataSlice = []byte{}
+		} else {
+			dataSlice = dataSlice[0:0]
+		}
+	} else {
+		dataSlice = dataSlice[removeLen:]
+	}
+	return dataSlice
+}
