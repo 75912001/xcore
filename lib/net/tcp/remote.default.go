@@ -51,7 +51,7 @@ func (p *Remote) GetIP() string {
 	return slice[0]
 }
 
-func (p *Remote) Start(tcpOptions *xcommon.ConnOptions, event xcommon.IEvent, handler xcommon.IHandler) {
+func (p *Remote) Start(connOptions *xcommon.ConnOptions, event xcommon.IEvent, handler xcommon.IHandler) {
 	//var err error
 	//if err = p.Conn.SetKeepAlive(true); err != nil {
 	//	xlog.PrintfErr("SetKeepAlive err:%v", err)
@@ -62,13 +62,13 @@ func (p *Remote) Start(tcpOptions *xcommon.ConnOptions, event xcommon.IEvent, ha
 	//if err := p.Conn.SetNoDelay(true); err != nil {
 	//	xlog.PrintfErr("SetNoDelay err:%v", err)
 	//}
-	if tcpOptions.ReadBuffer != nil {
-		if err := p.Conn.SetReadBuffer(*tcpOptions.ReadBuffer); err != nil {
+	if connOptions.ReadBuffer != nil {
+		if err := p.Conn.SetReadBuffer(*connOptions.ReadBuffer); err != nil {
 			xlog.PrintfErr("WithReadBuffer err:%v", err)
 		}
 	}
-	if tcpOptions.WriteBuffer != nil {
-		if err := p.Conn.SetWriteBuffer(*tcpOptions.WriteBuffer); err != nil {
+	if connOptions.WriteBuffer != nil {
+		if err := p.Conn.SetWriteBuffer(*connOptions.WriteBuffer); err != nil {
 			xlog.PrintfErr("WithWriteBuffer err:%v", err)
 		}
 	}
