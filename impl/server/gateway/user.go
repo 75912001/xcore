@@ -1,6 +1,8 @@
 package gateway
 
-import xnettcp "github.com/75912001/xcore/lib/net/tcp"
+import (
+	xnettcp "github.com/75912001/xcore/lib/net/common"
+)
 
 type User struct {
 	id           uint64       // 用户id

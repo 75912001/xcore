@@ -5,6 +5,7 @@ import (
 	xcommonservice "github.com/75912001/xcore/impl/common"
 	xutil "github.com/75912001/xcore/lib/control"
 	xerror "github.com/75912001/xcore/lib/error"
+	"github.com/75912001/xcore/lib/net/common"
 	xnettcp "github.com/75912001/xcore/lib/net/tcp"
 	packet2 "github.com/75912001/xcore/lib/packet"
 	xruntime "github.com/75912001/xcore/lib/runtime"
@@ -25,7 +26,7 @@ func userLoginTimeout(arg ...interface{}) error {
 	fmt.Printf("cbSecond:%v\n", arg...)
 	return nil
 }
-func (p *Server) OnConnect(remote xnettcp.IRemote) error {
+func (p *Server) OnConnect(remote common.IRemote) error {
 	p.Log.Tracef("OnConnect: %v", remote)
 	u := newUser(remote)
 	remote.(*xnettcp.Remote).Object = u
@@ -76,14 +77,14 @@ func (p *Server) OnCheckPacketLength(length uint32) error {
 	return nil
 }
 
-func (p *Server) OnCheckPacketLimit(remote xnettcp.IRemote) error {
+func (p *Server) OnCheckPacketLimit(remote common.IRemote) error {
 	if false {
 		return xerror.Quantity
 	}
 	return nil
 }
 
-func (p *Server) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
+func (p *Server) OnUnmarshalPacket(remote common.IRemote, data []byte) (packet2.IPacket, error) {
 	header := packet2.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
@@ -111,7 +112,7 @@ func (p *Server) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2
 	}
 }
 
-func (p *Server) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
+func (p *Server) OnPacket(remote common.IRemote, packet packet2.IPacket) error {
 	defaultRemote := remote.(*xnettcp.Remote)
 	user := defaultRemote.Object.(*User)
 	switch packet.(type) {
@@ -154,10 +155,10 @@ func (p *Server) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error 
 	}
 }
 
-func (p *Server) OnDisconnect(remote xnettcp.IRemote) error {
+func (p *Server) OnDisconnect(remote common.IRemote) error {
 	p.Log.Tracef("OnDisconnect: %v", remote)
 	switch remote.GetDisconnectReason() {
-	case xnettcp.DisconnectReasonClientShutdown:
+	case common.DisconnectReasonClientShutdown:
 		// 只移除 remote,不移除数据,数据设置为-非活跃状态.
 		gUserMgr.removeRemoteAndSetInactive(remote)
 	default:

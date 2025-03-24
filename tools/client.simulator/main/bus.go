@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	xerror "github.com/75912001/xcore/lib/error"
+	xcommon "github.com/75912001/xcore/lib/net/common"
 	xnettcp "github.com/75912001/xcore/lib/net/tcp"
 	"github.com/pkg/errors"
 	"os"
@@ -17,11 +18,11 @@ func Handle(busChannel chan interface{}) error {
 			var err error
 			switch event := value.(type) {
 			//tcp
-			case *xnettcp.Connect:
+			case *xcommon.Connect:
 				err = event.IHandler.OnConnect(event.IRemote)
-			case *xnettcp.Packet:
+			case *xcommon.Packet:
 				err = event.IHandler.OnPacket(event.IRemote, event.IPacket)
-			case *xnettcp.Disconnect:
+			case *xcommon.Disconnect:
 				err = event.IHandler.OnDisconnect(event.IRemote)
 				if event.IRemote.IsConnect() {
 					event.IRemote.Stop()

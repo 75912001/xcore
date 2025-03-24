@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	xerror "github.com/75912001/xcore/lib/error"
+	xcommon "github.com/75912001/xcore/lib/net/common"
 	xnettcp "github.com/75912001/xcore/lib/net/tcp"
 	xpacket "github.com/75912001/xcore/lib/packet"
 	xruntime "github.com/75912001/xcore/lib/runtime"
@@ -16,7 +17,7 @@ type defaultClient struct {
 	*xnettcp.Client
 }
 
-func (p *defaultClient) OnConnect(remote xnettcp.IRemote) error {
+func (p *defaultClient) OnConnect(remote xcommon.IRemote) error {
 	return nil
 }
 
@@ -24,11 +25,11 @@ func (p *defaultClient) OnCheckPacketLength(length uint32) error {
 	return nil
 }
 
-func (p *defaultClient) OnCheckPacketLimit(remote xnettcp.IRemote) error {
+func (p *defaultClient) OnCheckPacketLimit(remote xcommon.IRemote) error {
 	return nil
 }
 
-func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (xpacket.IPacket, error) {
+func (p *defaultClient) OnUnmarshalPacket(remote xcommon.IRemote, data []byte) (xpacket.IPacket, error) {
 	header := xpacket.NewHeader()
 	header.Unpack(data)
 
@@ -47,7 +48,7 @@ func (p *defaultClient) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (
 	return packet, nil
 }
 
-func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xpacket.IPacket) error {
+func (p *defaultClient) OnPacket(remote xcommon.IRemote, packet xpacket.IPacket) error {
 	defaultPacket, ok := packet.(*xpacket.Packet)
 	if !ok {
 		return xerror.Mismatch
@@ -91,7 +92,7 @@ func (p *defaultClient) OnPacket(remote xnettcp.IRemote, packet xpacket.IPacket)
 	log.Infof("\n======recv message======\n%s\nHeader: %s\nMessage: %s", msgName, strHeader, strPBMessage)
 	return nil
 }
-func (p *defaultClient) OnDisconnect(remote xnettcp.IRemote) error {
+func (p *defaultClient) OnDisconnect(remote xcommon.IRemote) error {
 	ColorPrintf(Red, "%v\n", xruntime.Location())
 	panic(fmt.Errorf("OnDisconnect:%v", remote))
 	return nil

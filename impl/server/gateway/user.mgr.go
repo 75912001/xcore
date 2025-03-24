@@ -2,7 +2,7 @@ package gateway
 
 import (
 	xcontrol "github.com/75912001/xcore/lib/control"
-	xnettcp "github.com/75912001/xcore/lib/net/tcp"
+	xnettcp "github.com/75912001/xcore/lib/net/common"
 )
 
 var gUserMgr *userMgr

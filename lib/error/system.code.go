@@ -53,6 +53,7 @@ var (
 	Hit               = NewError(0x0180).WithName("Hit").WithDesc("hit-命中")
 	Miss              = NewError(0x0181).WithName("Miss").WithDesc("miss-未命中")
 	Length            = NewError(0x0190).WithName("Length").WithDesc("length-长度")
+	LengthNotEnough   = NewError(0x0191).WithName("LengthNotEnough").WithDesc("length-not-enough-数据长度不够,需要继续接收") // 数据长度不够,需要继续接收
 	Quantity          = NewError(0x01a0).WithName("Quantity").WithDesc("quantity-数量")
 	Retry             = NewError(0x01b0).WithName("Retry").WithDesc("retry-重试")
 	Link              = NewError(0x01c0).WithName("Link").WithDesc("link-链接")

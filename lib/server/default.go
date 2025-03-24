@@ -8,6 +8,8 @@ import (
 	xerror "github.com/75912001/xcore/lib/error"
 	xetcd "github.com/75912001/xcore/lib/etcd"
 	xlog "github.com/75912001/xcore/lib/log"
+	xcommon "github.com/75912001/xcore/lib/net/common"
+	xkcp "github.com/75912001/xcore/lib/net/kcp"
 	xtcp "github.com/75912001/xcore/lib/net/tcp"
 	xpprof "github.com/75912001/xcore/lib/pprof"
 	xruntime "github.com/75912001/xcore/lib/runtime"
@@ -47,6 +49,7 @@ type Server struct {
 	QuitChan chan struct{} // 退出信号, 用于关闭服务
 
 	TCPServer *xtcp.Server
+	KCPServer *xkcp.Server
 }
 
 // NewServer 创建服务
@@ -94,7 +97,7 @@ func (p *Server) PreStop() error {
 }
 
 func (p *Server) Start(ctx context.Context,
-	handler xtcp.IHandler,
+	handler xcommon.IHandler,
 	logCallbackFunc xlog.CallBackFunc,
 	etcdCallbackFun xetcd.CallbackFun) (err error) {
 	rand.Seed(time.Now().UnixNano())
@@ -244,13 +247,14 @@ func (p *Server) Start(ctx context.Context,
 				p.TCPServer = xtcp.NewServer(handler)
 				if err = p.TCPServer.Start(ctx,
 					xtcp.NewServerOptions().
-						SetListenAddress(*element.Addr).
-						SetEventChan(p.BusChannel).
-						SetSendChanCapacity(*p.BenchMgr.Cfg.Base.SendChannelCapacity),
+						WithListenAddress(*element.Addr).
+						WithEventChan(p.BusChannel).
+						WithSendChanCapacity(*p.BenchMgr.Cfg.Base.SendChannelCapacity),
 				); err != nil {
 					return errors.WithMessage(err, xruntime.Location())
 				}
 			case "kcp":
+				p.KCPServer = nil // todo menglc xkcp.NewServer(handler)
 				return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
 			default:
 				return errors.WithMessage(xerror.NotImplemented, xruntime.Location())
@@ -265,6 +269,9 @@ func (p *Server) Start(ctx context.Context,
 func (p *Server) Stop() (err error) {
 	if p.TCPServer != nil {
 		p.TCPServer.Stop()
+	}
+	if p.KCPServer != nil {
+		p.KCPServer.Stop()
 	}
 	return nil
 }

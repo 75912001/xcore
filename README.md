@@ -12,6 +12,7 @@
 - go get go.etcd.io/etcd/client/v3@v3.5.15
 - go get github.com/google/uuid@v1.6.0
 - go get google.golang.org/protobuf/proto@v1.34.2
+- go get github.com/xtaci/kcp-go/v5@v5.6.16
 - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2 (生成: protoc-gen-go.exe)
 ## 代码测试工具
 - $ go get github.com/agiledragon/gomonkey@v2.0.2
@@ -119,7 +120,7 @@
   - **file**: 文件操作[todo menglc]
   - **log**: 日志[todo menglc]
   - **message**: 消息[todo menglc]
-  - **net**: 网络[todo menglc]
+  - **net**: 网络
   - **packet**: 数据包[todo menglc]
   - **pool**: 对象池[todo menglc]
   - **pprof**: 性能分析[todo menglc]
@@ -191,5 +192,8 @@ gateway 增加心跳检测,超时未登录断开连接
 gateway 路由功能放在配置文件中
 
 
+
+[todo menglc]
+所有向总线 channel 发送消息的地方都需要加入 switch case 语句,处理channel full 的情况
 
 

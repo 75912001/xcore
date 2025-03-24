@@ -5,6 +5,7 @@ import (
 	"fmt"
 	xcommonservice "github.com/75912001/xcore/impl/common"
 	xerror "github.com/75912001/xcore/lib/error"
+	xcommon "github.com/75912001/xcore/lib/net/common"
 	xnettcp "github.com/75912001/xcore/lib/net/tcp"
 	packet2 "github.com/75912001/xcore/lib/packet"
 	xruntime "github.com/75912001/xcore/lib/runtime"
@@ -20,7 +21,7 @@ func NewLoginService() *LoginService {
 	return &LoginService{}
 }
 
-func (p *LoginService) OnConnect(remote xnettcp.IRemote) error {
+func (p *LoginService) OnConnect(remote xcommon.IRemote) error {
 	return nil
 }
 
@@ -28,11 +29,11 @@ func (p *LoginService) OnCheckPacketLength(length uint32) error {
 	return nil
 }
 
-func (p *LoginService) OnCheckPacketLimit(remote xnettcp.IRemote) error {
+func (p *LoginService) OnCheckPacketLimit(remote xcommon.IRemote) error {
 	return nil
 }
 
-func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (packet2.IPacket, error) {
+func (p *LoginService) OnUnmarshalPacket(remote xcommon.IRemote, data []byte) (packet2.IPacket, error) {
 	header := packet2.NewHeader()
 	header.Unpack(data)
 	// todo menglc 判断消息是否禁用
@@ -59,7 +60,7 @@ func (p *LoginService) OnUnmarshalPacket(remote xnettcp.IRemote, data []byte) (p
 	}
 }
 
-func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) error {
+func (p *LoginService) OnPacket(remote xcommon.IRemote, packet packet2.IPacket) error {
 	defaultPacket, ok := packet.(*packet2.Packet)
 	if !ok {
 		return xerror.Mismatch
@@ -98,7 +99,7 @@ func (p *LoginService) OnPacket(remote xnettcp.IRemote, packet packet2.IPacket) 
 	}
 	return nil
 }
-func (p *LoginService) OnDisconnect(remote xnettcp.IRemote) error {
+func (p *LoginService) OnDisconnect(remote xcommon.IRemote) error {
 	// todo menglc
 
 	return nil
