@@ -137,9 +137,11 @@ func (p *Remote) updateWriteDeadline(lastTime *time.Time, thisTime time.Time, wr
 // 处理发送
 func (p *Remote) onSend(ctx context.Context) {
 	defer func() {
-		// 当 Conn 关闭, 该函数会引发 panic
-		if err := recover(); err != nil {
-			xlog.PrintErr(xerror.GoroutinePanic, p, err, debug.Stack())
+		if xruntime.IsRelease() {
+			// 当 Conn 关闭, 该函数会引发 panic
+			if err := recover(); err != nil {
+				xlog.PrintErr(xerror.GoroutinePanic, p, err, debug.Stack())
+			}
 		}
 		xlog.PrintInfo(xerror.GoroutineDone, p)
 	}()
@@ -202,9 +204,11 @@ func (p *Remote) onSend(ctx context.Context) {
 // 接收数据
 func (p *Remote) onRecv(event xcommon.IEvent, handler xcommon.IHandler) {
 	defer func() { // 断开链接
-		// 当 Conn 关闭, 该函数会引发 panic
-		if err := recover(); err != nil {
-			xlog.PrintErr(xerror.GoroutinePanic, p, err, debug.Stack())
+		if xruntime.IsRelease() {
+			// 当 Conn 关闭, 该函数会引发 panic
+			if err := recover(); err != nil {
+				xlog.PrintErr(xerror.GoroutinePanic, p, err, debug.Stack())
+			}
 		}
 		err := event.Disconnect(handler, p)
 		if err != nil {
