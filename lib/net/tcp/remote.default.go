@@ -3,6 +3,7 @@ package tcp
 import (
 	"context"
 	"encoding/binary"
+	xconstants "github.com/75912001/xcore/lib/constants"
 	xerror "github.com/75912001/xcore/lib/error"
 	xlog "github.com/75912001/xcore/lib/log"
 	xcommon "github.com/75912001/xcore/lib/net/common"
@@ -94,7 +95,7 @@ func (p *Remote) Send(packet xpacket.IPacket) error {
 	if !p.IsConnect() {
 		return errors.WithMessage(xerror.Link, xruntime.Location())
 	}
-	err := xutil.PushEventWithTimeout(p.sendChan, packet, time.Second*3)
+	err := xutil.PushEventWithTimeout(p.sendChan, packet, xconstants.BusAddTimeoutDuration)
 	if err != nil {
 		xlog.PrintfErr("Send packet, PushEventWithTimeout err:%v", err)
 		return errors.WithMessage(err, xruntime.Location())
@@ -198,7 +199,7 @@ func (p *Remote) onSend(ctx context.Context) {
 	}
 }
 
-// 处理接收
+// 接收数据
 func (p *Remote) onRecv(event xcommon.IEvent, handler xcommon.IHandler) {
 	defer func() { // 断开链接
 		// 当 Conn 关闭, 该函数会引发 panic
