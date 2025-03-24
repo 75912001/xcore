@@ -4,6 +4,7 @@ import (
 	"context"
 	xerror "github.com/75912001/xcore/lib/error"
 	xlog "github.com/75912001/xcore/lib/log"
+	xcommon "github.com/75912001/xcore/lib/net/common"
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	xutil "github.com/75912001/xcore/lib/util"
 	"github.com/pkg/errors"
@@ -14,14 +15,14 @@ import (
 
 // Server 服务端
 type Server struct {
-	IEvent   IEvent
-	IHandler IHandler
+	IEvent   xcommon.IEvent
+	IHandler xcommon.IHandler
 	listener *net.TCPListener //监听
-	options  *serviceOptions
+	options  *serverOptions
 }
 
 // NewServer 新建服务
-func NewServer(handler IHandler) *Server {
+func NewServer(handler xcommon.IHandler) *Server {
 	return &Server{
 		IEvent:   nil,
 		IHandler: handler,
@@ -44,9 +45,9 @@ func netErrorTemporary(tempDelay time.Duration) (newTempDelay time.Duration) {
 }
 
 // Start 运行服务
-func (p *Server) Start(_ context.Context, opts ...*serviceOptions) error {
-	p.options = mergeServiceOptions(opts...)
-	if err := serviceConfigure(p.options); err != nil {
+func (p *Server) Start(_ context.Context, opts ...*serverOptions) error {
+	p.options = mergeServerOptions(opts...)
+	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
 	p.IEvent = NewEvent(p.options.eventChan)
