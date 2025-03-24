@@ -1,9 +1,8 @@
-package tcp
+package common
 
 import (
 	xconstants "github.com/75912001/xcore/lib/constants"
 	xlog "github.com/75912001/xcore/lib/log"
-	xcommon "github.com/75912001/xcore/lib/net/common"
 	xpacket "github.com/75912001/xcore/lib/packet"
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	xutil "github.com/75912001/xcore/lib/util"
@@ -21,9 +20,9 @@ func NewEvent(eventChan chan<- interface{}) *Event {
 }
 
 // Connect 连接
-func (p *Event) Connect(handler xcommon.IHandler, remote xcommon.IRemote) error {
+func (p *Event) Connect(handler IHandler, remote IRemote) error {
 	err := xutil.PushEventWithTimeout(p.eventChan,
-		&xcommon.Connect{
+		&Connect{
 			IHandler: handler,
 			IRemote:  remote,
 		},
@@ -36,9 +35,9 @@ func (p *Event) Connect(handler xcommon.IHandler, remote xcommon.IRemote) error 
 }
 
 // Disconnect 断开链接
-func (p *Event) Disconnect(handler xcommon.IHandler, remote xcommon.IRemote) error {
+func (p *Event) Disconnect(handler IHandler, remote IRemote) error {
 	err := xutil.PushEventWithTimeout(p.eventChan,
-		&xcommon.Disconnect{
+		&Disconnect{
 			IHandler: handler,
 			IRemote:  remote,
 		},
@@ -51,9 +50,9 @@ func (p *Event) Disconnect(handler xcommon.IHandler, remote xcommon.IRemote) err
 }
 
 // Packet 数据包
-func (p *Event) Packet(handler xcommon.IHandler, remote xcommon.IRemote, packet xpacket.IPacket) error {
+func (p *Event) Packet(handler IHandler, remote IRemote, packet xpacket.IPacket) error {
 	err := xutil.PushEventWithTimeout(p.eventChan,
-		&xcommon.Packet{
+		&Packet{
 			IHandler: handler,
 			IRemote:  remote,
 			IPacket:  packet,
