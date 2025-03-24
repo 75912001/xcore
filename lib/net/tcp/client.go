@@ -31,7 +31,7 @@ func (p *Client) Connect(ctx context.Context, opts ...*clientOptions) error {
 	if err := clientConfigure(newOpts); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent = NewEvent(newOpts.eventChan)
+	p.IEvent = xcommon.NewEvent(newOpts.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", *newOpts.serverAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
