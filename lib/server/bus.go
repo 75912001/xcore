@@ -3,7 +3,7 @@ package server
 import (
 	xetcd "github.com/75912001/xcore/lib/etcd"
 	xlog "github.com/75912001/xcore/lib/log"
-	xnettcp "github.com/75912001/xcore/lib/net/tcp"
+	xnettcp "github.com/75912001/xcore/lib/net/common"
 	xruntime "github.com/75912001/xcore/lib/runtime"
 	xtimer "github.com/75912001/xcore/lib/timer"
 	"time"
