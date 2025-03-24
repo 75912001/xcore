@@ -106,7 +106,7 @@ func (p *Remote) Stop() {
 	if p.IsConnect() {
 		err := p.Conn.Close()
 		if err != nil {
-			xlog.PrintfErr("common close err:%v", err)
+			xlog.PrintfErr("connect close err:%v", err)
 		}
 	}
 	if p.cancelFunc != nil {
