@@ -142,9 +142,6 @@ func serverConfigure(opts *serverOptions) error {
 	if opts.windowSize == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
-	if opts.fec == nil {
-		return errors.WithMessage(xerror.Param, xruntime.Location())
-	}
 	if opts.ackNoDelay == nil {
 		return errors.WithMessage(xerror.Param, xruntime.Location())
 	}
