@@ -219,7 +219,7 @@ func (p *Remote) onRecv(event xcommon.IEvent, handler xcommon.IHandler) {
 			if !xutil.IsNetErrClosing(err) {
 				xlog.PrintfErr("remote:%p err:%v", p, err)
 			}
-			if p.GetDisconnectReason() != xcommon.DisconnectReasonUnknown { // 未设置,就设置为客户端主动断开
+			if p.GetDisconnectReason() == xcommon.DisconnectReasonUnknown { // 未设置,就设置为客户端主动断开
 				p.SetDisconnectReason(xcommon.DisconnectReasonClientShutdown)
 			} else { // 已设置,就不再设置
 			}
