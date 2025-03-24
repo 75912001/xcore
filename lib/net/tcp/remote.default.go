@@ -133,20 +133,6 @@ func (p *Remote) updateWriteDeadline(lastTime *time.Time, thisTime time.Time, wr
 	return nil
 }
 
-// 重新整理-待发送数据
-func rearrangeSendData(data []byte, cnt int, resetCnt int) []byte {
-	if len(data) == cnt {
-		if resetCnt <= cap(data) { // 占用空间过大,重新创建新的数据单元
-			data = []byte{}
-		} else {
-			data = data[0:0]
-		}
-	} else {
-		data = data[cnt:]
-	}
-	return data
-}
-
 // 处理发送
 func (p *Remote) onSend(ctx context.Context) {
 	defer func() {
@@ -183,7 +169,7 @@ func (p *Remote) onSend(ctx context.Context) {
 				}
 				writeCnt, err = p.Conn.Write(data)
 				if 0 < writeCnt {
-					data = rearrangeSendData(data, writeCnt, 10240)
+					data = xutil.RearRangeData(data, writeCnt, 10240)
 					if len(data) == 0 {
 						break
 					} else {
