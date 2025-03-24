@@ -50,7 +50,7 @@ func (p *Server) Start(_ context.Context, opts ...*serverOptions) error {
 	if err := serverConfigure(p.options); err != nil {
 		return errors.WithMessage(err, xruntime.Location())
 	}
-	p.IEvent = NewEvent(p.options.eventChan)
+	p.IEvent = xcommon.NewEvent(p.options.eventChan)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", *p.options.listenAddress)
 	if nil != err {
 		return errors.WithMessage(err, xruntime.Location())
